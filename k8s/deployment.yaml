@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: owls-insight-frontend
+  namespace: owls-insight-dev
+  labels:
+    app: owls-insight-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: owls-insight-frontend
+  template:
+    metadata:
+      labels:
+        app: owls-insight-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: 482566359918.dkr.ecr.us-east-1.amazonaws.com/owls-insight-frontend:v1.0.0
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NEXT_PUBLIC_API_URL
+              value: "https://ws.owlsinsight.com"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
