@@ -1,0 +1,109 @@
+"use client";
+
+import {
+  Zap,
+  Radio,
+  History,
+  Shield,
+  BarChart3,
+  Users,
+} from "lucide-react";
+
+const features = [
+  {
+    icon: Zap,
+    title: "Sub-500ms Latency",
+    description:
+      "Direct connections to sportsbook APIs with aggressive caching and edge distribution. Get odds faster than the competition.",
+    highlight: "< 500ms",
+  },
+  {
+    icon: Radio,
+    title: "WebSocket Streaming",
+    description:
+      "Real-time push updates the moment lines move. No polling required. Subscribe to specific events or entire markets.",
+    highlight: "Real-time",
+  },
+  {
+    icon: History,
+    title: "Line History & Analytics",
+    description:
+      "Track opening lines, line movements, and historical data. Identify CLV opportunities and steam moves.",
+    highlight: "Full History",
+  },
+  {
+    icon: Shield,
+    title: "99.9% Uptime SLA",
+    description:
+      "Enterprise-grade infrastructure with automatic failover. Rate limiting per API key with generous quotas.",
+    highlight: "Enterprise",
+  },
+  {
+    icon: BarChart3,
+    title: "Player Props",
+    description:
+      "Complete player prop markets including points, rebounds, assists, and more. Available on Pro and Enterprise tiers.",
+    highlight: "Full Props",
+  },
+  {
+    icon: Users,
+    title: "Multi-Sport Coverage",
+    description:
+      "NBA, NFL, NHL, MLB, NCAAB, and NCAAF. All major sports with consistent data schemas across markets.",
+    highlight: "6 Sports",
+  },
+];
+
+export function Features() {
+  return (
+    <section id="features" className="py-24 relative">
+      <div className="max-w-7xl mx-auto px-6">
+        {/* Section Header */}
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#00FF88]/20 bg-[#00FF88]/5 mb-6">
+            <span className="text-xs font-mono text-[#00FF88]">FEATURES</span>
+          </div>
+          <h2 className="text-4xl font-mono font-bold mb-4">
+            Built for{" "}
+            <span className="text-[#00FF88] text-glow-green">Speed & Scale</span>
+          </h2>
+          <p className="text-zinc-400 max-w-2xl mx-auto">
+            Every feature designed for professional traders, sportsbook operators,
+            and data analysts who need reliable, fast, and comprehensive odds data.
+          </p>
+        </div>
+
+        {/* Features Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {features.map((feature, index) => (
+            <div
+              key={feature.title}
+              className="group relative p-6 rounded-xl bg-[#111111] border border-white/5 card-hover"
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
+              {/* Highlight badge */}
+              <div className="absolute top-4 right-4">
+                <span className="text-xs font-mono text-[#00FF88]/60 group-hover:text-[#00FF88] transition-colors">
+                  {feature.highlight}
+                </span>
+              </div>
+
+              {/* Icon */}
+              <div className="w-12 h-12 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center mb-4 group-hover:border-[#00FF88]/30 group-hover:bg-[#00FF88]/5 transition-all">
+                <feature.icon className="w-6 h-6 text-neutral-400 group-hover:text-[#00FF88] transition-colors" />
+              </div>
+
+              {/* Content */}
+              <h3 className="text-lg font-mono font-semibold mb-2 group-hover:text-[#00FF88] transition-colors">
+                {feature.title}
+              </h3>
+              <p className="text-sm text-zinc-500 leading-relaxed">
+                {feature.description}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
