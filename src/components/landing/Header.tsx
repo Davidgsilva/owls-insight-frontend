@@ -59,7 +59,7 @@ export function Header() {
             href="/docs"
             className="text-sm text-neutral-400 hover:text-white transition-colors"
           >
-            Documentation
+            Docs
           </Link>
           <Link
             href="#coverage"
@@ -69,7 +69,7 @@ export function Header() {
           </Link>
         </nav>
 
-        {/* CTA Buttons */}
+        {/* TODO: Uncomment when ready to launch
         <div className="flex items-center gap-3">
           <Link href="/login">
             <Button
@@ -85,6 +85,7 @@ export function Header() {
             </Button>
           </Link>
         </div>
+        */}
       </div>
     </header>
   );

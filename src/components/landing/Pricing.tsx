@@ -7,32 +7,34 @@ import Link from "next/link";
 const tiers = [
   {
     name: "Bench",
-    price: "Free",
-    period: "trial",
-    description: "Test the API and explore the data",
+    price: "$9.99",
+    period: "/month",
+    description: "Casual users, basic odds tracking",
     features: [
-      "100 requests/day",
-      "REST API access",
-      "All 6 sportsbooks",
-      "Spreads & moneylines",
-      "7-day trial",
+      "10,000 requests/month",
+      "20 requests/minute",
+      "REST API only",
+      "Odds, spreads & totals",
+      "Live scores",
+      "45-second data delay",
     ],
-    cta: "Start Free Trial",
+    cta: "Get Started",
     ctaVariant: "outline" as const,
     popular: false,
   },
   {
     name: "Rookie",
-    price: "$49.99",
+    price: "$24.99",
     period: "/month",
-    description: "For individual traders and researchers",
+    description: "Active bettors, real-time data needs",
     features: [
-      "10,000 requests/day",
-      "REST API + WebSocket",
-      "All 6 sportsbooks",
-      "All market types",
-      "Line history (30 days)",
-      "Email support",
+      "75,000 requests/month",
+      "120 requests/minute",
+      "REST API + WebSocket (2 connections)",
+      "Player props access",
+      "EV calculations & arbitrage",
+      "14 days historical data",
+      "Real-time data",
     ],
     cta: "Get Started",
     ctaVariant: "outline" as const,
@@ -40,18 +42,18 @@ const tiers = [
   },
   {
     name: "MVP",
-    price: "$149.99",
+    price: "$49.99",
     period: "/month",
-    description: "For serious traders and small teams",
+    description: "Professional users, high-volume applications",
     features: [
-      "100,000 requests/day",
-      "REST API + WebSocket",
-      "All 6 sportsbooks",
-      "All market types",
-      "Player props",
-      "Line history (90 days)",
-      "Opening lines",
-      "Priority support",
+      "300,000 requests/month",
+      "400 requests/minute",
+      "REST API + WebSocket (5 connections)",
+      "15 concurrent requests",
+      "Player props + WebSocket props",
+      "EV calculations & arbitrage",
+      "90 days historical data",
+      "Real-time data",
     ],
     cta: "Start MVP Trial",
     ctaVariant: "default" as const,
@@ -120,7 +122,12 @@ export function Pricing() {
                 ))}
               </ul>
 
-              {/* CTA */}
+              {/* Coming Soon */}
+              <div className="w-full py-2 text-center rounded-md border border-amber-500/30 bg-amber-500/10">
+                <span className="text-sm font-mono text-amber-400">Coming Soon</span>
+              </div>
+
+              {/* TODO: Uncomment when ready to launch
               <Link href="/register" className="block">
                 <Button
                   variant={tier.ctaVariant}
@@ -133,6 +140,7 @@ export function Pricing() {
                   {tier.cta}
                 </Button>
               </Link>
+              */}
             </div>
           ))}
         </div>
@@ -146,14 +154,7 @@ export function Pricing() {
               className="text-[#00FF88] hover:text-[#00d4aa] transition-colors"
             >
               Contact us
-            </a>{" "}
-            or check our{" "}
-            <Link
-              href="/docs#faq"
-              className="text-[#00FF88] hover:text-[#00d4aa] transition-colors"
-            >
-              FAQ
-            </Link>
+            </a>
           </p>
         </div>
       </div>

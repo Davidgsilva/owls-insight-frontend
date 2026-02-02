@@ -34,7 +34,7 @@ export function Hero() {
               Real-Time Odds.
               <br />
               <span className="text-[#00FF88] text-glow-primary">
-                Institutional Grade.
+                All Books. One API.
               </span>
             </h1>
 
@@ -50,23 +50,27 @@ export function Hero() {
             <div className="flex gap-8 opacity-0 animate-fade-in-up stagger-3">
               <div>
                 <div className="text-3xl font-mono font-bold text-[#00FF88] text-glow-green">
-                  &lt;500ms
+                  6
                 </div>
-                <div className="text-sm text-zinc-500">Avg Latency</div>
-              </div>
-              <div className="w-px bg-white/10" />
-              <div>
-                <div className="text-3xl font-mono font-bold text-white">6</div>
                 <div className="text-sm text-zinc-500">Sportsbooks</div>
               </div>
               <div className="w-px bg-white/10" />
               <div>
-                <div className="text-3xl font-mono font-bold text-white">99.9%</div>
-                <div className="text-sm text-zinc-500">Uptime</div>
+                <div className="text-3xl font-mono font-bold text-white">6</div>
+                <div className="text-sm text-zinc-500">Sports</div>
               </div>
             </div>
 
-            {/* CTA Buttons */}
+            {/* Coming Soon Badge */}
+            <div className="opacity-0 animate-fade-in-up stagger-4">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-amber-500/30 bg-amber-500/10">
+                <span className="text-sm font-mono text-amber-400">
+                  Coming Soon
+                </span>
+              </div>
+            </div>
+
+            {/* TODO: Uncomment when ready to launch
             <div className="flex gap-4 opacity-0 animate-fade-in-up stagger-4">
               <Link href="/register">
                 <Button
@@ -86,6 +90,7 @@ export function Hero() {
                 </Button>
               </Link>
             </div>
+            */}
           </div>
 
           {/* Right column - Terminal Demo */}

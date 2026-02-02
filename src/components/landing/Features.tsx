@@ -12,10 +12,10 @@ import {
 const features = [
   {
     icon: Zap,
-    title: "Sub-500ms Latency",
+    title: "6-Book Aggregation",
     description:
-      "Direct connections to sportsbook APIs with aggressive caching and edge distribution. Get odds faster than the competition.",
-    highlight: "< 500ms",
+      "Pinnacle, FanDuel, DraftKings, BetMGM, Bet365, and Caesars — all normalized into a single, consistent API schema.",
+    highlight: "6 Books",
   },
   {
     icon: Radio,

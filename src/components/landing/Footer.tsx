@@ -29,8 +29,9 @@ export function Footer() {
             </p>
           </div>
 
+          {/* TODO: Uncomment when pages are ready
           {/* Product */}
-          <div>
+          {/* <div>
             <h4 className="font-mono font-semibold text-sm mb-4 text-neutral-300">
               Product
             </h4>
@@ -68,10 +69,10 @@ export function Footer() {
                 </Link>
               </li>
             </ul>
-          </div>
+          </div> */}
 
           {/* Resources */}
-          <div>
+          {/* <div>
             <h4 className="font-mono font-semibold text-sm mb-4 text-neutral-300">
               Resources
             </h4>
@@ -111,10 +112,10 @@ export function Footer() {
                 </a>
               </li>
             </ul>
-          </div>
+          </div> */}
 
           {/* Company */}
-          <div>
+          {/* <div>
             <h4 className="font-mono font-semibold text-sm mb-4 text-neutral-300">
               Company
             </h4>
@@ -153,6 +154,7 @@ export function Footer() {
               </li>
             </ul>
           </div>
+          */}
         </div>
 
         {/* Bottom bar */}

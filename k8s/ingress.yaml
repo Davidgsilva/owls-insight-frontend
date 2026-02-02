@@ -17,8 +17,7 @@ metadata:
     alb.ingress.kubernetes.io/unhealthy-threshold-count: "2"
     alb.ingress.kubernetes.io/success-codes: "200"
     alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS13-1-2-2021-06
-    alb.ingress.kubernetes.io/tags: Environment=development, Application=owls-insight-frontend
-    alb.ingress.kubernetes.io/group.name: owls-insight
+    alb.ingress.kubernetes.io/tags: Environment=production,Application=owls-insight-frontend
 spec:
   ingressClassName: alb
   rules:

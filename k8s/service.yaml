@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: owls-insight-frontend
-  namespace: owls-insight-dev
+  namespace: owls-insight-prod
   labels:
     app: owls-insight-frontend
 spec:

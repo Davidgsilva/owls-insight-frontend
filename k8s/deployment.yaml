@@ -2,11 +2,11 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: owls-insight-frontend
-  namespace: owls-insight-dev
+  namespace: owls-insight-prod
   labels:
     app: owls-insight-frontend
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: owls-insight-frontend
@@ -17,12 +17,12 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: 482566359918.dkr.ecr.us-east-1.amazonaws.com/owls-insight-frontend:v1.0.0
+          image: 482566359918.dkr.ecr.us-east-1.amazonaws.com/owls-insight-frontend:v1.0.1
           ports:
             - containerPort: 3000
           env:
             - name: NEXT_PUBLIC_API_URL
-              value: "https://ws.owlsinsight.com"
+              value: "https://api.owlsinsight.com"
           resources:
             requests:
               memory: "256Mi"

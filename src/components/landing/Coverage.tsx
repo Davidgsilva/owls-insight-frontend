@@ -3,55 +3,49 @@
 const sportsbooks = [
   {
     name: "Pinnacle",
-    shortName: "PIN",
     description: "Sharp book, no limits",
-    speed: "500-800ms",
-    color: "text-amber-400",
+    badge: "Sharp",
+    logo: "https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://pinnacle.com&size=128",
   },
   {
     name: "FanDuel",
-    shortName: "FD",
     description: "Top US retail book",
-    speed: "300-600ms",
-    color: "text-blue-400",
+    badge: "Props",
+    logo: "https://www.google.com/s2/favicons?domain=fanduel.com&sz=128",
   },
   {
     name: "DraftKings",
-    shortName: "DK",
     description: "Full market coverage",
-    speed: "400-700ms",
-    color: "text-green-400",
+    badge: "Props",
+    logo: "https://www.google.com/s2/favicons?domain=draftkings.com&sz=128",
   },
   {
     name: "BetMGM",
-    shortName: "MGM",
     description: "Vegas-backed lines",
-    speed: "3-8s",
-    color: "text-yellow-400",
+    badge: "Props",
+    logo: "https://www.google.com/s2/favicons?domain=betmgm.com&sz=128",
   },
   {
     name: "Bet365",
-    shortName: "365",
     description: "Global market leader",
-    speed: "15-30s",
-    color: "text-emerald-400",
+    badge: "Props",
+    logo: "https://www.google.com/s2/favicons?domain=bet365.com&sz=128",
   },
   {
     name: "Caesars",
-    shortName: "CZR",
     description: "Casino heritage",
-    speed: "2-5s",
-    color: "text-purple-400",
+    badge: "Props",
+    logo: "https://www.google.com/s2/favicons?domain=caesars.com&sz=128",
   },
 ];
 
 const sports = [
-  { name: "NBA", icon: "🏀", games: "~15/day" },
-  { name: "NFL", icon: "🏈", games: "~16/week" },
-  { name: "NHL", icon: "🏒", games: "~15/day" },
-  { name: "MLB", icon: "⚾", games: "~15/day" },
-  { name: "NCAAB", icon: "🏀", games: "~100/day" },
-  { name: "NCAAF", icon: "🏈", games: "~60/week" },
+  { name: "NBA", logo: "https://www.google.com/s2/favicons?domain=nba.com&sz=128" },
+  { name: "NFL", logo: "https://www.google.com/s2/favicons?domain=nfl.com&sz=128" },
+  { name: "NHL", logo: "https://www.google.com/s2/favicons?domain=nhl.com&sz=128" },
+  { name: "MLB", logo: "https://www.google.com/s2/favicons?domain=mlb.com&sz=128" },
+  { name: "NCAAB", logo: "https://www.google.com/s2/favicons?domain=ncaa.com&sz=128" },
+  { name: "NCAAF", logo: "https://www.google.com/s2/favicons?domain=ncaa.com&sz=128" },
 ];
 
 export function Coverage() {
@@ -88,12 +82,14 @@ export function Coverage() {
                 key={book.name}
                 className="group p-4 rounded-xl bg-[#111111] border border-white/5 hover:border-white/10 transition-all"
               >
-                <div className="flex items-center justify-between mb-2">
-                  <span className={`font-mono font-bold ${book.color}`}>
-                    {book.shortName}
-                  </span>
-                  <span className="text-xs font-mono text-zinc-600">
-                    {book.speed}
+                <div className="flex items-center justify-between mb-3">
+                  <img
+                    src={book.logo}
+                    alt={`${book.name} logo`}
+                    className="w-8 h-8 rounded"
+                  />
+                  <span className="text-xs font-mono text-[#00FF88]/60">
+                    {book.badge}
                   </span>
                 </div>
                 <div className="text-sm text-white font-medium mb-1">
@@ -117,44 +113,21 @@ export function Coverage() {
                 key={sport.name}
                 className="group p-4 rounded-xl bg-[#111111] border border-white/5 hover:border-[#00FF88]/20 transition-all text-center"
               >
-                <div className="text-3xl mb-2">{sport.icon}</div>
-                <div className="font-mono font-bold text-white mb-1">
+                <div className="flex justify-center mb-2">
+                  <img
+                    src={sport.logo}
+                    alt={`${sport.name} logo`}
+                    className="w-8 h-8"
+                  />
+                </div>
+                <div className="font-mono font-bold text-white">
                   {sport.name}
                 </div>
-                <div className="text-xs text-zinc-500">{sport.games}</div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Data coverage matrix teaser */}
-        <div className="mt-16 p-6 rounded-xl bg-[#111111] border border-white/5">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div>
-              <h3 className="font-mono font-semibold mb-1">
-                Live Coverage Matrix
-              </h3>
-              <p className="text-sm text-zinc-500">
-                See real-time coverage percentages across all books and sports
-              </p>
-            </div>
-            <div className="flex items-center gap-6">
-              <div className="text-center">
-                <div className="text-2xl font-mono font-bold text-green-400">
-                  98.2%
-                </div>
-                <div className="text-xs text-zinc-500">Avg Coverage</div>
-              </div>
-              <div className="w-px h-10 bg-white/10" />
-              <div className="text-center">
-                <div className="text-2xl font-mono font-bold text-[#00FF88]">
-                  ~500
-                </div>
-                <div className="text-xs text-zinc-500">Events/Day</div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   );
