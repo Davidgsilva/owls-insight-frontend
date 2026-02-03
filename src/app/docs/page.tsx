@@ -29,6 +29,7 @@ const sections = [
   // { id: "analytics-api", label: "EV & Arbitrage", icon: TrendingUp },
   // { id: "picks-api", label: "Picks API", icon: Target },
   { id: "websocket", label: "WebSocket API", icon: Radio },
+  { id: "usage-api", label: "Usage API", icon: BarChart3 },
   { id: "rate-limits", label: "Rate Limits", icon: AlertCircle },
   { id: "errors", label: "Error Codes", icon: AlertCircle },
 ];
@@ -464,7 +465,7 @@ export default function DocsPage() {
                 { name: "game_id", type: "string", required: false, description: "Filter to a specific game" },
                 { name: "player", type: "string", required: false, description: "Filter by player name (partial match)" },
                 { name: "category", type: "string", required: false, description: "Filter by prop category" },
-                { name: "books", type: "string", required: false, description: "Comma-separated list: pinnacle,bet365,fanduel,draftkings,caesars" },
+                { name: "books", type: "string", required: false, description: "Comma-separated list: pinnacle,fanduel,draftkings,betmgm,bet365,caesars" },
               ]}
             />
 
@@ -884,6 +885,73 @@ socket.emit("subscribe:props", {
   sports: ["nba"],
   categories: ["points", "rebounds", "assists"]
 });`}
+            />
+          </section>
+
+          {/* Usage API */}
+          <section id="usage-api" className="mb-16">
+            <h2 className="text-2xl font-mono font-bold mb-4 flex items-center gap-2">
+              <BarChart3 className="w-6 h-6 text-[#00FF88]" />
+              Usage API
+            </h2>
+            <p className="text-zinc-400 mb-6">
+              Monitor your API usage and rate limit status.
+            </p>
+
+            <h3 className="text-lg font-mono font-semibold mb-3">Endpoint</h3>
+            <div className="space-y-3 mb-8">
+              <Endpoint
+                method="GET"
+                path="/api/v1/usage"
+                description="Get your API usage statistics for today or a specific date"
+              />
+            </div>
+
+            <h3 className="text-lg font-mono font-semibold mb-3">Query Parameters</h3>
+            <ParamTable
+              params={[
+                { name: "date", type: "string", required: false, description: "Date in YYYY-MM-DD format (defaults to today)" },
+                { name: "apiKeyId", type: "string", required: false, description: "Filter to a specific API key" },
+              ]}
+            />
+
+            <h3 className="text-lg font-mono font-semibold mt-8 mb-3">Example Request</h3>
+            <CodeBlock
+              language="bash"
+              code={`curl -H "Authorization: Bearer YOUR_API_KEY" \\
+  "https://api.owlsinsight.com/api/v1/usage?date=2026-02-01"`}
+            />
+
+            <h3 className="text-lg font-mono font-semibold mt-8 mb-3">Example Response</h3>
+            <CodeBlock
+              language="json"
+              code={`{
+  "success": true,
+  "date": "2026-02-01",
+  "totals": {
+    "totalRequests": 1234,
+    "successfulRequests": 1200,
+    "failedRequests": 34
+  },
+  "usage": [
+    {
+      "apiKeyId": "key_abc123",
+      "keyName": "Production",
+      "tier": "rookie",
+      "date": "2026-02-01",
+      "stats": {
+        "totalRequests": 1234,
+        "successfulRequests": 1200,
+        "failedRequests": 34
+      },
+      "currentRateLimits": {
+        "minute": { "count": 45, "limit": 120, "remaining": 75 },
+        "month": { "count": 12340, "limit": 75000, "remaining": 62660 }
+      }
+    }
+  ],
+  "apiKeyCount": 1
+}`}
             />
           </section>
 
