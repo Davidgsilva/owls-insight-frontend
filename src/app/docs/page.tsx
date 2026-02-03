@@ -15,9 +15,8 @@ import {
   Users,
   AlertCircle,
   BookOpen,
-  TrendingUp,
-  Target,
-  Settings,
+  // TrendingUp,  // For future EV & Arbitrage section
+  // Target,      // For future Picks API section
 } from "lucide-react";
 
 // Navigation sections
@@ -30,7 +29,6 @@ const sections = [
   // { id: "analytics-api", label: "EV & Arbitrage", icon: TrendingUp },
   // { id: "picks-api", label: "Picks API", icon: Target },
   { id: "websocket", label: "WebSocket API", icon: Radio },
-  { id: "account-api", label: "Account API", icon: Settings },
   { id: "rate-limits", label: "Rate Limits", icon: AlertCircle },
   { id: "errors", label: "Error Codes", icon: AlertCircle },
 ];
@@ -886,87 +884,6 @@ socket.emit("subscribe:props", {
   sports: ["nba"],
   categories: ["points", "rebounds", "assists"]
 });`}
-            />
-          </section>
-
-          {/* Account API */}
-          <section id="account-api" className="mb-16">
-            <h2 className="text-2xl font-mono font-bold mb-4 flex items-center gap-2">
-              <Settings className="w-6 h-6 text-[#00FF88]" />
-              Account API
-            </h2>
-            <p className="text-zinc-400 mb-6">
-              Manage your subscription and view usage statistics.
-            </p>
-
-            <h3 className="text-lg font-mono font-semibold mb-3">Endpoints</h3>
-            <div className="space-y-3 mb-8">
-              <Endpoint
-                method="GET"
-                path="/api/v1/subscription"
-                description="Get your current subscription details"
-              />
-              <Endpoint
-                method="PUT"
-                path="/api/v1/subscription"
-                description="Update your subscription tier"
-              />
-              <Endpoint
-                method="GET"
-                path="/api/v1/usage"
-                description="Get your API usage statistics"
-              />
-            </div>
-
-            <h3 className="text-lg font-mono font-semibold mt-8 mb-3">Subscription Response</h3>
-            <CodeBlock
-              language="json"
-              code={`{
-  "success": true,
-  "subscription": {
-    "tier": "rookie",
-    "status": "active",
-    "currentPeriodStart": "2026-01-01T00:00:00.000Z",
-    "currentPeriodEnd": "2026-02-01T00:00:00.000Z",
-    "limits": {
-      "requestsPerMonth": 75000,
-      "requestsPerMinute": 120,
-      "websocketConnections": 2,
-      "historyDays": 14
-    }
-  }
-}`}
-            />
-
-            <h3 className="text-lg font-mono font-semibold mt-8 mb-3">Usage Response</h3>
-            <CodeBlock
-              language="json"
-              code={`{
-  "success": true,
-  "date": "2026-01-31",
-  "totals": {
-    "totalRequests": 1234,
-    "successfulRequests": 1200,
-    "failedRequests": 34
-  },
-  "usage": [
-    {
-      "apiKeyId": "key_abc123",
-      "keyName": "Production",
-      "tier": "rookie",
-      "stats": {
-        "totalRequests": 1234,
-        "successfulRequests": 1200,
-        "failedRequests": 34,
-        "avgResponseTime": 24
-      },
-      "currentRateLimits": {
-        "minute": { "count": 45, "limit": 120 },
-        "month": { "count": 12340, "limit": 75000 }
-      }
-    }
-  ]
-}`}
             />
           </section>
 
