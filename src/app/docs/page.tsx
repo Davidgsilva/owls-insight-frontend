@@ -929,10 +929,10 @@ socket.emit("subscribe:props", {
     "currentPeriodStart": "2026-01-01T00:00:00.000Z",
     "currentPeriodEnd": "2026-02-01T00:00:00.000Z",
     "limits": {
-      "requestsPerMonth": 50000,
-      "requestsPerMinute": 100,
+      "requestsPerMonth": 75000,
+      "requestsPerMinute": 120,
       "websocketConnections": 2,
-      "historyDays": 30
+      "historyDays": 14
     }
   }
 }`}
@@ -961,8 +961,8 @@ socket.emit("subscribe:props", {
         "avgResponseTime": 24
       },
       "currentRateLimits": {
-        "minute": { "count": 45, "limit": 100 },
-        "month": { "count": 12340, "limit": 50000 }
+        "minute": { "count": 45, "limit": 120 },
+        "month": { "count": 12340, "limit": 75000 }
       }
     }
   ]
@@ -974,10 +974,10 @@ socket.emit("subscribe:props", {
           <section id="rate-limits" className="mb-16">
             <h2 className="text-2xl font-mono font-bold mb-4 flex items-center gap-2">
               <AlertCircle className="w-6 h-6 text-[#00FF88]" />
-              Rate Limits
+              Rate Limits & Tiers
             </h2>
             <p className="text-zinc-400 mb-6">
-              Rate limits are applied per API key. Limits vary by subscription tier.
+              Rate limits are applied per API key. Limits and features vary by subscription tier.
             </p>
 
             <div className="overflow-x-auto mb-8">
@@ -985,6 +985,7 @@ socket.emit("subscribe:props", {
                 <thead>
                   <tr className="border-b border-white/10">
                     <th className="text-left py-3 px-4 font-mono text-zinc-400">Tier</th>
+                    <th className="text-left py-3 px-4 font-mono text-zinc-400">Price</th>
                     <th className="text-left py-3 px-4 font-mono text-zinc-400">Requests/Month</th>
                     <th className="text-left py-3 px-4 font-mono text-zinc-400">Requests/Minute</th>
                     <th className="text-left py-3 px-4 font-mono text-zinc-400">WebSocket</th>
@@ -993,24 +994,71 @@ socket.emit("subscribe:props", {
                 <tbody>
                   <tr className="border-b border-white/5">
                     <td className="py-3 px-4 font-mono text-white">Bench</td>
-                    <td className="py-3 px-4 text-zinc-400">500</td>
-                    <td className="py-3 px-4 text-zinc-400">10</td>
-                    <td className="py-3 px-4 text-zinc-500">Not available</td>
+                    <td className="py-3 px-4 text-zinc-400">$9.99/mo</td>
+                    <td className="py-3 px-4 text-zinc-400">10,000</td>
+                    <td className="py-3 px-4 text-zinc-400">20</td>
+                    <td className="py-3 px-4 text-zinc-500">REST only</td>
                   </tr>
                   <tr className="border-b border-white/5">
                     <td className="py-3 px-4 font-mono text-white">Rookie</td>
-                    <td className="py-3 px-4 text-zinc-400">50,000</td>
-                    <td className="py-3 px-4 text-zinc-400">100</td>
+                    <td className="py-3 px-4 text-zinc-400">$24.99/mo</td>
+                    <td className="py-3 px-4 text-zinc-400">75,000</td>
+                    <td className="py-3 px-4 text-zinc-400">120</td>
                     <td className="py-3 px-4 text-zinc-400">2 connections</td>
                   </tr>
                   <tr className="border-b border-white/5">
                     <td className="py-3 px-4 font-mono text-white">MVP</td>
-                    <td className="py-3 px-4 text-zinc-400">500,000</td>
-                    <td className="py-3 px-4 text-zinc-400">500</td>
-                    <td className="py-3 px-4 text-zinc-400">10 connections</td>
+                    <td className="py-3 px-4 text-zinc-400">$49.99/mo</td>
+                    <td className="py-3 px-4 text-zinc-400">300,000</td>
+                    <td className="py-3 px-4 text-zinc-400">400</td>
+                    <td className="py-3 px-4 text-zinc-400">5 connections</td>
                   </tr>
                 </tbody>
               </table>
+            </div>
+
+            <h3 className="text-lg font-mono font-semibold mb-3">Tier Features</h3>
+            <div className="grid gap-4 mb-8">
+              <div className="p-4 rounded-lg bg-[#111111] border border-white/5">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="font-mono font-semibold text-white">Bench</span>
+                  <span className="text-xs text-zinc-500">$9.99/month</span>
+                </div>
+                <ul className="text-sm text-zinc-400 space-y-1">
+                  <li>• REST API only (no WebSocket)</li>
+                  <li>• Odds, spreads & totals</li>
+                  <li>• Live scores</li>
+                  <li>• 45-second data delay</li>
+                </ul>
+              </div>
+              <div className="p-4 rounded-lg bg-[#111111] border border-white/5">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="font-mono font-semibold text-white">Rookie</span>
+                  <span className="text-xs text-zinc-500">$24.99/month</span>
+                </div>
+                <ul className="text-sm text-zinc-400 space-y-1">
+                  <li>• REST API + WebSocket (2 connections)</li>
+                  <li>• Player props access</li>
+                  <li>• EV calculations & arbitrage detection</li>
+                  <li>• 14 days historical data</li>
+                  <li>• Real-time data updates</li>
+                </ul>
+              </div>
+              <div className="p-4 rounded-lg bg-[#111111] border border-purple-500/30">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="font-mono font-semibold text-white">MVP</span>
+                  <span className="text-xs text-purple-400">Most Popular</span>
+                  <span className="text-xs text-zinc-500">$49.99/month</span>
+                </div>
+                <ul className="text-sm text-zinc-400 space-y-1">
+                  <li>• REST API + WebSocket (5 connections)</li>
+                  <li>• 15 concurrent requests</li>
+                  <li>• Player props + WebSocket props streaming</li>
+                  <li>• EV calculations & arbitrage detection</li>
+                  <li>• 90 days historical data</li>
+                  <li>• Real-time data updates</li>
+                </ul>
+              </div>
             </div>
 
             <h3 className="text-lg font-mono font-semibold mb-3">Rate Limit Headers</h3>
@@ -1019,10 +1067,10 @@ socket.emit("subscribe:props", {
             </p>
             <CodeBlock
               language="http"
-              code={`X-RateLimit-Limit-Minute: 100
+              code={`X-RateLimit-Limit-Minute: 120
 X-RateLimit-Remaining-Minute: 87
-X-RateLimit-Limit-Month: 50000
-X-RateLimit-Remaining-Month: 49234`}
+X-RateLimit-Limit-Month: 75000
+X-RateLimit-Remaining-Month: 62340`}
             />
           </section>
 

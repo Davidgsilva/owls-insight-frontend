@@ -32,23 +32,33 @@ export function TerminalDemo() {
 
   useEffect(() => {
     let index = 0;
-    const typeInterval = setInterval(() => {
-      if (index < API_RESPONSE.length) {
-        setDisplayedText(API_RESPONSE.slice(0, index + 1));
-        index++;
-      } else {
-        setIsTyping(false);
-        clearInterval(typeInterval);
-      }
-    }, 8);
+    let animationId: number;
+    let lastTime = 0;
+    const charsPerFrame = 3; // Type multiple chars per frame for smoother effect
+    const frameDelay = 16; // ~60fps
 
-    return () => clearInterval(typeInterval);
+    const animate = (currentTime: number) => {
+      if (currentTime - lastTime >= frameDelay) {
+        if (index < API_RESPONSE.length) {
+          index = Math.min(index + charsPerFrame, API_RESPONSE.length);
+          setDisplayedText(API_RESPONSE.slice(0, index));
+          lastTime = currentTime;
+        } else {
+          setIsTyping(false);
+          return;
+        }
+      }
+      animationId = requestAnimationFrame(animate);
+    };
+
+    animationId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationId);
   }, []);
 
   useEffect(() => {
     const cursorInterval = setInterval(() => {
       setCursorVisible((v) => !v);
-    }, 530);
+    }, 500);
     return () => clearInterval(cursorInterval);
   }, []);
 
@@ -117,7 +127,7 @@ export function TerminalDemo() {
             &quot;X-API-Key: oi_live_xxxx&quot;
           </span>
           <span className="text-[#00FF88] break-all">
-            https://ws.owlsinsight.com/api/v1/nba/odds
+            https://api.owlsinsight.com/api/v1/nba/odds
           </span>
         </div>
 
@@ -126,8 +136,12 @@ export function TerminalDemo() {
           <pre className="text-neutral-300 whitespace-pre">
             {highlightJson(displayedText)}
           </pre>
-          {isTyping && cursorVisible && (
-            <span className="inline-block w-2 h-4 bg-[#00FF88] ml-0.5 animate-pulse" />
+          {isTyping && (
+            <span
+              className={`inline-block w-2 h-4 bg-[#00FF88] ml-0.5 transition-opacity duration-100 ${
+                cursorVisible ? 'opacity-100' : 'opacity-0'
+              }`}
+            />
           )}
         </div>
       </div>

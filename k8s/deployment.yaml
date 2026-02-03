@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: 482566359918.dkr.ecr.us-east-1.amazonaws.com/owls-insight-frontend:v1.0.1
+          image: 482566359918.dkr.ecr.us-east-1.amazonaws.com/owls-insight-frontend:v1.0.3
           ports:
             - containerPort: 3000
           env:
