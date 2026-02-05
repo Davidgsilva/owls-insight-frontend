@@ -37,6 +37,12 @@ const sportsbooks = [
     badge: "Props",
     logo: "https://www.google.com/s2/favicons?domain=caesars.com&sz=128",
   },
+  {
+    name: "Kalshi",
+    description: "Prediction markets",
+    badge: "Exchange",
+    logo: "https://www.google.com/s2/favicons?domain=kalshi.com&sz=128",
+  },
 ];
 
 const sports = [
@@ -61,7 +67,7 @@ export function Coverage() {
             <span className="text-xs font-mono text-[#00FF88]">COVERAGE</span>
           </div>
           <h2 className="text-4xl font-mono font-bold mb-4">
-            6 Books. 6 Sports.{" "}
+            7 Books. 6 Sports.{" "}
             <span className="text-[#00FF88] text-glow-primary">One API.</span>
           </h2>
           <p className="text-zinc-400 max-w-2xl mx-auto">

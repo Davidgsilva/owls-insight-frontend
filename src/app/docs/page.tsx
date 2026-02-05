@@ -308,8 +308,8 @@ export default function DocsPage() {
               Odds API
             </h2>
             <p className="text-zinc-400 mb-6">
-              Real-time betting odds from 6 major sportsbooks: Pinnacle, FanDuel, DraftKings,
-              BetMGM, Bet365, and Caesars.
+              Real-time betting odds from 7 major sportsbooks: Pinnacle, FanDuel, DraftKings,
+              BetMGM, Bet365, Caesars, and Kalshi.
             </p>
 
             <h3 className="text-lg font-mono font-semibold mb-3">Endpoints</h3>
@@ -348,10 +348,81 @@ export default function DocsPage() {
               ))}
             </div>
 
+            <h3 className="text-lg font-mono font-semibold mb-3">Sportsbooks</h3>
+            <div className="overflow-x-auto mb-8">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-white/10">
+                    <th className="text-left py-2 px-3 font-mono text-zinc-400">Key</th>
+                    <th className="text-left py-2 px-3 font-mono text-zinc-400">Name</th>
+                    <th className="text-left py-2 px-3 font-mono text-zinc-400">Type</th>
+                    <th className="text-left py-2 px-3 font-mono text-zinc-400">Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b border-white/5">
+                    <td className="py-2 px-3 font-mono text-[#00FF88]">pinnacle</td>
+                    <td className="py-2 px-3 text-zinc-300">Pinnacle</td>
+                    <td className="py-2 px-3 text-zinc-400">Sportsbook</td>
+                    <td className="py-2 px-3 text-zinc-500">Sharp book, market-making reference</td>
+                  </tr>
+                  <tr className="border-b border-white/5">
+                    <td className="py-2 px-3 font-mono text-[#00FF88]">fanduel</td>
+                    <td className="py-2 px-3 text-zinc-300">FanDuel</td>
+                    <td className="py-2 px-3 text-zinc-400">Sportsbook</td>
+                    <td className="py-2 px-3 text-zinc-500">US retail leader, full props</td>
+                  </tr>
+                  <tr className="border-b border-white/5">
+                    <td className="py-2 px-3 font-mono text-[#00FF88]">draftkings</td>
+                    <td className="py-2 px-3 text-zinc-300">DraftKings</td>
+                    <td className="py-2 px-3 text-zinc-400">Sportsbook</td>
+                    <td className="py-2 px-3 text-zinc-500">Full market coverage</td>
+                  </tr>
+                  <tr className="border-b border-white/5">
+                    <td className="py-2 px-3 font-mono text-[#00FF88]">betmgm</td>
+                    <td className="py-2 px-3 text-zinc-300">BetMGM</td>
+                    <td className="py-2 px-3 text-zinc-400">Sportsbook</td>
+                    <td className="py-2 px-3 text-zinc-500">Vegas-backed lines</td>
+                  </tr>
+                  <tr className="border-b border-white/5">
+                    <td className="py-2 px-3 font-mono text-[#00FF88]">bet365</td>
+                    <td className="py-2 px-3 text-zinc-300">Bet365</td>
+                    <td className="py-2 px-3 text-zinc-400">Sportsbook</td>
+                    <td className="py-2 px-3 text-zinc-500">Global market leader</td>
+                  </tr>
+                  <tr className="border-b border-white/5">
+                    <td className="py-2 px-3 font-mono text-[#00FF88]">caesars</td>
+                    <td className="py-2 px-3 text-zinc-300">Caesars</td>
+                    <td className="py-2 px-3 text-zinc-400">Sportsbook</td>
+                    <td className="py-2 px-3 text-zinc-500">Casino heritage</td>
+                  </tr>
+                  <tr className="border-b border-white/5">
+                    <td className="py-2 px-3 font-mono text-[#00FF88]">kalshi</td>
+                    <td className="py-2 px-3 text-zinc-300">Kalshi</td>
+                    <td className="py-2 px-3 text-purple-400">Exchange</td>
+                    <td className="py-2 px-3 text-zinc-500">CFTC-regulated prediction market</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div className="p-4 rounded-lg bg-purple-500/5 border border-purple-500/20 mb-8">
+              <h4 className="font-mono font-semibold text-purple-400 mb-2">About Kalshi</h4>
+              <p className="text-sm text-zinc-400 mb-2">
+                Kalshi is a CFTC-regulated prediction market exchange. Unlike traditional sportsbooks,
+                Kalshi uses exchange-based pricing where users trade contracts against each other.
+              </p>
+              <ul className="text-sm text-zinc-500 space-y-1">
+                <li>• Prices are converted from contract cents (0-100) to American odds</li>
+                <li>• Markets include moneylines, spreads, and totals</li>
+                <li>• Coverage varies by sport and event popularity</li>
+              </ul>
+            </div>
+
             <h3 className="text-lg font-mono font-semibold mb-3">Query Parameters</h3>
             <ParamTable
               params={[
-                { name: "books", type: "string", required: false, description: "Comma-separated list of sportsbooks (pinnacle,fanduel,draftkings,betmgm,bet365,caesars)" },
+                { name: "books", type: "string", required: false, description: "Comma-separated list of sportsbooks (pinnacle,fanduel,draftkings,betmgm,bet365,caesars,kalshi)" },
                 { name: "game_id", type: "string", required: false, description: "Filter to a specific game" },
               ]}
             />
@@ -401,6 +472,27 @@ export default function DocsPage() {
               "outcomes": [
                 { "name": "Over", "price": -110, "point": 224.5 },
                 { "name": "Under", "price": -110, "point": 224.5 }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "kalshi",
+          "title": "Kalshi",
+          "last_update": "2026-01-31T18:29:30Z",
+          "markets": [
+            {
+              "key": "h2h",
+              "outcomes": [
+                { "name": "Los Angeles Lakers", "price": -163 },
+                { "name": "Boston Celtics", "price": 138 }
+              ]
+            },
+            {
+              "key": "spreads",
+              "outcomes": [
+                { "name": "Los Angeles Lakers", "price": -105, "point": -3.5 },
+                { "name": "Boston Celtics", "price": -115, "point": 3.5 }
               ]
             }
           ]
@@ -465,7 +557,7 @@ export default function DocsPage() {
                 { name: "game_id", type: "string", required: false, description: "Filter to a specific game" },
                 { name: "player", type: "string", required: false, description: "Filter by player name (partial match)" },
                 { name: "category", type: "string", required: false, description: "Filter by prop category" },
-                { name: "books", type: "string", required: false, description: "Comma-separated list: pinnacle,fanduel,draftkings,betmgm,bet365,caesars" },
+                { name: "books", type: "string", required: false, description: "Comma-separated list: pinnacle,fanduel,draftkings,betmgm,bet365,caesars (Kalshi does not offer props)" },
               ]}
             />
 

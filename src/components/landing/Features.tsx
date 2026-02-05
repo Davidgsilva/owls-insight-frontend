@@ -12,10 +12,10 @@ import {
 const features = [
   {
     icon: Zap,
-    title: "6-Book Aggregation",
+    title: "7-Book Aggregation",
     description:
-      "Pinnacle, FanDuel, DraftKings, BetMGM, Bet365, and Caesars — all normalized into a single, consistent API schema.",
-    highlight: "6 Books",
+      "Pinnacle, FanDuel, DraftKings, BetMGM, Bet365, Caesars, and Kalshi — all normalized into a single, consistent API schema.",
+    highlight: "7 Books",
   },
   {
     icon: Radio,
