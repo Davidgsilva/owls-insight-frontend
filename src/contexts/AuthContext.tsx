@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 interface User {
   id: string;
   email: string;
+  discordUsername: string | null;
+  discordAvatar: string | null;
   createdAt: string;
 }
 

@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LogOut, Settings, User } from "lucide-react";
 import Link from "next/link";
 
@@ -23,9 +23,12 @@ const tierColors = {
 export function Header() {
   const { user, subscription, logout } = useAuth();
 
-  const initials = user?.email
-    ? user.email.substring(0, 2).toUpperCase()
-    : "??";
+  const displayName = user?.discordUsername || user?.email || "Unknown";
+  const initials = user?.discordUsername
+    ? user.discordUsername.substring(0, 2).toUpperCase()
+    : user?.email
+      ? user.email.substring(0, 2).toUpperCase()
+      : "??";
 
   const tier = subscription?.tier || "bench";
 
@@ -44,6 +47,9 @@ export function Header() {
           <DropdownMenuTrigger asChild>
             <button className="flex items-center gap-2 p-1 rounded-lg hover:bg-white/5 transition-colors">
               <Avatar className="w-8 h-8 border border-white/10">
+                {user?.discordAvatar && (
+                  <AvatarImage src={user.discordAvatar} alt={displayName} />
+                )}
                 <AvatarFallback className="bg-[#111113] text-zinc-400 text-xs font-mono">
                   {initials}
                 </AvatarFallback>
@@ -57,7 +63,7 @@ export function Header() {
             <DropdownMenuLabel className="text-zinc-400 font-normal">
               <div className="flex flex-col space-y-1">
                 <p className="text-sm font-medium text-white truncate">
-                  {user?.email}
+                  {displayName}
                 </p>
                 <p className="text-xs text-zinc-500">
                   {tier.charAt(0).toUpperCase() + tier.slice(1)} Plan

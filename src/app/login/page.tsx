@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -19,6 +19,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { DiscordIcon } from "@/components/icons/DiscordIcon";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -26,6 +27,14 @@ const loginSchema = z.object({
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
+
+const DISCORD_ERROR_MESSAGES: Record<string, string> = {
+  invalid_state: "Security validation failed. Please try again.",
+  expired_state: "Login session expired. Please try again.",
+  missing_params: "Invalid callback. Please try again.",
+  service_unavailable: "Service temporarily unavailable.",
+  discord_auth_failed: "Discord authentication failed.",
+};
 
 export default function LoginPage() {
   const router = useRouter();
@@ -38,6 +47,15 @@ export default function LoginPage() {
   const redirectTo = redirectParam && redirectParam.startsWith("/") && !redirectParam.startsWith("//")
     ? redirectParam
     : "/dashboard";
+
+  // Show Discord OAuth errors from callback redirect
+  const errorParam = searchParams.get("error");
+  useEffect(() => {
+    if (errorParam) {
+      const message = DISCORD_ERROR_MESSAGES[errorParam] || "An error occurred. Please try again.";
+      toast.error(message);
+    }
+  }, [errorParam]);
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -81,6 +99,27 @@ export default function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {/* Discord OAuth */}
+            <a
+              href="/api/auth/discord"
+              className="w-full flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-md
+                         bg-[#5865F2] hover:bg-[#4752C4] text-white font-semibold text-sm
+                         transition-colors duration-150"
+            >
+              <DiscordIcon className="w-5 h-5" />
+              Sign in with Discord
+            </a>
+
+            {/* Divider */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-white/10" />
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="bg-[#111113] px-3 text-zinc-500">or continue with email</span>
+              </div>
+            </div>
+
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField

@@ -19,6 +19,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { DiscordIcon } from "@/components/icons/DiscordIcon";
 
 const registerSchema = z
   .object({
@@ -134,6 +135,27 @@ export default function RegisterPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {/* Discord OAuth */}
+            <a
+              href="/api/auth/discord"
+              className="w-full flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-md
+                         bg-[#5865F2] hover:bg-[#4752C4] text-white font-semibold text-sm
+                         transition-colors duration-150"
+            >
+              <DiscordIcon className="w-5 h-5" />
+              Sign up with Discord
+            </a>
+
+            {/* Divider */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-white/10" />
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="bg-[#111113] px-3 text-zinc-500">or register with email</span>
+              </div>
+            </div>
+
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField

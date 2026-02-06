@@ -1,0 +1,92 @@
+import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'crypto';
+
+const INTERNAL_AUTH_SECRET = process.env.INTERNAL_AUTH_SECRET;
+const API_SERVER_URL = process.env.API_SERVER_URL || 'http://owls-insight-api-server';
+const isProduction = process.env.NODE_ENV === 'production';
+
+const DISCORD_REDIRECT_URI = isProduction
+  ? 'https://owlsinsight.com/api/auth/discord/callback'
+  : 'http://localhost:3000/api/auth/discord/callback';
+
+/** Redirect to login with error, always clearing the state cookie */
+function errorRedirect(request: NextRequest, error: string): NextResponse {
+  const response = NextResponse.redirect(
+    new URL(`/login?error=${encodeURIComponent(error)}`, request.url)
+  );
+  response.cookies.set('discord_oauth_state', '', { expires: new Date(0), path: '/' });
+  return response;
+}
+
+export async function GET(request: NextRequest) {
+  const { searchParams } = request.nextUrl;
+  const code = searchParams.get('code');
+  const state = searchParams.get('state');
+  const error = searchParams.get('error');
+
+  // Handle Discord errors (user denied consent, etc.)
+  if (error) {
+    return errorRedirect(request, 'Authorization denied');
+  }
+
+  if (!code || !state) {
+    return errorRedirect(request, 'missing_params');
+  }
+
+  // Validate state against cookie (CSRF protection)
+  const storedState = request.cookies.get('discord_oauth_state')?.value;
+  if (!storedState) {
+    return errorRedirect(request, 'expired_state');
+  }
+
+  // Timing-safe comparison to prevent timing attacks
+  const stateBuffer = Buffer.from(state);
+  const storedBuffer = Buffer.from(storedState);
+  if (stateBuffer.length !== storedBuffer.length ||
+      !crypto.timingSafeEqual(stateBuffer, storedBuffer)) {
+    return errorRedirect(request, 'invalid_state');
+  }
+
+  try {
+    // Exchange code via backend API
+    const response = await fetch(`${API_SERVER_URL}/api/v1/auth/discord/callback`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Internal-Auth': INTERNAL_AUTH_SECRET || '',
+      },
+      body: JSON.stringify({ code, redirectUri: DISCORD_REDIRECT_URI }),
+      signal: AbortSignal.timeout(15000),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return errorRedirect(request, data.error || 'discord_auth_failed');
+    }
+
+    // Success - set JWT cookie and redirect to dashboard
+    const redirectResponse = NextResponse.redirect(new URL('/dashboard', request.url));
+
+    if (data.token) {
+      redirectResponse.cookies.set('token', data.token, {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 7 * 24 * 60 * 60, // 7 days
+      });
+    }
+
+    // Clear the state cookie
+    redirectResponse.cookies.set('discord_oauth_state', '', {
+      expires: new Date(0),
+      path: '/',
+    });
+
+    return redirectResponse;
+  } catch (err) {
+    console.error('Discord callback proxy error:', err);
+    return errorRedirect(request, 'service_unavailable');
+  }
+}
