@@ -69,7 +69,6 @@ export function Header() {
           </Link>
         </nav>
 
-        {/* TODO: Uncomment when ready to launch
         <div className="flex items-center gap-3">
           <Link href="/login">
             <Button
@@ -81,11 +80,10 @@ export function Header() {
           </Link>
           <Link href="/register">
             <Button className="text-sm bg-[#00FF88] hover:bg-[#00d4aa] text-[#0a0a0a] font-medium px-4">
-              Get API Key
+              Sign Up
             </Button>
           </Link>
         </div>
-        */}
       </div>
     </header>
   );

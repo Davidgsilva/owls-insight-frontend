@@ -55,7 +55,7 @@ const tiers = [
       "90 days historical data",
       "Real-time data",
     ],
-    cta: "Start MVP Trial",
+    cta: "Start Free Trial",
     ctaVariant: "default" as const,
     popular: true,
   },
@@ -122,13 +122,8 @@ export function Pricing() {
                 ))}
               </ul>
 
-              {/* Coming Soon */}
-              <div className="w-full py-2 text-center rounded-md border border-amber-500/30 bg-amber-500/10">
-                <span className="text-sm font-mono text-amber-400">Coming Soon</span>
-              </div>
-
-              {/* TODO: Uncomment when ready to launch
-              <Link href="/register" className="block">
+              {/* CTA Button */}
+              <Link href={`/register?tier=${tier.name.toLowerCase()}`} className="block">
                 <Button
                   variant={tier.ctaVariant}
                   className={`w-full font-mono ${
@@ -140,7 +135,6 @@ export function Pricing() {
                   {tier.cta}
                 </Button>
               </Link>
-              */}
             </div>
           ))}
         </div>

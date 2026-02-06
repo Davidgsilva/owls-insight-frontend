@@ -61,18 +61,9 @@ export function Hero() {
               </div>
             </div>
 
-            {/* Coming Soon Badge */}
-            <div className="opacity-0 animate-fade-in-up stagger-4">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-amber-500/30 bg-amber-500/10">
-                <span className="text-sm font-mono text-amber-400">
-                  Coming Soon
-                </span>
-              </div>
-            </div>
-
-            {/* TODO: Uncomment when ready to launch
+            {/* CTA Buttons */}
             <div className="flex gap-4 opacity-0 animate-fade-in-up stagger-4">
-              <Link href="/register">
+              <Link href="/register?tier=mvp">
                 <Button
                   size="lg"
                   className="bg-[#00FF88] hover:bg-[#00d4aa] text-[#0a0a0a] font-mono font-medium px-6 glow-primary"
@@ -90,7 +81,6 @@ export function Hero() {
                 </Button>
               </Link>
             </div>
-            */}
           </div>
 
           {/* Right column - Terminal Demo */}
