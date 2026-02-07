@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, CreditCard, Zap, ExternalLink } from "lucide-react";
+import { Check, CreditCard, Lightning, ArrowSquareOut } from "@phosphor-icons/react";
 
 const tiers = {
   bench: {
@@ -31,7 +31,7 @@ const tiers = {
       "120 requests/minute",
       "REST + WebSocket (2 connections)",
       "Player props access",
-      "14 days historical data",
+      "Historical odds & props",
       "Real-time updates",
     ],
     color: "blue",
@@ -45,7 +45,7 @@ const tiers = {
       "400 requests/minute",
       "REST + WebSocket (5 connections)",
       "Full props + alternates",
-      "90 days historical data",
+      "Full historical odds & props",
       "Priority support",
     ],
     color: "purple",
@@ -60,6 +60,16 @@ export default function BillingPage() {
   const validTiers = ["bench", "rookie", "mvp"] as const;
   const rawTier = subscription?.tier;
   const currentTier = rawTier && validTiers.includes(rawTier) ? rawTier : "bench";
+
+  function getTrialDaysRemaining(): number | null {
+    if (subscription?.status !== "trialing" || !subscription.currentPeriodEnd) return null;
+    const endDate = new Date(subscription.currentPeriodEnd);
+    const diffMs = endDate.getTime() - Date.now();
+    return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+  }
+
+  const trialDays = getTrialDaysRemaining();
+  const isTrialing = subscription?.status === "trialing";
 
   async function handleUpgrade(tier: "bench" | "rookie" | "mvp") {
     setIsLoading(tier);
@@ -132,7 +142,7 @@ export default function BillingPage() {
       <Card className="bg-[#111113] border-white/5">
         <CardHeader>
           <CardTitle className="text-lg font-mono text-white flex items-center gap-2">
-            <CreditCard className="w-5 h-5 text-[#00FF88]" />
+            <CreditCard size={20} weight="duotone" className="text-[#00FF88]" />
             Current Plan
           </CardTitle>
           <CardDescription className="text-zinc-500">
@@ -158,7 +168,11 @@ export default function BillingPage() {
                   {tiers[currentTier].price}/month
                 </p>
                 <p className="text-zinc-500 text-sm">
-                  {subscription?.status === "active" ? "Active" : subscription?.status || "Free trial"}
+                  {isTrialing && trialDays !== null
+                    ? `Free trial — ${trialDays} day${trialDays !== 1 ? "s" : ""} remaining`
+                    : subscription?.status === "active"
+                    ? "Active"
+                    : subscription?.status || "Active"}
                 </p>
               </div>
             </div>
@@ -169,11 +183,39 @@ export default function BillingPage() {
               className="border-white/10 text-white hover:bg-white/5"
             >
               {isLoading === "portal" ? "Loading..." : "Manage Billing"}
-              <ExternalLink className="w-4 h-4 ml-2" />
+              <ArrowSquareOut size={16} className="ml-2" />
             </Button>
           </div>
         </CardContent>
       </Card>
+
+      {/* Trial Banner */}
+      {isTrialing && trialDays !== null && (
+        <Card className="bg-[#00FF88]/5 border-[#00FF88]/20">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[#00FF88] font-mono font-semibold text-lg">
+                  MVP Free Trial
+                </p>
+                <p className="text-zinc-400 text-sm mt-1">
+                  {trialDays > 0
+                    ? `Your trial ends on ${new Date(subscription!.currentPeriodEnd!).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}. Your card will be charged $49.99/mo after the trial.`
+                    : "Your trial has ended. Your card will be charged shortly."}
+                </p>
+              </div>
+              <Button
+                onClick={handleManageBilling}
+                disabled={isLoading === "portal"}
+                variant="outline"
+                className="border-[#00FF88]/30 text-[#00FF88] hover:bg-[#00FF88]/10 shrink-0"
+              >
+                {isLoading === "portal" ? "Loading..." : "Cancel Trial"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Available Plans */}
       <div>
@@ -225,7 +267,7 @@ export default function BillingPage() {
                           key={feature}
                           className="flex items-center gap-2 text-sm text-zinc-300"
                         >
-                          <Check className="w-4 h-4 text-[#00FF88] shrink-0" />
+                          <Check size={16} weight="bold" className="text-[#00FF88] shrink-0" />
                           {feature}
                         </li>
                       ))}
@@ -242,7 +284,7 @@ export default function BillingPage() {
                         className="w-full bg-[#00FF88] hover:bg-[#00d474] text-[#0a0a0a] font-semibold"
                       >
                         {isLoading === tier ? "Loading..." : "Upgrade"}
-                        <Zap className="w-4 h-4 ml-2" />
+                        <Lightning size={16} weight="fill" className="ml-2" />
                       </Button>
                     ) : (
                       <Button

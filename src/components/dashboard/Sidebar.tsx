@@ -3,20 +3,20 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard,
+  SquaresFour,
   Key,
-  BarChart3,
+  ChartBar,
   CreditCard,
   FileText,
-  LogOut,
-} from "lucide-react";
+  SignOut,
+} from "@phosphor-icons/react";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 
 const navigation = [
-  { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Overview", href: "/dashboard", icon: SquaresFour },
   { name: "API Keys", href: "/dashboard/keys", icon: Key },
-  { name: "Usage", href: "/dashboard/usage", icon: BarChart3 },
+  { name: "Usage", href: "/dashboard/usage", icon: ChartBar },
   { name: "Billing", href: "/dashboard/billing", icon: CreditCard },
 ];
 
@@ -59,7 +59,7 @@ export function Sidebar() {
                   : "text-zinc-400 hover:text-white hover:bg-white/5"
               )}
             >
-              <item.icon className="w-5 h-5" />
+              <item.icon size={20} weight="duotone" />
               {item.name}
             </Link>
           );
@@ -74,7 +74,7 @@ export function Sidebar() {
             href={item.href}
             className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/5 transition-colors"
           >
-            <item.icon className="w-5 h-5" />
+            <item.icon size={20} weight="duotone" />
             {item.name}
           </Link>
         ))}
@@ -82,7 +82,7 @@ export function Sidebar() {
           onClick={logout}
           className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-400 hover:text-red-400 hover:bg-red-500/5 transition-colors w-full"
         >
-          <LogOut className="w-5 h-5" />
+          <SignOut size={20} weight="duotone" />
           Sign out
         </button>
       </div>

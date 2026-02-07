@@ -1,52 +1,52 @@
 "use client";
 
 import {
-  Zap,
-  Radio,
-  History,
-  Shield,
-  BarChart3,
-  Users,
-} from "lucide-react";
+  Lightning,
+  Broadcast,
+  ClockCounterClockwise,
+  ShieldCheck,
+  ChartBar,
+  UsersThree,
+} from "@phosphor-icons/react";
 
 const features = [
   {
-    icon: Zap,
+    icon: Lightning,
     title: "7-Book Aggregation",
     description:
       "Pinnacle, FanDuel, DraftKings, BetMGM, Bet365, Caesars, and Kalshi — all normalized into a single, consistent API schema.",
     highlight: "7 Books",
   },
   {
-    icon: Radio,
+    icon: Broadcast,
     title: "WebSocket Streaming",
     description:
       "Real-time push updates the moment lines move. No polling required. Subscribe to specific events or entire markets.",
     highlight: "Real-time",
   },
   {
-    icon: History,
+    icon: ClockCounterClockwise,
     title: "Line History & Analytics",
     description:
       "Track opening lines, line movements, and historical data. Identify CLV opportunities and steam moves.",
     highlight: "Full History",
   },
   {
-    icon: Shield,
+    icon: ShieldCheck,
     title: "99.9% Uptime SLA",
     description:
       "Enterprise-grade infrastructure with automatic failover. Rate limiting per API key with generous quotas.",
     highlight: "Enterprise",
   },
   {
-    icon: BarChart3,
+    icon: ChartBar,
     title: "Player Props",
     description:
       "Complete player prop markets including points, rebounds, assists, and more. Available on Pro and Enterprise tiers.",
     highlight: "Full Props",
   },
   {
-    icon: Users,
+    icon: UsersThree,
     title: "Multi-Sport Coverage",
     description:
       "NBA, NFL, NHL, MLB, NCAAB, and NCAAF. All major sports with consistent data schemas across markets.",
@@ -90,7 +90,7 @@ export function Features() {
 
               {/* Icon */}
               <div className="w-12 h-12 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center mb-4 group-hover:border-[#00FF88]/30 group-hover:bg-[#00FF88]/5 transition-all">
-                <feature.icon className="w-6 h-6 text-neutral-400 group-hover:text-[#00FF88] transition-colors" />
+                <feature.icon size={24} weight="duotone" className="text-neutral-400 group-hover:text-[#00FF88] transition-colors" />
               </div>
 
               {/* Content */}

@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LogOut, Settings, User } from "lucide-react";
+import { SignOut, GearSix, User } from "@phosphor-icons/react";
 import Link from "next/link";
 
 const tierColors = {
@@ -76,7 +76,7 @@ export function Header() {
                 href="/dashboard"
                 className="flex items-center gap-2 text-zinc-300 cursor-pointer"
               >
-                <User className="w-4 h-4" />
+                <User size={16} weight="duotone" />
                 Dashboard
               </Link>
             </DropdownMenuItem>
@@ -85,7 +85,7 @@ export function Header() {
                 href="/dashboard/billing"
                 className="flex items-center gap-2 text-zinc-300 cursor-pointer"
               >
-                <Settings className="w-4 h-4" />
+                <GearSix size={16} weight="duotone" />
                 Billing
               </Link>
             </DropdownMenuItem>
@@ -94,7 +94,7 @@ export function Header() {
               onClick={logout}
               className="flex items-center gap-2 text-red-400 cursor-pointer focus:text-red-400"
             >
-              <LogOut className="w-4 h-4" />
+              <SignOut size={16} weight="duotone" />
               Sign out
             </DropdownMenuItem>
           </DropdownMenuContent>

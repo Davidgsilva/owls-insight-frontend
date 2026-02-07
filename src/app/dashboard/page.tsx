@@ -3,10 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Key, BarChart3, FileText, Zap, ArrowRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface UsageData {
   totalRequests: number;
@@ -20,6 +18,57 @@ interface UsageData {
 interface KeysData {
   count: number;
   maxKeys: number;
+}
+
+function StatCard({
+  label,
+  value,
+  sub,
+  accent,
+  loading,
+}: {
+  label: string;
+  value: string;
+  sub: string;
+  accent?: boolean;
+  loading?: boolean;
+}) {
+  return (
+    <div className="group relative rounded-xl bg-[#111113] border border-white/[0.06] p-5 transition-colors duration-200 hover:border-white/[0.12]">
+      <p className="text-[11px] font-mono uppercase tracking-[0.15em] text-zinc-500 mb-4">
+        {label}
+      </p>
+      <p
+        className={cn(
+          "text-[32px] leading-none font-mono font-bold tracking-tight",
+          accent ? "text-[#00FF88]" : "text-white"
+        )}
+      >
+        {loading ? (
+          <span className="inline-block w-16 h-8 bg-white/5 rounded animate-pulse" />
+        ) : (
+          value
+        )}
+      </p>
+      <p className="text-xs text-zinc-500 mt-2 font-sans">{sub}</p>
+    </div>
+  );
+}
+
+function UsageBar({ used, total, loading }: { used: number; total: number; loading?: boolean }) {
+  const pct = total > 0 ? Math.min((used / total) * 100, 100) : 0;
+  return (
+    <div className="mt-3">
+      <div className="h-1 w-full rounded-full bg-white/[0.06] overflow-hidden">
+        {!loading && (
+          <div
+            className="h-full rounded-full bg-[#00FF88] transition-[width] duration-700 ease-out"
+            style={{ width: `${pct}%` }}
+          />
+        )}
+      </div>
+    </div>
+  );
 }
 
 export default function DashboardPage() {
@@ -73,7 +122,6 @@ export default function DashboardPage() {
     return () => controller.abort();
   }, []);
 
-  // Validate tier from API to prevent runtime errors
   const validTiers = ["bench", "rookie", "mvp"] as const;
   const rawTier = subscription?.tier;
   const tier = rawTier && validTiers.includes(rawTier) ? rawTier : "bench";
@@ -82,167 +130,156 @@ export default function DashboardPage() {
     rookie: { month: 75000, minute: 120 },
     mvp: { month: 300000, minute: 400 },
   };
-
   const limits = tierLimits[tier];
 
+  const monthUsed = usage?.rateLimits?.month?.count || 0;
+  const monthPct = ((monthUsed / limits.month) * 100).toFixed(1);
+
   return (
-    <div className="space-y-6">
-      {/* Welcome Section */}
+    <div className="max-w-5xl space-y-8">
+      {/* Header */}
       <div>
-        <h1 className="text-2xl font-mono font-bold text-white">
-          Welcome back
+        <h1 className="text-2xl font-mono font-bold text-white tracking-tight">
+          Overview
         </h1>
-        <p className="text-zinc-400 mt-1">
-          Here&apos;s an overview of your API usage
+        <p className="text-zinc-500 text-sm mt-1 font-sans">
+          API usage and account status
         </p>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-[#111113] border-white/5">
-          <CardHeader className="pb-2">
-            <CardDescription className="text-zinc-500 flex items-center gap-2">
-              <BarChart3 className="w-4 h-4" />
-              Requests Today
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-mono font-bold text-white">
-              {isLoading ? "..." : (usage?.totalRequests || 0).toLocaleString()}
-            </div>
-            <p className="text-xs text-zinc-500 mt-1">
-              {usage?.successfulRequests || 0} successful
-            </p>
-          </CardContent>
-        </Card>
+      {/* Metrics */}
+      <section aria-label="Usage metrics">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <StatCard
+            label="Requests today"
+            value={isLoading ? "" : (usage?.totalRequests || 0).toLocaleString()}
+            sub={`${usage?.successfulRequests || 0} successful`}
+            loading={isLoading}
+          />
 
-        <Card className="bg-[#111113] border-white/5">
-          <CardHeader className="pb-2">
-            <CardDescription className="text-zinc-500 flex items-center gap-2">
-              <Zap className="w-4 h-4" />
-              Monthly Usage
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-mono font-bold text-white">
-              {isLoading
-                ? "..."
-                : `${((usage?.rateLimits?.month?.count || 0) / limits.month * 100).toFixed(1)}%`}
-            </div>
-            <p className="text-xs text-zinc-500 mt-1">
-              {(usage?.rateLimits?.month?.count || 0).toLocaleString()} / {limits.month.toLocaleString()}
+          <div className="group relative rounded-xl bg-[#111113] border border-white/[0.06] p-5 transition-colors duration-200 hover:border-white/[0.12]">
+            <p className="text-[11px] font-mono uppercase tracking-[0.15em] text-zinc-500 mb-4">
+              Monthly usage
             </p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-[#111113] border-white/5">
-          <CardHeader className="pb-2">
-            <CardDescription className="text-zinc-500 flex items-center gap-2">
-              <Key className="w-4 h-4" />
-              API Keys
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-mono font-bold text-white">
-              {isLoading ? "..." : keys?.count || 0}
-            </div>
-            <p className="text-xs text-zinc-500 mt-1">
-              of {keys?.maxKeys || 5} available
+            <p className="text-[32px] leading-none font-mono font-bold tracking-tight text-white">
+              {isLoading ? (
+                <span className="inline-block w-16 h-8 bg-white/5 rounded animate-pulse" />
+              ) : (
+                <>{monthPct}<span className="text-lg text-zinc-500 ml-0.5">%</span></>
+              )}
             </p>
-          </CardContent>
-        </Card>
+            <p className="text-xs text-zinc-500 mt-2 font-sans">
+              {monthUsed.toLocaleString()} / {limits.month.toLocaleString()}
+            </p>
+            <UsageBar used={monthUsed} total={limits.month} loading={isLoading} />
+          </div>
 
-        <Card className="bg-[#111113] border-white/5">
-          <CardHeader className="pb-2">
-            <CardDescription className="text-zinc-500 flex items-center gap-2">
-              Subscription
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+          <StatCard
+            label="API keys"
+            value={isLoading ? "" : `${keys?.count || 0}`}
+            sub={`of ${keys?.maxKeys || 5} available`}
+            loading={isLoading}
+          />
+
+          <div className="group relative rounded-xl bg-[#111113] border border-white/[0.06] p-5 transition-colors duration-200 hover:border-white/[0.12]">
+            <p className="text-[11px] font-mono uppercase tracking-[0.15em] text-zinc-500 mb-4">
+              Plan
+            </p>
             <Badge
-              className={`font-mono ${
+              className={cn(
+                "font-mono text-xs border mt-1",
                 tier === "mvp"
-                  ? "bg-purple-500/20 text-purple-400 border-purple-500/30"
+                  ? "bg-purple-500/15 text-purple-400 border-purple-500/25"
                   : tier === "rookie"
-                  ? "bg-blue-500/20 text-blue-400 border-blue-500/30"
-                  : "bg-zinc-500/20 text-zinc-400 border-zinc-500/30"
-              } border`}
+                  ? "bg-[#06b6d4]/15 text-[#06b6d4] border-[#06b6d4]/25"
+                  : "bg-zinc-500/15 text-zinc-400 border-zinc-500/25"
+              )}
             >
               {tier.toUpperCase()}
             </Badge>
-            <p className="text-xs text-zinc-500 mt-2">
+            <p className="text-xs text-zinc-500 mt-3 font-sans">
               {tier === "mvp"
                 ? "Full access"
                 : tier === "rookie"
                 ? "Standard access"
                 : "Basic access"}
             </p>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </div>
+      </section>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="bg-[#111113] border-white/5">
-          <CardHeader>
-            <CardTitle className="text-lg font-mono text-white flex items-center gap-2">
-              <Key className="w-5 h-5 text-[#00FF88]" />
-              API Keys
-            </CardTitle>
-            <CardDescription className="text-zinc-500">
-              Manage your API keys for programmatic access
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link href="/dashboard/keys">
-              <Button className="bg-[#00FF88] hover:bg-[#00d474] text-[#0a0a0a] font-semibold">
-                Manage Keys
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-[#111113] border-white/5">
-          <CardHeader>
-            <CardTitle className="text-lg font-mono text-white flex items-center gap-2">
-              <FileText className="w-5 h-5 text-[#00FF88]" />
-              Documentation
-            </CardTitle>
-            <CardDescription className="text-zinc-500">
-              Learn how to integrate the API into your application
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link href="/docs">
-              <Button variant="outline" className="border-white/10 text-white hover:bg-white/5">
-                View Docs
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Tier Upgrade Banner (if not MVP) */}
-      {tier !== "mvp" && (
-        <Card className="bg-gradient-to-r from-purple-500/10 to-[#00FF88]/10 border-purple-500/20">
-          <CardContent className="flex items-center justify-between py-6">
-            <div>
-              <h3 className="text-lg font-mono font-semibold text-white">
-                Upgrade to {tier === "bench" ? "Rookie or MVP" : "MVP"}
-              </h3>
-              <p className="text-zinc-400 text-sm mt-1">
-                Get more requests, WebSocket access, and historical data
-              </p>
+      <section aria-label="Quick actions">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <Link
+            href="/dashboard/keys"
+            className="group relative rounded-xl bg-[#111113] border border-white/[0.06] p-6 transition-colors duration-200 hover:border-[#00FF88]/20 focus-visible:ring-2 focus-visible:ring-[#00FF88]/50 focus-visible:outline-none"
+          >
+            <div className="flex items-start justify-between">
+              <div>
+                <h2 className="text-sm font-mono font-semibold text-white mb-1">
+                  API Keys
+                </h2>
+                <p className="text-sm text-zinc-500 font-sans leading-relaxed">
+                  Create and manage keys for programmatic access
+                </p>
+              </div>
+              <span
+                className="text-zinc-600 group-hover:text-[#00FF88] group-hover:translate-x-0.5 transition-all duration-200 text-lg mt-0.5"
+                aria-hidden="true"
+              >
+                &rarr;
+              </span>
             </div>
-            <Link href="/dashboard/billing">
-              <Button className="bg-purple-500 hover:bg-purple-600 text-white font-semibold">
-                Upgrade Now
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
+          </Link>
+
+          <Link
+            href="/docs"
+            className="group relative rounded-xl bg-[#111113] border border-white/[0.06] p-6 transition-colors duration-200 hover:border-white/[0.12] focus-visible:ring-2 focus-visible:ring-[#00FF88]/50 focus-visible:outline-none"
+          >
+            <div className="flex items-start justify-between">
+              <div>
+                <h2 className="text-sm font-mono font-semibold text-white mb-1">
+                  Documentation
+                </h2>
+                <p className="text-sm text-zinc-500 font-sans leading-relaxed">
+                  Integrate the API into your application
+                </p>
+              </div>
+              <span
+                className="text-zinc-600 group-hover:text-white group-hover:translate-x-0.5 transition-all duration-200 text-lg mt-0.5"
+                aria-hidden="true"
+              >
+                &rarr;
+              </span>
+            </div>
+          </Link>
+        </div>
+      </section>
+
+      {/* Upgrade Banner */}
+      {tier !== "mvp" && (
+        <section aria-label="Upgrade plan">
+          <Link
+            href="/dashboard/billing"
+            className="group block relative rounded-xl border border-purple-500/15 overflow-hidden focus-visible:ring-2 focus-visible:ring-purple-500/50 focus-visible:outline-none"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/[0.07] via-transparent to-[#00FF88]/[0.05]" />
+            <div className="relative flex items-center justify-between p-6">
+              <div>
+                <h2 className="text-sm font-mono font-semibold text-white">
+                  Upgrade to {tier === "bench" ? "Rookie or MVP" : "MVP"}
+                </h2>
+                <p className="text-sm text-zinc-500 mt-1 font-sans">
+                  More requests, WebSocket access, and historical data
+                </p>
+              </div>
+              <span className="shrink-0 ml-4 text-xs font-mono font-medium text-purple-400 bg-purple-500/10 border border-purple-500/20 rounded-md px-3 py-1.5 group-hover:bg-purple-500/20 transition-colors duration-200">
+                Upgrade
+              </span>
+            </div>
+          </Link>
+        </section>
       )}
     </div>
   );

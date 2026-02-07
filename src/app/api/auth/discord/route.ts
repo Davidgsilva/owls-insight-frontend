@@ -4,9 +4,8 @@ import crypto from 'crypto';
 const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID;
 const isProduction = process.env.NODE_ENV === 'production';
 
-const DISCORD_REDIRECT_URI = isProduction
-  ? 'https://owlsinsight.com/api/auth/discord/callback'
-  : 'http://localhost:3000/api/auth/discord/callback';
+const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI
+  || 'https://owlsinsight.com/api/auth/discord/callback';
 
 export async function GET() {
   if (!DISCORD_CLIENT_ID) {

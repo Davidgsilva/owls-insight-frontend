@@ -3,11 +3,10 @@ import crypto from 'crypto';
 
 const INTERNAL_AUTH_SECRET = process.env.INTERNAL_AUTH_SECRET;
 const API_SERVER_URL = process.env.API_SERVER_URL || 'http://owls-insight-api-server';
-const isProduction = process.env.NODE_ENV === 'production';
+const isProduction = process.env.NODE_ENV === 'production' || !process.env.DISCORD_REDIRECT_URI?.includes('localhost');
 
-const DISCORD_REDIRECT_URI = isProduction
-  ? 'https://owlsinsight.com/api/auth/discord/callback'
-  : 'http://localhost:3000/api/auth/discord/callback';
+const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI
+  || 'https://owlsinsight.com/api/auth/discord/callback';
 
 /** Redirect to login with error, always clearing the state cookie */
 function errorRedirect(request: NextRequest, error: string): NextResponse {

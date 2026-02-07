@@ -107,6 +107,9 @@ export function Pricing() {
                   <span className="text-zinc-500 text-sm">{tier.period}</span>
                 </div>
                 <p className="text-sm text-zinc-500 mt-2">{tier.description}</p>
+                {tier.popular && (
+                  <p className="text-xs text-[#00FF88] font-mono mt-1">7-day free trial</p>
+                )}
               </div>
 
               {/* Features */}

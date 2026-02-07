@@ -22,7 +22,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Key, Plus, Copy, AlertTriangle } from "lucide-react";
+import { Key, Plus, Copy, Warning } from "@phosphor-icons/react";
+import { useAuth } from "@/hooks/useAuth";
 
 interface APIKey {
   id: string;
@@ -40,6 +41,8 @@ const tierColors = {
 };
 
 export default function APIKeysPage() {
+  const { user } = useAuth();
+  const isVerified = user?.emailVerified ?? false;
   const [keys, setKeys] = useState<APIKey[]>([]);
   const [maxKeys, setMaxKeys] = useState(5);
   const [isLoading, setIsLoading] = useState(true);
@@ -129,18 +132,27 @@ export default function APIKeysPage() {
         </div>
         <Button
           onClick={() => setShowGenerateModal(true)}
-          disabled={keys.length >= maxKeys}
+          disabled={keys.length >= maxKeys || !isVerified}
           className="bg-[#00FF88] hover:bg-[#00d474] text-[#0a0a0a] font-semibold"
+          title={!isVerified ? "Verify your email to generate API keys" : undefined}
         >
-          <Plus className="w-4 h-4 mr-2" />
+          <Plus size={16} className="mr-2" />
           Generate New Key
         </Button>
       </div>
 
+      {!isVerified && (
+        <div className="rounded-lg border border-yellow-500/20 bg-yellow-500/5 px-4 py-3">
+          <p className="text-sm text-yellow-200">
+            Please verify your email before generating API keys.
+          </p>
+        </div>
+      )}
+
       <Card className="bg-[#111113] border-white/5">
         <CardHeader>
           <CardTitle className="text-lg font-mono text-white flex items-center gap-2">
-            <Key className="w-5 h-5 text-[#00FF88]" />
+            <Key size={20} weight="duotone" className="text-[#00FF88]" />
             Your API Keys
           </CardTitle>
           <CardDescription className="text-zinc-500">
@@ -154,7 +166,7 @@ export default function APIKeysPage() {
             </div>
           ) : keys.length === 0 ? (
             <div className="text-center py-8">
-              <Key className="w-12 h-12 text-zinc-600 mx-auto mb-4" />
+              <Key size={48} weight="duotone" className="text-zinc-600 mx-auto mb-4" />
               <p className="text-zinc-400">No API keys yet</p>
               <p className="text-zinc-500 text-sm mt-1">
                 Generate your first key to start using the API
@@ -257,7 +269,7 @@ export default function APIKeysPage() {
         <DialogContent className="bg-[#111113] border-white/10 max-w-2xl">
           <DialogHeader>
             <DialogTitle className="text-white font-mono flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-yellow-400" />
+              <Warning size={20} weight="duotone" className="text-yellow-400" />
               Save Your API Key
             </DialogTitle>
             <DialogDescription className="text-zinc-400">
@@ -276,13 +288,13 @@ export default function APIKeysPage() {
                   size="sm"
                   className="border-white/10 text-white hover:bg-white/5 shrink-0"
                 >
-                  <Copy className="w-4 h-4 mr-2" />
+                  <Copy size={16} className="mr-2" />
                   Copy
                 </Button>
               </div>
             </div>
             <p className="text-xs text-yellow-400/80 mt-3 flex items-center gap-1">
-              <AlertTriangle className="w-3 h-3" />
+              <Warning size={12} weight="bold" />
               You will not be able to see this key again after closing this dialog
             </p>
           </div>

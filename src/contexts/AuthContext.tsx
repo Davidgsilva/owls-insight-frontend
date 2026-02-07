@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 interface User {
   id: string;
   email: string;
+  emailVerified: boolean;
   discordUsername: string | null;
   discordAvatar: string | null;
   createdAt: string;
@@ -14,6 +15,8 @@ interface User {
 interface Subscription {
   tier: "bench" | "rookie" | "mvp";
   status: "active" | "past_due" | "canceled" | "trialing" | "paused";
+  currentPeriodEnd: string | null;
+  cancelAtPeriodEnd: boolean;
 }
 
 interface AuthContextType {

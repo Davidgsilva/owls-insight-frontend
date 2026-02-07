@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { BarChart3, Zap, Clock, CheckCircle, XCircle, TrendingUp, CalendarIcon } from "lucide-react";
+import { ChartBar, Lightning, Clock, CheckCircle, XCircle, TrendUp, CalendarBlank } from "@phosphor-icons/react";
 import { format } from "date-fns";
 import {
   ResponsiveContainer,
@@ -252,7 +252,7 @@ export default function UsagePage() {
               variant="outline"
               className="bg-[#0a0a0a] border-white/10 text-white hover:bg-white/5 hover:text-white font-mono text-sm gap-2 px-3"
             >
-              <CalendarIcon className="w-4 h-4 text-zinc-400" />
+              <CalendarBlank size={16} className="text-zinc-400" />
               {format(selectedDay, "MMM d, yyyy")}
             </Button>
           </PopoverTrigger>
@@ -294,7 +294,7 @@ export default function UsagePage() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-lg font-mono text-white flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-[#00FF88]" />
+                <TrendUp size={20} weight="duotone" className="text-[#00FF88]" />
                 7-Day Usage Trend
               </CardTitle>
               <CardDescription className="text-zinc-500">
@@ -407,7 +407,7 @@ export default function UsagePage() {
         <Card className="bg-[#111113] border-white/5">
           <CardHeader>
             <CardTitle className="text-lg font-mono text-white flex items-center gap-2">
-              <Zap className="w-5 h-5 text-[#00FF88]" />
+              <Lightning size={20} weight="duotone" className="text-[#00FF88]" />
               Monthly Usage
             </CardTitle>
             <CardDescription className="text-zinc-500">
@@ -438,7 +438,7 @@ export default function UsagePage() {
         <Card className="bg-[#111113] border-white/5">
           <CardHeader>
             <CardTitle className="text-lg font-mono text-white flex items-center gap-2">
-              <Clock className="w-5 h-5 text-[#00FF88]" />
+              <Clock size={20} weight="duotone" className="text-[#00FF88]" />
               Rate Limit
             </CardTitle>
             <CardDescription className="text-zinc-500">
@@ -471,7 +471,7 @@ export default function UsagePage() {
       <Card className="bg-[#111113] border-white/5">
         <CardHeader>
           <CardTitle className="text-lg font-mono text-white flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-[#00FF88]" />
+            <ChartBar size={20} weight="duotone" className="text-[#00FF88]" />
             Daily Statistics
           </CardTitle>
           <CardDescription className="text-zinc-500">
@@ -487,7 +487,7 @@ export default function UsagePage() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="p-4 bg-[#0a0a0a] rounded-lg border border-white/5">
                 <div className="flex items-center gap-2 text-zinc-400 text-sm mb-2">
-                  <BarChart3 className="w-4 h-4" />
+                  <ChartBar size={16} weight="duotone" />
                   Total Requests
                 </div>
                 <p className="text-2xl font-mono font-bold text-white">
@@ -497,7 +497,7 @@ export default function UsagePage() {
 
               <div className="p-4 bg-[#0a0a0a] rounded-lg border border-white/5">
                 <div className="flex items-center gap-2 text-zinc-400 text-sm mb-2">
-                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <CheckCircle size={16} weight="duotone" className="text-green-400" />
                   Successful
                 </div>
                 <p className="text-2xl font-mono font-bold text-green-400">
@@ -507,7 +507,7 @@ export default function UsagePage() {
 
               <div className="p-4 bg-[#0a0a0a] rounded-lg border border-white/5">
                 <div className="flex items-center gap-2 text-zinc-400 text-sm mb-2">
-                  <XCircle className="w-4 h-4 text-red-400" />
+                  <XCircle size={16} weight="duotone" className="text-red-400" />
                   Failed
                 </div>
                 <p className="text-2xl font-mono font-bold text-red-400">
@@ -517,7 +517,7 @@ export default function UsagePage() {
 
               <div className="p-4 bg-[#0a0a0a] rounded-lg border border-white/5">
                 <div className="flex items-center gap-2 text-zinc-400 text-sm mb-2">
-                  <Clock className="w-4 h-4" />
+                  <Clock size={16} weight="duotone" />
                   Avg Response
                 </div>
                 <p className="text-2xl font-mono font-bold text-white">

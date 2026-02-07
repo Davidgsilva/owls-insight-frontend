@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useMemo, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -85,10 +85,12 @@ function PasswordStrength({ password }: { password: string }) {
   );
 }
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { register: registerUser } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const isMvpTrial = searchParams.get("tier") === "mvp";
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -105,8 +107,30 @@ export default function RegisterPage() {
     setIsLoading(true);
     try {
       await registerUser(data.email, data.password);
-      toast.success("Account created successfully!");
-      router.push("/dashboard");
+
+      if (isMvpTrial) {
+        // Redirect to Stripe checkout for MVP trial
+        const res = await fetch("/api/stripe/checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            tier: "mvp",
+            successUrl: `${window.location.origin}/dashboard?checkout=success&trial=true`,
+            cancelUrl: `${window.location.origin}/pricing?checkout=canceled`,
+          }),
+        });
+        const checkoutData = await res.json();
+        if (res.ok && checkoutData.url) {
+          window.location.href = checkoutData.url;
+          return;
+        }
+        // Checkout creation failed — notify and fall through to normal flow
+        toast.error("Couldn't start your free trial. You can start it from your billing page.");
+      }
+
+      toast.success("Account created! Check your email to verify.");
+      router.push("/verify-email");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Registration failed");
     } finally {
@@ -129,21 +153,25 @@ export default function RegisterPage() {
 
         <Card className="bg-[#111113] border-white/10">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-mono text-white">Create an account</CardTitle>
+            <CardTitle className="text-2xl font-mono text-white">
+              {isMvpTrial ? "Start your free trial" : "Create an account"}
+            </CardTitle>
             <CardDescription className="text-zinc-400">
-              Get started with your API access today
+              {isMvpTrial
+                ? "Create an account to start your 7-day free MVP trial"
+                : "Get started with your API access today"}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {/* Discord OAuth */}
             <a
-              href="/api/auth/discord"
+              href={`/api/auth/discord${isMvpTrial ? '?tier=mvp' : ''}`}
               className="w-full flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-md
                          bg-[#5865F2] hover:bg-[#4752C4] text-white font-semibold text-sm
                          transition-colors duration-150"
             >
               <DiscordIcon className="w-5 h-5" />
-              Sign up with Discord
+              {isMvpTrial ? "Sign up with Discord & Start Trial" : "Sign up with Discord"}
             </a>
 
             {/* Divider */}
@@ -155,6 +183,15 @@ export default function RegisterPage() {
                 <span className="bg-[#111113] px-3 text-zinc-500">or register with email</span>
               </div>
             </div>
+
+            {isMvpTrial && (
+              <div className="mb-4 p-3 rounded-lg bg-[#00FF88]/5 border border-[#00FF88]/20">
+                <p className="text-sm text-[#00FF88] font-mono font-medium">7-Day Free Trial</p>
+                <p className="text-xs text-zinc-400 mt-1">
+                  Credit card required. Cancel anytime during the trial — you won&apos;t be charged. After 7 days, $49.99/mo.
+                </p>
+              </div>
+            )}
 
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -242,7 +279,9 @@ export default function RegisterPage() {
                   className="w-full bg-[#00FF88] hover:bg-[#00d474] text-[#0a0a0a] font-semibold"
                   disabled={isLoading}
                 >
-                  {isLoading ? "Creating account..." : "Create account"}
+                  {isLoading
+                    ? (isMvpTrial ? "Starting trial..." : "Creating account...")
+                    : (isMvpTrial ? "Start 7-Day Free Trial" : "Create account")}
                 </Button>
               </form>
             </Form>
@@ -268,5 +307,13 @@ export default function RegisterPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense>
+      <RegisterForm />
+    </Suspense>
   );
 }
