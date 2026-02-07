@@ -1,40 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import {
-  ChevronRight,
-  Copy,
-  Check,
-  Home,
-  Key,
-  Zap,
-  Radio,
-  BarChart3,
-  Users,
-  AlertCircle,
-  BookOpen,
-  // TrendingUp,  // For future EV & Arbitrage section
-  // Target,      // For future Picks API section
-} from "lucide-react";
+import { Copy, Check } from "@phosphor-icons/react";
 
 // Navigation sections
 const sections = [
-  { id: "getting-started", label: "Getting Started", icon: BookOpen },
-  { id: "authentication", label: "Authentication", icon: Key },
-  { id: "odds-api", label: "Odds API", icon: Zap },
-  { id: "props-api", label: "Player Props API", icon: Users },
-  { id: "scores-api", label: "Live Scores API", icon: BarChart3 },
-  // { id: "analytics-api", label: "EV & Arbitrage", icon: TrendingUp },
-  // { id: "picks-api", label: "Picks API", icon: Target },
-  { id: "websocket", label: "WebSocket API", icon: Radio },
-  { id: "usage-api", label: "Usage API", icon: BarChart3 },
-  { id: "rate-limits", label: "Rate Limits", icon: AlertCircle },
-  { id: "errors", label: "Error Codes", icon: AlertCircle },
+  { id: "getting-started", label: "Getting Started" },
+  { id: "authentication", label: "Authentication" },
+  { id: "odds-api", label: "Odds" },
+  { id: "props-api", label: "Player Props" },
+  { id: "scores-api", label: "Live Scores" },
+  { id: "history-api", label: "Historical Data" },
+  { id: "websocket", label: "WebSocket" },
+  { id: "usage-api", label: "Usage" },
+  { id: "rate-limits", label: "Rate Limits" },
+  { id: "errors", label: "Errors" },
 ];
 
-// Code block component with copy functionality
+// ---------------------------------------------------------------------------
+// Shared sub-components
+// ---------------------------------------------------------------------------
+
 function CodeBlock({ code, language = "json" }: { code: string; language?: string }) {
   const [copied, setCopied] = useState(false);
 
@@ -45,71 +32,62 @@ function CodeBlock({ code, language = "json" }: { code: string; language?: strin
   };
 
   return (
-    <div className="relative group rounded-lg overflow-hidden bg-[#0a0a0a] border border-white/10">
-      <div className="flex items-center justify-between px-4 py-2 bg-[#111111] border-b border-white/5">
-        <span className="text-xs font-mono text-zinc-500">{language}</span>
+    <div className="relative group rounded-lg overflow-hidden bg-[#0a0a0a] border border-white/[0.06]">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-white/[0.04]">
+        <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-600">{language}</span>
         <button
           onClick={handleCopy}
-          className="text-zinc-500 hover:text-white transition-colors"
+          className="text-zinc-600 hover:text-zinc-300 transition-colors p-1 -m-1"
+          aria-label={copied ? "Copied" : "Copy code"}
         >
-          {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+          {copied ? <Check size={14} /> : <Copy size={14} />}
         </button>
       </div>
-      <pre className="p-4 overflow-x-auto text-sm font-mono text-zinc-300">
+      <pre className="p-4 overflow-x-auto text-[13px] leading-relaxed font-mono text-zinc-400">
         <code>{code}</code>
       </pre>
     </div>
   );
 }
 
-// Endpoint component
 function Endpoint({
   method,
   path,
   description,
-  auth = true,
   tier,
 }: {
   method: "GET" | "POST" | "PUT" | "DELETE";
   path: string;
   description: string;
-  auth?: boolean;
   tier?: string;
 }) {
-  const methodColors = {
-    GET: "bg-green-500/20 text-green-400 border-green-500/30",
-    POST: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-    PUT: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-    DELETE: "bg-red-500/20 text-red-400 border-red-500/30",
+  const methodColors: Record<string, string> = {
+    GET: "text-emerald-400",
+    POST: "text-blue-400",
+    PUT: "text-amber-400",
+    DELETE: "text-red-400",
   };
 
   return (
-    <div className="p-4 rounded-lg bg-[#111111] border border-white/5 hover:border-white/10 transition-colors">
-      <div className="flex items-center gap-3 mb-2">
-        <span
-          className={`px-2 py-0.5 rounded text-xs font-mono font-medium border ${methodColors[method]}`}
-        >
-          {method}
-        </span>
-        <code className="text-sm font-mono text-[#00FF88]">{path}</code>
-        {tier && (
-          <span className="px-2 py-0.5 rounded text-xs font-mono bg-purple-500/20 text-purple-400 border border-purple-500/30">
-            {tier}
-          </span>
-        )}
-      </div>
-      <p className="text-sm text-zinc-400">{description}</p>
-      {auth && (
-        <div className="mt-2 flex items-center gap-1 text-xs text-zinc-500">
-          <Key className="w-3 h-3" />
-          <span>Requires API Key</span>
+    <div className="flex items-start gap-3 py-3 border-b border-white/[0.04] last:border-0">
+      <span className={`font-mono text-xs font-semibold mt-0.5 w-10 shrink-0 ${methodColors[method]}`}>
+        {method}
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2 flex-wrap">
+          <code className="text-sm font-mono text-white">{path}</code>
+          {tier && (
+            <span className="text-[10px] font-mono font-medium uppercase tracking-wider text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded">
+              {tier}
+            </span>
+          )}
         </div>
-      )}
+        <p className="text-sm text-zinc-500 mt-0.5">{description}</p>
+      </div>
     </div>
   );
 }
 
-// Parameter table component
 function ParamTable({
   params,
 }: {
@@ -119,26 +97,26 @@ function ParamTable({
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-white/10">
-            <th className="text-left py-2 px-3 font-mono text-zinc-400">Parameter</th>
-            <th className="text-left py-2 px-3 font-mono text-zinc-400">Type</th>
-            <th className="text-left py-2 px-3 font-mono text-zinc-400">Required</th>
-            <th className="text-left py-2 px-3 font-mono text-zinc-400">Description</th>
+          <tr className="border-b border-white/[0.08]">
+            <th className="text-left py-2 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Parameter</th>
+            <th className="text-left py-2 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Type</th>
+            <th className="text-left py-2 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Required</th>
+            <th className="text-left py-2 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Description</th>
           </tr>
         </thead>
         <tbody>
           {params.map((param) => (
-            <tr key={param.name} className="border-b border-white/5">
-              <td className="py-2 px-3 font-mono text-[#00FF88]">{param.name}</td>
-              <td className="py-2 px-3 font-mono text-zinc-500">{param.type}</td>
-              <td className="py-2 px-3">
+            <tr key={param.name} className="border-b border-white/[0.04]">
+              <td className="py-2.5 pr-6 font-mono text-[13px] text-white">{param.name}</td>
+              <td className="py-2.5 pr-6 font-mono text-[13px] text-zinc-500">{param.type}</td>
+              <td className="py-2.5 pr-6">
                 {param.required ? (
-                  <span className="text-red-400">Yes</span>
+                  <span className="text-[13px] text-amber-400">required</span>
                 ) : (
-                  <span className="text-zinc-500">No</span>
+                  <span className="text-[13px] text-zinc-600">optional</span>
                 )}
               </td>
-              <td className="py-2 px-3 text-zinc-400">{param.description}</td>
+              <td className="py-2.5 text-[13px] text-zinc-400">{param.description}</td>
             </tr>
           ))}
         </tbody>
@@ -147,86 +125,131 @@ function ParamTable({
   );
 }
 
+function SectionHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <h2 className="text-xl font-mono font-bold text-white mb-1 tracking-tight">
+      {children}
+    </h2>
+  );
+}
+
+function SubHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <h3 className="text-sm font-mono font-semibold text-zinc-300 mt-10 mb-3 uppercase tracking-wider">
+      {children}
+    </h3>
+  );
+}
+
+function TierBadge({ tier, className = "" }: { tier: string; className?: string }) {
+  return (
+    <span className={`inline-block text-[11px] font-mono font-medium uppercase tracking-wider px-2 py-1 rounded border ${
+      tier === "MVP"
+        ? "text-purple-400 bg-purple-500/10 border-purple-500/20"
+        : "text-blue-400 bg-blue-500/10 border-blue-500/20"
+    } ${className}`}>
+      {tier}
+    </span>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Main page
+// ---------------------------------------------------------------------------
+
 export default function DocsPage() {
   const [activeSection, setActiveSection] = useState("getting-started");
+
+  // Track active section on scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        }
+      },
+      { rootMargin: "-80px 0px -60% 0px", threshold: 0 }
+    );
+
+    for (const section of sections) {
+      const el = document.getElementById(section.id);
+      if (el) observer.observe(el);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/" className="flex items-center gap-2">
-              <Home className="w-5 h-5 text-zinc-400" />
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/90 backdrop-blur-xl border-b border-white/[0.04]">
+        <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link href="/" className="text-zinc-500 hover:text-white transition-colors text-sm font-sans">
+              Home
             </Link>
-            <ChevronRight className="w-4 h-4 text-zinc-600" />
-            <span className="font-mono text-[#00FF88]">API Documentation</span>
+            <span className="text-zinc-700">/</span>
+            <span className="font-mono text-sm text-white">Docs</span>
           </div>
-          {/* TODO: Uncomment when ready to launch
-          <div className="flex items-center gap-4">
-            <Link href="/register">
-              <Button
-                size="sm"
-                className="bg-[#00FF88] hover:bg-[#00d4aa] text-[#0a0a0a] font-mono"
-              >
-                Get API Key
-              </Button>
-            </Link>
-          </div>
-          */}
         </div>
       </header>
 
-      <div className="flex pt-16">
+      <div className="flex pt-14">
         {/* Sidebar */}
-        <aside className="fixed left-0 top-16 bottom-0 w-64 bg-[#0a0a0a] border-r border-white/5 overflow-y-auto">
-          <nav className="p-4 space-y-1">
-            {sections.map((section) => (
-              <a
-                key={section.id}
-                href={`#${section.id}`}
-                onClick={() => setActiveSection(section.id)}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-                  activeSection === section.id
-                    ? "bg-[#00FF88]/10 text-[#00FF88]"
-                    : "text-zinc-400 hover:text-white hover:bg-white/5"
-                }`}
-              >
-                <section.icon className="w-4 h-4" />
-                {section.label}
-              </a>
-            ))}
+        <aside className="fixed left-0 top-14 bottom-0 w-56 border-r border-white/[0.04] overflow-y-auto">
+          <nav className="py-6 px-4">
+            <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-600 mb-3 px-2">Reference</p>
+            <div className="space-y-0.5">
+              {sections.map((section) => (
+                <a
+                  key={section.id}
+                  href={`#${section.id}`}
+                  className={`block px-2 py-1.5 rounded text-[13px] transition-colors ${
+                    activeSection === section.id
+                      ? "text-white bg-white/[0.04]"
+                      : "text-zinc-500 hover:text-zinc-300"
+                  }`}
+                >
+                  {section.label}
+                </a>
+              ))}
+            </div>
           </nav>
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 ml-64 p-8 max-w-4xl">
-          {/* Getting Started */}
-          <section id="getting-started" className="mb-16">
-            <h1 className="text-3xl font-mono font-bold mb-4">API Documentation</h1>
-            <p className="text-zinc-400 mb-8">
-              Complete reference for the Owls Insight REST API and WebSocket streaming service.
+        <main className="flex-1 ml-56 px-12 py-12 max-w-3xl">
+
+          {/* ─── Getting Started ────────────────────────────────────── */}
+          <section id="getting-started" className="mb-20">
+            <h1 className="text-3xl font-mono font-bold tracking-tight text-white mb-2">
+              API Reference
+            </h1>
+            <p className="text-zinc-500 text-sm font-sans leading-relaxed mb-10">
+              REST API and WebSocket streaming for real-time sports betting odds from 7 sportsbooks.
             </p>
 
-            <div className="p-4 rounded-lg bg-[#00FF88]/5 border border-[#00FF88]/20 mb-8">
-              <h3 className="font-mono font-semibold text-[#00FF88] mb-2">Base URL</h3>
+            <div className="rounded-lg bg-[#111113] border border-white/[0.06] px-5 py-4 mb-10">
+              <p className="text-[11px] font-mono uppercase tracking-wider text-zinc-600 mb-1.5">Base URL</p>
               <code className="text-sm font-mono text-white">https://api.owlsinsight.com</code>
             </div>
 
-            <h2 className="text-xl font-mono font-bold mb-4">Quick Start</h2>
-            <div className="space-y-4">
-              <p className="text-zinc-400">1. Get your API key from the dashboard after signing up.</p>
-              <p className="text-zinc-400">2. Include your API key in the Authorization header:</p>
-              <CodeBlock
-                language="bash"
-                code={`curl -H "Authorization: Bearer YOUR_API_KEY" \\
+            <SubHeading>Quick start</SubHeading>
+            <ol className="text-sm text-zinc-400 font-sans space-y-2 mb-6 list-decimal list-inside">
+              <li>Create an account and get your API key from the dashboard.</li>
+              <li>Include the key in every request via the <code className="text-[13px] font-mono text-zinc-300">Authorization</code> header.</li>
+            </ol>
+            <CodeBlock
+              language="bash"
+              code={`curl -H "Authorization: Bearer YOUR_API_KEY" \\
   https://api.owlsinsight.com/api/v1/nba/odds`}
-              />
-            </div>
+            />
 
-            <h3 className="text-lg font-mono font-semibold mt-8 mb-3">Health Check</h3>
-            <p className="text-zinc-400 mb-4">
-              Verify the API is operational (no authentication required):
+            <SubHeading>Health check</SubHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-4">
+              No authentication required.
             </p>
             <CodeBlock
               language="bash"
@@ -234,207 +257,86 @@ export default function DocsPage() {
             />
           </section>
 
-          {/* Authentication */}
-          <section id="authentication" className="mb-16">
-            <h2 className="text-2xl font-mono font-bold mb-4 flex items-center gap-2">
-              <Key className="w-6 h-6 text-[#00FF88]" />
-              Authentication
-            </h2>
-            <p className="text-zinc-400 mb-6">
-              All API requests require authentication via an API key. Include your key in the
-              Authorization header.
+          {/* ─── Authentication ─────────────────────────────────────── */}
+          <section id="authentication" className="mb-20">
+            <SectionHeading>Authentication</SectionHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-6">
+              All endpoints require an API key in the Authorization header.
             </p>
 
-            <h3 className="text-lg font-mono font-semibold mb-3">Header Format</h3>
             <CodeBlock language="http" code={`Authorization: Bearer YOUR_API_KEY`} />
-
-            {/* TODO: Uncomment when auth is ready
-            <h3 className="text-lg font-mono font-semibold mt-8 mb-3">Auth Endpoints</h3>
-            <div className="space-y-3">
-              <Endpoint
-                method="POST"
-                path="/api/v1/auth/register"
-                description="Create a new account"
-                auth={false}
-              />
-              <Endpoint
-                method="POST"
-                path="/api/v1/auth/login"
-                description="Login and receive JWT token"
-                auth={false}
-              />
-              <Endpoint
-                method="POST"
-                path="/api/v1/auth/generate-key"
-                description="Generate a new API key (requires JWT)"
-              />
-              <Endpoint
-                method="GET"
-                path="/api/v1/auth/generate-key"
-                description="List your API keys (requires JWT)"
-              />
-            </div>
-
-            <h3 className="text-lg font-mono font-semibold mt-8 mb-3">Register Request</h3>
-            <CodeBlock
-              language="json"
-              code={`{
-  "email": "user@example.com",
-  "password": "your_password",
-  "name": "Your Name"
-}`}
-            />
-
-            <h3 className="text-lg font-mono font-semibold mt-8 mb-3">Login Response</h3>
-            <CodeBlock
-              language="json"
-              code={`{
-  "success": true,
-  "token": "eyJhbGciOiJIUzI1NiIs...",
-  "user": {
-    "id": "usr_abc123",
-    "email": "user@example.com",
-    "tier": "rookie"
-  }
-}`}
-            />
-            */}
           </section>
 
-          {/* Odds API */}
-          <section id="odds-api" className="mb-16">
-            <h2 className="text-2xl font-mono font-bold mb-4 flex items-center gap-2">
-              <Zap className="w-6 h-6 text-[#00FF88]" />
-              Odds API
-            </h2>
-            <p className="text-zinc-400 mb-6">
-              Real-time betting odds from 7 major sportsbooks: Pinnacle, FanDuel, DraftKings,
-              BetMGM, Bet365, Caesars, and Kalshi.
+          {/* ─── Odds API ──────────────────────────────────────────── */}
+          <section id="odds-api" className="mb-20">
+            <SectionHeading>Odds API</SectionHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-6">
+              Real-time betting odds from Pinnacle, FanDuel, DraftKings, BetMGM, Bet365, Caesars, and Kalshi.
             </p>
 
-            <h3 className="text-lg font-mono font-semibold mb-3">Endpoints</h3>
-            <div className="space-y-3 mb-8">
-              <Endpoint
-                method="GET"
-                path="/api/v1/{sport}/odds"
-                description="Get all odds for a sport (spreads, moneylines, totals)"
-              />
-              <Endpoint
-                method="GET"
-                path="/api/v1/{sport}/moneyline"
-                description="Get moneyline odds only"
-              />
-              <Endpoint
-                method="GET"
-                path="/api/v1/{sport}/spreads"
-                description="Get point spread odds only"
-              />
-              <Endpoint
-                method="GET"
-                path="/api/v1/{sport}/totals"
-                description="Get over/under totals only"
-              />
+            <SubHeading>Endpoints</SubHeading>
+            <div className="mb-8">
+              <Endpoint method="GET" path="/api/v1/{sport}/odds" description="All odds for a sport (spreads, moneylines, totals)" />
+              <Endpoint method="GET" path="/api/v1/{sport}/moneyline" description="Moneyline odds only" />
+              <Endpoint method="GET" path="/api/v1/{sport}/spreads" description="Point spread odds only" />
+              <Endpoint method="GET" path="/api/v1/{sport}/totals" description="Over/under totals only" />
             </div>
 
-            <h3 className="text-lg font-mono font-semibold mb-3">Supported Sports</h3>
-            <div className="grid grid-cols-3 gap-3 mb-8">
+            <SubHeading>Sports</SubHeading>
+            <div className="flex flex-wrap gap-2 mb-8">
               {["nba", "ncaab", "nfl", "nhl", "ncaaf", "mlb"].map((sport) => (
-                <div
-                  key={sport}
-                  className="p-3 rounded-lg bg-[#111111] border border-white/5 text-center"
-                >
-                  <code className="font-mono text-[#00FF88]">{sport}</code>
-                </div>
+                <code key={sport} className="text-[13px] font-mono text-zinc-300 bg-white/[0.04] px-2.5 py-1 rounded">
+                  {sport}
+                </code>
               ))}
             </div>
 
-            <h3 className="text-lg font-mono font-semibold mb-3">Sportsbooks</h3>
+            <SubHeading>Sportsbooks</SubHeading>
             <div className="overflow-x-auto mb-8">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-white/10">
-                    <th className="text-left py-2 px-3 font-mono text-zinc-400">Key</th>
-                    <th className="text-left py-2 px-3 font-mono text-zinc-400">Name</th>
-                    <th className="text-left py-2 px-3 font-mono text-zinc-400">Type</th>
-                    <th className="text-left py-2 px-3 font-mono text-zinc-400">Notes</th>
+                  <tr className="border-b border-white/[0.08]">
+                    <th className="text-left py-2 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Key</th>
+                    <th className="text-left py-2 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Name</th>
+                    <th className="text-left py-2 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Notes</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr className="border-b border-white/5">
-                    <td className="py-2 px-3 font-mono text-[#00FF88]">pinnacle</td>
-                    <td className="py-2 px-3 text-zinc-300">Pinnacle</td>
-                    <td className="py-2 px-3 text-zinc-400">Sportsbook</td>
-                    <td className="py-2 px-3 text-zinc-500">Sharp book, market-making reference</td>
-                  </tr>
-                  <tr className="border-b border-white/5">
-                    <td className="py-2 px-3 font-mono text-[#00FF88]">fanduel</td>
-                    <td className="py-2 px-3 text-zinc-300">FanDuel</td>
-                    <td className="py-2 px-3 text-zinc-400">Sportsbook</td>
-                    <td className="py-2 px-3 text-zinc-500">US retail leader, full props</td>
-                  </tr>
-                  <tr className="border-b border-white/5">
-                    <td className="py-2 px-3 font-mono text-[#00FF88]">draftkings</td>
-                    <td className="py-2 px-3 text-zinc-300">DraftKings</td>
-                    <td className="py-2 px-3 text-zinc-400">Sportsbook</td>
-                    <td className="py-2 px-3 text-zinc-500">Full market coverage</td>
-                  </tr>
-                  <tr className="border-b border-white/5">
-                    <td className="py-2 px-3 font-mono text-[#00FF88]">betmgm</td>
-                    <td className="py-2 px-3 text-zinc-300">BetMGM</td>
-                    <td className="py-2 px-3 text-zinc-400">Sportsbook</td>
-                    <td className="py-2 px-3 text-zinc-500">Vegas-backed lines</td>
-                  </tr>
-                  <tr className="border-b border-white/5">
-                    <td className="py-2 px-3 font-mono text-[#00FF88]">bet365</td>
-                    <td className="py-2 px-3 text-zinc-300">Bet365</td>
-                    <td className="py-2 px-3 text-zinc-400">Sportsbook</td>
-                    <td className="py-2 px-3 text-zinc-500">Global market leader</td>
-                  </tr>
-                  <tr className="border-b border-white/5">
-                    <td className="py-2 px-3 font-mono text-[#00FF88]">caesars</td>
-                    <td className="py-2 px-3 text-zinc-300">Caesars</td>
-                    <td className="py-2 px-3 text-zinc-400">Sportsbook</td>
-                    <td className="py-2 px-3 text-zinc-500">Casino heritage</td>
-                  </tr>
-                  <tr className="border-b border-white/5">
-                    <td className="py-2 px-3 font-mono text-[#00FF88]">kalshi</td>
-                    <td className="py-2 px-3 text-zinc-300">Kalshi</td>
-                    <td className="py-2 px-3 text-purple-400">Exchange</td>
-                    <td className="py-2 px-3 text-zinc-500">CFTC-regulated prediction market</td>
-                  </tr>
+                <tbody className="text-[13px]">
+                  {[
+                    { key: "pinnacle", name: "Pinnacle", notes: "Sharp book, market-making reference" },
+                    { key: "fanduel", name: "FanDuel", notes: "US retail leader, full props" },
+                    { key: "draftkings", name: "DraftKings", notes: "Full market coverage" },
+                    { key: "betmgm", name: "BetMGM", notes: "Vegas-backed lines" },
+                    { key: "bet365", name: "Bet365", notes: "Global market leader" },
+                    { key: "caesars", name: "Caesars", notes: "Casino heritage" },
+                    { key: "kalshi", name: "Kalshi", notes: "CFTC-regulated prediction exchange" },
+                  ].map((book) => (
+                    <tr key={book.key} className="border-b border-white/[0.04]">
+                      <td className="py-2.5 pr-6 font-mono text-white">{book.key}</td>
+                      <td className="py-2.5 pr-6 text-zinc-300">{book.name}</td>
+                      <td className="py-2.5 text-zinc-500">{book.notes}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
 
-            <div className="p-4 rounded-lg bg-purple-500/5 border border-purple-500/20 mb-8">
-              <h4 className="font-mono font-semibold text-purple-400 mb-2">About Kalshi</h4>
-              <p className="text-sm text-zinc-400 mb-2">
-                Kalshi is a CFTC-regulated prediction market exchange. Unlike traditional sportsbooks,
-                Kalshi uses exchange-based pricing where users trade contracts against each other.
-              </p>
-              <ul className="text-sm text-zinc-500 space-y-1">
-                <li>• Prices are converted from contract cents (0-100) to American odds</li>
-                <li>• Markets include moneylines, spreads, and totals</li>
-                <li>• Coverage varies by sport and event popularity</li>
-              </ul>
-            </div>
-
-            <h3 className="text-lg font-mono font-semibold mb-3">Query Parameters</h3>
+            <SubHeading>Parameters</SubHeading>
             <ParamTable
               params={[
-                { name: "books", type: "string", required: false, description: "Comma-separated list of sportsbooks (pinnacle,fanduel,draftkings,betmgm,bet365,caesars,kalshi)" },
+                { name: "books", type: "string", required: false, description: "Comma-separated list of sportsbooks to include" },
                 { name: "game_id", type: "string", required: false, description: "Filter to a specific game" },
               ]}
             />
 
-            <h3 className="text-lg font-mono font-semibold mt-8 mb-3">Example Request</h3>
+            <SubHeading>Example request</SubHeading>
             <CodeBlock
               language="bash"
               code={`curl -H "Authorization: Bearer YOUR_API_KEY" \\
   "https://api.owlsinsight.com/api/v1/nba/odds?books=pinnacle,fanduel"`}
             />
 
-            <h3 className="text-lg font-mono font-semibold mt-8 mb-3">Example Response</h3>
+            <SubHeading>Response</SubHeading>
             <CodeBlock
               language="json"
               code={`{
@@ -475,27 +377,6 @@ export default function DocsPage() {
               ]
             }
           ]
-        },
-        {
-          "key": "kalshi",
-          "title": "Kalshi",
-          "last_update": "2026-01-31T18:29:30Z",
-          "markets": [
-            {
-              "key": "h2h",
-              "outcomes": [
-                { "name": "Los Angeles Lakers", "price": -163 },
-                { "name": "Boston Celtics", "price": 138 }
-              ]
-            },
-            {
-              "key": "spreads",
-              "outcomes": [
-                { "name": "Los Angeles Lakers", "price": -105, "point": -3.5 },
-                { "name": "Boston Celtics", "price": -115, "point": 3.5 }
-              ]
-            }
-          ]
         }
       ]
     }
@@ -504,65 +385,37 @@ export default function DocsPage() {
             />
           </section>
 
-          {/* Props API */}
-          <section id="props-api" className="mb-16">
-            <h2 className="text-2xl font-mono font-bold mb-4 flex items-center gap-2">
-              <Users className="w-6 h-6 text-[#00FF88]" />
-              Player Props API
-            </h2>
-            <p className="text-zinc-400 mb-2">
+          {/* ─── Props API ─────────────────────────────────────────── */}
+          <section id="props-api" className="mb-20">
+            <SectionHeading>Player Props API</SectionHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-2">
               Player prop betting lines from multiple sportsbooks with alternate lines support.
             </p>
-            <p className="text-sm text-purple-400 mb-6">
-              Requires Rookie or MVP subscription tier.
+            <p className="text-sm mb-6">
+              <TierBadge tier="Rookie+" />
             </p>
 
-            <h3 className="text-lg font-mono font-semibold mb-3">Endpoints</h3>
-            <div className="space-y-3 mb-8">
-              <Endpoint
-                method="GET"
-                path="/api/v1/{sport}/props"
-                description="Get aggregated player props from all books"
-                tier="Rookie+"
-              />
-              <Endpoint
-                method="GET"
-                path="/api/v1/{sport}/props/bet365"
-                description="Get Bet365 player props only"
-                tier="Rookie+"
-              />
-              <Endpoint
-                method="GET"
-                path="/api/v1/{sport}/props/fanduel"
-                description="Get FanDuel player props only"
-                tier="Rookie+"
-              />
-              <Endpoint
-                method="GET"
-                path="/api/v1/{sport}/props/history"
-                description="Get historical prop line movements"
-                tier="Rookie+"
-              />
-              <Endpoint
-                method="GET"
-                path="/api/v1/props/stats"
-                description="Get props cache statistics"
-                tier="Rookie+"
-              />
+            <SubHeading>Endpoints</SubHeading>
+            <div className="mb-8">
+              <Endpoint method="GET" path="/api/v1/{sport}/props" description="Aggregated player props from all books" tier="Rookie+" />
+              <Endpoint method="GET" path="/api/v1/{sport}/props/bet365" description="Bet365 player props only" tier="Rookie+" />
+              <Endpoint method="GET" path="/api/v1/{sport}/props/fanduel" description="FanDuel player props only" tier="Rookie+" />
+              <Endpoint method="GET" path="/api/v1/{sport}/props/history" description="Historical prop line movements" tier="Rookie+" />
+              <Endpoint method="GET" path="/api/v1/props/stats" description="Props cache statistics" tier="Rookie+" />
             </div>
 
-            <h3 className="text-lg font-mono font-semibold mb-3">Query Parameters</h3>
+            <SubHeading>Parameters</SubHeading>
             <ParamTable
               params={[
                 { name: "game_id", type: "string", required: false, description: "Filter to a specific game" },
                 { name: "player", type: "string", required: false, description: "Filter by player name (partial match)" },
                 { name: "category", type: "string", required: false, description: "Filter by prop category" },
-                { name: "books", type: "string", required: false, description: "Comma-separated list: pinnacle,fanduel,draftkings,betmgm,bet365,caesars (Kalshi does not offer props)" },
+                { name: "books", type: "string", required: false, description: "Comma-separated: pinnacle, fanduel, draftkings, betmgm, bet365, caesars" },
               ]}
             />
 
-            <h3 className="text-lg font-mono font-semibold mt-8 mb-3">Prop Categories</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-8">
+            <SubHeading>Prop categories</SubHeading>
+            <div className="flex flex-wrap gap-1.5 mb-8">
               {[
                 "points", "rebounds", "assists", "steals", "blocks", "threes_made",
                 "pts_rebs_asts", "pts_rebs", "pts_asts", "rebs_asts",
@@ -570,13 +423,13 @@ export default function DocsPage() {
                 "receiving_yards", "receptions", "touchdowns",
                 "goals", "hockey_assists", "hockey_points", "shots_on_goal",
               ].map((cat) => (
-                <code key={cat} className="text-xs font-mono text-zinc-400 bg-[#111111] px-2 py-1 rounded">
+                <code key={cat} className="text-[12px] font-mono text-zinc-500 bg-white/[0.03] px-2 py-0.5 rounded">
                   {cat}
                 </code>
               ))}
             </div>
 
-            <h3 className="text-lg font-mono font-semibold mt-8 mb-3">Example Response</h3>
+            <SubHeading>Response</SubHeading>
             <CodeBlock
               language="json"
               code={`{
@@ -596,13 +449,6 @@ export default function DocsPage() {
               "line": 25.5,
               "overPrice": -115,
               "underPrice": -105
-            },
-            {
-              "playerName": "LeBron James",
-              "category": "rebounds",
-              "line": 7.5,
-              "overPrice": -110,
-              "underPrice": -110
             }
           ]
         },
@@ -629,51 +475,39 @@ export default function DocsPage() {
     "sport": "nba",
     "timestamp": "2026-01-31T18:30:00.000Z",
     "gamesReturned": 1,
-    "propsReturned": 156,
-    "requestedBooks": ["pinnacle", "fanduel", "bet365", "draftkings", "caesars"]
+    "propsReturned": 156
   }
 }`}
             />
 
-            <h3 className="text-lg font-mono font-semibold mt-8 mb-3">Props History</h3>
-            <p className="text-zinc-400 mb-4">
+            <SubHeading>Props history parameters</SubHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-4">
               Track line movements for a specific player prop over time.
             </p>
             <ParamTable
               params={[
-                { name: "game_id", type: "string", required: true, description: "Game ID (e.g., nba:BOS@LAL-20260131)" },
+                { name: "game_id", type: "string", required: true, description: "Game ID (e.g. nba:BOS@LAL-20260131)" },
                 { name: "player", type: "string", required: true, description: "Player name" },
-                { name: "category", type: "string", required: true, description: "Prop category (e.g., points)" },
+                { name: "category", type: "string", required: true, description: "Prop category (e.g. points)" },
                 { name: "hours", type: "number", required: false, description: "Hours of history (1-168, default: since opening)" },
               ]}
             />
           </section>
 
-          {/* Scores API */}
-          <section id="scores-api" className="mb-16">
-            <h2 className="text-2xl font-mono font-bold mb-4 flex items-center gap-2">
-              <BarChart3 className="w-6 h-6 text-[#00FF88]" />
-              Live Scores API
-            </h2>
-            <p className="text-zinc-400 mb-6">
-              Real-time game scores and status updates from ESPN.
+          {/* ─── Scores API ────────────────────────────────────────── */}
+          <section id="scores-api" className="mb-20">
+            <SectionHeading>Live Scores API</SectionHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-6">
+              Real-time game scores and status updates.
             </p>
 
-            <h3 className="text-lg font-mono font-semibold mb-3">Endpoints</h3>
-            <div className="space-y-3 mb-8">
-              <Endpoint
-                method="GET"
-                path="/api/v1/scores/live"
-                description="Get live scores across all sports"
-              />
-              <Endpoint
-                method="GET"
-                path="/api/v1/{sport}/scores/live"
-                description="Get live scores for a specific sport"
-              />
+            <SubHeading>Endpoints</SubHeading>
+            <div className="mb-8">
+              <Endpoint method="GET" path="/api/v1/scores/live" description="Live scores across all sports" />
+              <Endpoint method="GET" path="/api/v1/{sport}/scores/live" description="Live scores for a specific sport" />
             </div>
 
-            <h3 className="text-lg font-mono font-semibold mt-8 mb-3">Example Response</h3>
+            <SubHeading>Response</SubHeading>
             <CodeBlock
               language="json"
               code={`{
@@ -711,165 +545,142 @@ export default function DocsPage() {
             />
           </section>
 
-          {/* TODO: Uncomment when EV & Arbitrage API is ready
-          <section id="analytics-api" className="mb-16">
-            <h2 className="text-2xl font-mono font-bold mb-4 flex items-center gap-2">
-              <TrendingUp className="w-6 h-6 text-[#00FF88]" />
-              EV & Arbitrage API
-            </h2>
-            <p className="text-zinc-400 mb-6">
-              Expected value calculations and arbitrage opportunity detection across sportsbooks.
+          {/* ─── Historical Data API ───────────────────────────────── */}
+          <section id="history-api" className="mb-20">
+            <SectionHeading>Historical Data API</SectionHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-2">
+              Archived odds and props snapshots for completed games. Data is archived automatically when games finish.
+            </p>
+            <p className="text-sm mb-6">
+              <TierBadge tier="MVP" />
             </p>
 
-            <h3 className="text-lg font-mono font-semibold mb-3">Endpoints</h3>
-            <div className="space-y-3 mb-8">
-              <Endpoint
-                method="GET"
-                path="/api/v1/{sport}/ev"
-                description="Get expected value opportunities for a sport"
-              />
-              <Endpoint
-                method="GET"
-                path="/api/odds/ev/history"
-                description="Get historical EV data"
-              />
-              <Endpoint
-                method="GET"
-                path="/api/v1/{sport}/arbitrage"
-                description="Get arbitrage opportunities for a sport"
-              />
-              <Endpoint
-                method="GET"
-                path="/api/odds/history"
-                description="Get historical odds data for a specific event"
-              />
-              <Endpoint
-                method="GET"
-                path="/api/odds/analytics"
-                description="Get line movement analytics and sharp indicators"
-              />
+            <SubHeading>Endpoints</SubHeading>
+            <div className="mb-8">
+              <Endpoint method="GET" path="/api/v1/history/games" description="List archived games with filtering and pagination" tier="MVP" />
+              <Endpoint method="GET" path="/api/v1/history/odds" description="Historical odds snapshots for an archived game" tier="MVP" />
+              <Endpoint method="GET" path="/api/v1/history/props" description="Historical props snapshots for an archived game" tier="MVP" />
             </div>
 
-            <p className="text-sm text-zinc-500 mb-4">
-              Supported sports: nba, ncaab, nfl, nhl, ncaaf (MLB not yet supported for EV/arbitrage)
-            </p>
-
-            <h3 className="text-lg font-mono font-semibold mt-8 mb-3">EV Response Example</h3>
-            <CodeBlock
-              language="json"
-              code={`{
-  "success": true,
-  "sport": "nba",
-  "opportunities": [
-    {
-      "event_id": "nba:BOS@LAL-20260131",
-      "market": "spreads",
-      "side": "away",
-      "team": "Boston Celtics",
-      "book": "draftkings",
-      "price": -105,
-      "point": 3.5,
-      "pinnacle_price": -110,
-      "ev_percent": 2.4,
-      "kelly_fraction": 0.048
-    }
-  ],
-  "timestamp": "2026-01-31T18:30:00.000Z"
-}`}
+            <SubHeading>/history/games parameters</SubHeading>
+            <ParamTable
+              params={[
+                { name: "sport", type: "string", required: false, description: "Filter by sport (nba, ncaab, nfl, nhl, ncaaf, mlb)" },
+                { name: "startDate", type: "string", required: false, description: "Start date (YYYY-MM-DD)" },
+                { name: "endDate", type: "string", required: false, description: "End date (YYYY-MM-DD)" },
+                { name: "limit", type: "number", required: false, description: "Max results (1-100, default 50)" },
+                { name: "offset", type: "number", required: false, description: "Pagination offset" },
+              ]}
             />
 
-            <h3 className="text-lg font-mono font-semibold mt-8 mb-3">Arbitrage Response Example</h3>
+            <SubHeading>/history/odds parameters</SubHeading>
+            <ParamTable
+              params={[
+                { name: "eventId", type: "string", required: true, description: "Game identifier from /history/games" },
+                { name: "book", type: "string", required: false, description: "Filter by sportsbook" },
+                { name: "market", type: "string", required: false, description: "h2h, spreads, or totals" },
+                { name: "side", type: "string", required: false, description: "home, away, over, or under" },
+                { name: "startTime", type: "string", required: false, description: "ISO date or Unix timestamp (ms)" },
+                { name: "endTime", type: "string", required: false, description: "ISO date or Unix timestamp (ms)" },
+                { name: "limit", type: "number", required: false, description: "Max results (1-5000, default 1000)" },
+              ]}
+            />
+
+            <SubHeading>/history/props parameters</SubHeading>
+            <ParamTable
+              params={[
+                { name: "eventId", type: "string", required: true, description: "Game identifier from /history/games" },
+                { name: "playerName", type: "string", required: false, description: "Filter by player name" },
+                { name: "propType", type: "string", required: false, description: "Filter by prop type (points, rebounds, etc.)" },
+                { name: "book", type: "string", required: false, description: "Filter by sportsbook" },
+                { name: "limit", type: "number", required: false, description: "Max results (1-5000, default 1000)" },
+              ]}
+            />
+
+            <SubHeading>Games response</SubHeading>
             <CodeBlock
               language="json"
               code={`{
   "success": true,
-  "sport": "nba",
-  "arbitrages": [
-    {
-      "event_id": "nba:BOS@LAL-20260131",
-      "market": "h2h",
-      "profit_percent": 1.2,
-      "legs": [
-        { "book": "fanduel", "side": "home", "price": 145 },
-        { "book": "draftkings", "side": "away", "price": -135 }
-      ],
-      "stake_allocation": {
-        "home": 0.425,
-        "away": 0.575
+  "data": {
+    "games": [
+      {
+        "eventId": "nba:Los Angeles Clippers@Sacramento Kings-20260207",
+        "sport": "nba",
+        "homeTeam": "Sacramento Kings",
+        "awayTeam": "Los Angeles Clippers",
+        "gameDate": "2026-02-07T00:00:00.000Z",
+        "archivedAt": "2026-02-07T05:54:48.000Z",
+        "oddsSnapshots": 116364,
+        "propsSnapshots": 41650
       }
-    }
-  ],
-  "timestamp": "2026-01-31T18:30:00.000Z"
+    ],
+    "pagination": { "total": 602, "limit": 50, "offset": 0 }
+  }
 }`}
             />
-          </section>
-          */}
 
-          {/* TODO: Uncomment when Picks API is ready
-          <section id="picks-api" className="mb-16">
-            <h2 className="text-2xl font-mono font-bold mb-4 flex items-center gap-2">
-              <Target className="w-6 h-6 text-[#00FF88]" />
-              Picks API
-            </h2>
-            <p className="text-zinc-400 mb-6">
-              Save, manage, and track your betting picks. Get suggested picks based on EV and arbitrage analysis.
-            </p>
-
-            <h3 className="text-lg font-mono font-semibold mb-3">Endpoints</h3>
-            <div className="space-y-3 mb-8">
-              <Endpoint
-                method="GET"
-                path="/api/v1/{sport}/picks/suggest"
-                description="Get AI-suggested picks based on EV and line movement"
-              />
-              <Endpoint
-                method="GET"
-                path="/api/v1/picks"
-                description="List all your saved picks"
-              />
-              <Endpoint
-                method="POST"
-                path="/api/v1/picks"
-                description="Create a new pick"
-              />
-              <Endpoint
-                method="DELETE"
-                path="/api/v1/picks/{id}"
-                description="Delete a saved pick"
-              />
-            </div>
-
-            <h3 className="text-lg font-mono font-semibold mt-8 mb-3">Create Pick Request</h3>
+            <SubHeading>Odds snapshots response</SubHeading>
             <CodeBlock
               language="json"
               code={`{
-  "event_id": "nba:BOS@LAL-20260131",
-  "market": "spreads",
-  "side": "away",
-  "book": "pinnacle",
-  "price": -110,
-  "point": 3.5,
-  "stake": 100,
-  "notes": "Sharp line movement detected"
+  "success": true,
+  "data": {
+    "eventId": "nba:Los Angeles Clippers@Sacramento Kings-20260207",
+    "timeRange": { "start": null, "end": null },
+    "snapshots": [
+      {
+        "book": "pinnacle",
+        "market": "h2h",
+        "side": "home",
+        "price": 143,
+        "point": null,
+        "recordedAt": "2026-02-05T22:17:24.424Z"
+      }
+    ],
+    "count": 1,
+    "limit": 1000
+  }
+}`}
+            />
+
+            <SubHeading>Props snapshots response</SubHeading>
+            <CodeBlock
+              language="json"
+              code={`{
+  "success": true,
+  "data": {
+    "eventId": "nba:Los Angeles Clippers@Sacramento Kings-20260207",
+    "timeRange": { "start": null, "end": null },
+    "snapshots": [
+      {
+        "playerName": "deaaronfox",
+        "propType": "points",
+        "book": "fanduel",
+        "line": "26.5",
+        "overPrice": -110,
+        "underPrice": -110,
+        "recordedAt": "2026-02-06T15:30:12.000Z"
+      }
+    ],
+    "count": 1,
+    "limit": 1000
+  }
 }`}
             />
           </section>
-          */}
 
-          {/* WebSocket API */}
-          <section id="websocket" className="mb-16">
-            <h2 className="text-2xl font-mono font-bold mb-4 flex items-center gap-2">
-              <Radio className="w-6 h-6 text-[#00FF88]" />
-              WebSocket API
-            </h2>
-            <p className="text-zinc-400 mb-2">
-              Real-time streaming updates for odds, scores, and player props.
+          {/* ─── WebSocket API ─────────────────────────────────────── */}
+          <section id="websocket" className="mb-20">
+            <SectionHeading>WebSocket API</SectionHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-2">
+              Real-time streaming for odds, scores, and player props.
             </p>
-            <p className="text-sm text-purple-400 mb-6">
-              Requires Rookie or MVP subscription tier.
+            <p className="text-sm mb-6">
+              <TierBadge tier="Rookie+" />
             </p>
 
-            <h3 className="text-lg font-mono font-semibold mb-3">Connection</h3>
+            <SubHeading>Connection</SubHeading>
             <CodeBlock
               language="javascript"
               code={`import { io } from "socket.io-client";
@@ -881,69 +692,32 @@ const socket = io("wss://api.owlsinsight.com", {
 
 socket.on("connect", () => {
   console.log("Connected to Owls Insight");
-});
-
-socket.on("connect_error", (error) => {
-  console.error("Connection failed:", error.message);
 });`}
             />
 
-            <h3 className="text-lg font-mono font-semibold mt-8 mb-3">Events</h3>
-            <div className="space-y-4">
-              <div className="p-4 rounded-lg bg-[#111111] border border-white/5">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="px-2 py-0.5 rounded text-xs font-mono bg-green-500/20 text-green-400 border border-green-500/30">
-                    EVENT
-                  </span>
-                  <code className="font-mono text-[#00FF88]">odds-update</code>
+            <SubHeading>Events</SubHeading>
+            <div className="space-y-0 mb-8">
+              {[
+                { name: "odds-update", description: "Latest odds data, emitted every ~30 seconds", tier: undefined },
+                { name: "scores-update", description: "Current scores during live games, every ~3 seconds", tier: undefined },
+                { name: "props-update", description: "Aggregated player props from all books, every ~45 seconds", tier: "Rookie+" },
+              ].map((event) => (
+                <div key={event.name} className="flex items-start gap-3 py-3 border-b border-white/[0.04]">
+                  <code className="text-[13px] font-mono text-white shrink-0">{event.name}</code>
+                  <p className="text-sm text-zinc-500 flex-1">{event.description}</p>
+                  {event.tier && <TierBadge tier={event.tier} className="shrink-0" />}
                 </div>
-                <p className="text-sm text-zinc-400">
-                  Emitted every ~30 seconds with latest odds data. Payload contains all sports with active events.
-                </p>
-              </div>
-
-              <div className="p-4 rounded-lg bg-[#111111] border border-white/5">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="px-2 py-0.5 rounded text-xs font-mono bg-green-500/20 text-green-400 border border-green-500/30">
-                    EVENT
-                  </span>
-                  <code className="font-mono text-[#00FF88]">scores-update</code>
-                </div>
-                <p className="text-sm text-zinc-400">
-                  Emitted every ~3 seconds during live games with current scores.
-                </p>
-              </div>
-
-              <div className="p-4 rounded-lg bg-[#111111] border border-white/5">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="px-2 py-0.5 rounded text-xs font-mono bg-green-500/20 text-green-400 border border-green-500/30">
-                    EVENT
-                  </span>
-                  <code className="font-mono text-[#00FF88]">props-update</code>
-                  <span className="px-2 py-0.5 rounded text-xs font-mono bg-purple-500/20 text-purple-400 border border-purple-500/30">
-                    Rookie+
-                  </span>
-                </div>
-                <p className="text-sm text-zinc-400">
-                  Emitted every ~45 seconds with aggregated player props from all books.
-                </p>
-              </div>
+              ))}
             </div>
 
-            <h3 className="text-lg font-mono font-semibold mt-8 mb-3">Subscribing to Events</h3>
+            <SubHeading>Subscribing to events</SubHeading>
             <CodeBlock
               language="javascript"
               code={`// Listen to odds updates
 socket.on("odds-update", (data) => {
   console.log("NBA games:", data.sports.nba?.length || 0);
-  console.log("NFL games:", data.sports.nfl?.length || 0);
-
-  // Access individual games
   data.sports.nba?.forEach(game => {
     console.log(\`\${game.away_team} @ \${game.home_team}\`);
-    game.bookmakers.forEach(book => {
-      console.log(\`  \${book.key}: \${book.markets[0]?.outcomes[0]?.price}\`);
-    });
   });
 });
 
@@ -960,13 +734,10 @@ socket.on("props-update", (data) => {
 });`}
             />
 
-            <h3 className="text-lg font-mono font-semibold mt-8 mb-3">Subscription Filtering</h3>
-            <p className="text-zinc-400 mb-4">
-              You can filter which sports and markets you receive updates for:
-            </p>
+            <SubHeading>Filtering</SubHeading>
             <CodeBlock
               language="javascript"
-              code={`// Subscribe to specific sports only
+              code={`// Subscribe to specific sports
 socket.emit("subscribe", {
   sports: ["nba", "nfl"],
   markets: ["h2h", "spreads", "totals"]
@@ -980,26 +751,19 @@ socket.emit("subscribe:props", {
             />
           </section>
 
-          {/* Usage API */}
-          <section id="usage-api" className="mb-16">
-            <h2 className="text-2xl font-mono font-bold mb-4 flex items-center gap-2">
-              <BarChart3 className="w-6 h-6 text-[#00FF88]" />
-              Usage API
-            </h2>
-            <p className="text-zinc-400 mb-6">
-              Monitor your API usage and rate limit status.
+          {/* ─── Usage API ─────────────────────────────────────────── */}
+          <section id="usage-api" className="mb-20">
+            <SectionHeading>Usage API</SectionHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-6">
+              Monitor API usage and rate limit status.
             </p>
 
-            <h3 className="text-lg font-mono font-semibold mb-3">Endpoint</h3>
-            <div className="space-y-3 mb-8">
-              <Endpoint
-                method="GET"
-                path="/api/v1/usage"
-                description="Get your API usage statistics for today or a specific date"
-              />
+            <SubHeading>Endpoint</SubHeading>
+            <div className="mb-8">
+              <Endpoint method="GET" path="/api/v1/usage" description="API usage statistics for today or a specific date" />
             </div>
 
-            <h3 className="text-lg font-mono font-semibold mb-3">Query Parameters</h3>
+            <SubHeading>Parameters</SubHeading>
             <ParamTable
               params={[
                 { name: "date", type: "string", required: false, description: "Date in YYYY-MM-DD format (defaults to today)" },
@@ -1007,14 +771,7 @@ socket.emit("subscribe:props", {
               ]}
             />
 
-            <h3 className="text-lg font-mono font-semibold mt-8 mb-3">Example Request</h3>
-            <CodeBlock
-              language="bash"
-              code={`curl -H "Authorization: Bearer YOUR_API_KEY" \\
-  "https://api.owlsinsight.com/api/v1/usage?date=2026-02-01"`}
-            />
-
-            <h3 className="text-lg font-mono font-semibold mt-8 mb-3">Example Response</h3>
+            <SubHeading>Response</SubHeading>
             <CodeBlock
               language="json"
               code={`{
@@ -1030,7 +787,6 @@ socket.emit("subscribe:props", {
       "apiKeyId": "key_abc123",
       "keyName": "Production",
       "tier": "rookie",
-      "date": "2026-02-01",
       "stats": {
         "totalRequests": 1234,
         "successfulRequests": 1200,
@@ -1041,106 +797,83 @@ socket.emit("subscribe:props", {
         "month": { "count": 12340, "limit": 75000, "remaining": 62660 }
       }
     }
-  ],
-  "apiKeyCount": 1
+  ]
 }`}
             />
           </section>
 
-          {/* Rate Limits */}
-          <section id="rate-limits" className="mb-16">
-            <h2 className="text-2xl font-mono font-bold mb-4 flex items-center gap-2">
-              <AlertCircle className="w-6 h-6 text-[#00FF88]" />
-              Rate Limits & Tiers
-            </h2>
-            <p className="text-zinc-400 mb-6">
-              Rate limits are applied per API key. Limits and features vary by subscription tier.
+          {/* ─── Rate Limits ───────────────────────────────────────── */}
+          <section id="rate-limits" className="mb-20">
+            <SectionHeading>Rate Limits</SectionHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-6">
+              Rate limits are applied per API key. Limits vary by subscription tier.
             </p>
 
-            <div className="overflow-x-auto mb-8">
+            <div className="overflow-x-auto mb-10">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-white/10">
-                    <th className="text-left py-3 px-4 font-mono text-zinc-400">Tier</th>
-                    <th className="text-left py-3 px-4 font-mono text-zinc-400">Price</th>
-                    <th className="text-left py-3 px-4 font-mono text-zinc-400">Requests/Month</th>
-                    <th className="text-left py-3 px-4 font-mono text-zinc-400">Requests/Minute</th>
-                    <th className="text-left py-3 px-4 font-mono text-zinc-400">WebSocket</th>
+                  <tr className="border-b border-white/[0.08]">
+                    <th className="text-left py-2.5 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Tier</th>
+                    <th className="text-left py-2.5 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Price</th>
+                    <th className="text-left py-2.5 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Req/Month</th>
+                    <th className="text-left py-2.5 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Req/Minute</th>
+                    <th className="text-left py-2.5 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">WebSocket</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr className="border-b border-white/5">
-                    <td className="py-3 px-4 font-mono text-white">Bench</td>
-                    <td className="py-3 px-4 text-zinc-400">$9.99/mo</td>
-                    <td className="py-3 px-4 text-zinc-400">10,000</td>
-                    <td className="py-3 px-4 text-zinc-400">20</td>
-                    <td className="py-3 px-4 text-zinc-500">REST only</td>
+                <tbody className="text-[13px]">
+                  <tr className="border-b border-white/[0.04]">
+                    <td className="py-2.5 pr-6 font-mono text-white">Bench</td>
+                    <td className="py-2.5 pr-6 text-zinc-400">$9.99/mo</td>
+                    <td className="py-2.5 pr-6 text-zinc-400">10,000</td>
+                    <td className="py-2.5 pr-6 text-zinc-400">20</td>
+                    <td className="py-2.5 text-zinc-600">REST only</td>
                   </tr>
-                  <tr className="border-b border-white/5">
-                    <td className="py-3 px-4 font-mono text-white">Rookie</td>
-                    <td className="py-3 px-4 text-zinc-400">$24.99/mo</td>
-                    <td className="py-3 px-4 text-zinc-400">75,000</td>
-                    <td className="py-3 px-4 text-zinc-400">120</td>
-                    <td className="py-3 px-4 text-zinc-400">2 connections</td>
+                  <tr className="border-b border-white/[0.04]">
+                    <td className="py-2.5 pr-6 font-mono text-white">Rookie</td>
+                    <td className="py-2.5 pr-6 text-zinc-400">$24.99/mo</td>
+                    <td className="py-2.5 pr-6 text-zinc-400">75,000</td>
+                    <td className="py-2.5 pr-6 text-zinc-400">120</td>
+                    <td className="py-2.5 text-zinc-400">2 connections</td>
                   </tr>
-                  <tr className="border-b border-white/5">
-                    <td className="py-3 px-4 font-mono text-white">MVP</td>
-                    <td className="py-3 px-4 text-zinc-400">$49.99/mo</td>
-                    <td className="py-3 px-4 text-zinc-400">300,000</td>
-                    <td className="py-3 px-4 text-zinc-400">400</td>
-                    <td className="py-3 px-4 text-zinc-400">5 connections</td>
+                  <tr className="border-b border-white/[0.04]">
+                    <td className="py-2.5 pr-6 font-mono text-white">MVP</td>
+                    <td className="py-2.5 pr-6 text-zinc-400">$49.99/mo</td>
+                    <td className="py-2.5 pr-6 text-zinc-400">300,000</td>
+                    <td className="py-2.5 pr-6 text-zinc-400">400</td>
+                    <td className="py-2.5 text-zinc-400">5 connections</td>
                   </tr>
                 </tbody>
               </table>
             </div>
 
-            <h3 className="text-lg font-mono font-semibold mb-3">Tier Features</h3>
-            <div className="grid gap-4 mb-8">
-              <div className="p-4 rounded-lg bg-[#111111] border border-white/5">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="font-mono font-semibold text-white">Bench</span>
-                  <span className="text-xs text-zinc-500">$9.99/month</span>
-                </div>
-                <ul className="text-sm text-zinc-400 space-y-1">
-                  <li>• REST API only (no WebSocket)</li>
-                  <li>• Odds, spreads & totals</li>
-                  <li>• Live scores</li>
-                  <li>• 45-second data delay</li>
+            <SubHeading>Tier features</SubHeading>
+            <div className="space-y-4 mb-10">
+              <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5">
+                <p className="font-mono text-sm font-semibold text-white mb-2">Bench</p>
+                <ul className="text-[13px] text-zinc-500 space-y-1">
+                  <li>REST API only, odds/spreads/totals, live scores, 45-second delay</li>
                 </ul>
               </div>
-              <div className="p-4 rounded-lg bg-[#111111] border border-white/5">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="font-mono font-semibold text-white">Rookie</span>
-                  <span className="text-xs text-zinc-500">$24.99/month</span>
-                </div>
-                <ul className="text-sm text-zinc-400 space-y-1">
-                  <li>• REST API + WebSocket (2 connections)</li>
-                  <li>• Player props access</li>
-                  <li>• EV calculations & arbitrage detection</li>
-                  <li>• 14 days historical data</li>
-                  <li>• Real-time data updates</li>
+              <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5">
+                <p className="font-mono text-sm font-semibold text-white mb-2">Rookie</p>
+                <ul className="text-[13px] text-zinc-500 space-y-1">
+                  <li>REST + WebSocket (2 connections), player props, historical odds & props, real-time data</li>
                 </ul>
               </div>
-              <div className="p-4 rounded-lg bg-[#111111] border border-purple-500/30">
+              <div className="rounded-lg bg-[#111113] border border-purple-500/15 p-5">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="font-mono font-semibold text-white">MVP</span>
-                  <span className="text-xs text-purple-400">Most Popular</span>
-                  <span className="text-xs text-zinc-500">$49.99/month</span>
+                  <p className="font-mono text-sm font-semibold text-white">MVP</p>
+                  <span className="text-[10px] font-mono text-purple-400">Most Popular</span>
                 </div>
-                <ul className="text-sm text-zinc-400 space-y-1">
-                  <li>• REST API + WebSocket (5 connections)</li>
-                  <li>• 15 concurrent requests</li>
-                  <li>• Player props + WebSocket props streaming</li>
-                  <li>• EV calculations & arbitrage detection</li>
-                  <li>• 90 days historical data</li>
-                  <li>• Real-time data updates</li>
+                <ul className="text-[13px] text-zinc-500 space-y-1">
+                  <li>REST + WebSocket (5 connections), 15 concurrent requests, full props + WebSocket streaming, full historical odds & props, real-time data</li>
                 </ul>
               </div>
             </div>
 
-            <h3 className="text-lg font-mono font-semibold mb-3">Rate Limit Headers</h3>
-            <p className="text-zinc-400 mb-4">
-              Each response includes headers showing your current rate limit status:
+            <SubHeading>Rate limit headers</SubHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-4">
+              Every response includes headers with your current rate limit status.
             </p>
             <CodeBlock
               language="http"
@@ -1151,39 +884,43 @@ X-RateLimit-Remaining-Month: 62340`}
             />
           </section>
 
-          {/* Error Codes */}
-          <section id="errors" className="mb-16">
-            <h2 className="text-2xl font-mono font-bold mb-4 flex items-center gap-2">
-              <AlertCircle className="w-6 h-6 text-[#00FF88]" />
-              Error Codes
-            </h2>
-            <p className="text-zinc-400 mb-6">
-              All errors return a JSON response with an error message.
+          {/* ─── Errors ────────────────────────────────────────────── */}
+          <section id="errors" className="mb-20">
+            <SectionHeading>Error Codes</SectionHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-6">
+              All errors return JSON with an error message.
             </p>
 
-            <div className="space-y-4">
-              {[
-                { code: 400, title: "Bad Request", description: "Invalid parameters or malformed request" },
-                { code: 401, title: "Unauthorized", description: "Missing or invalid API key" },
-                { code: 403, title: "Forbidden", description: "Valid API key but insufficient tier for this endpoint" },
-                { code: 404, title: "Not Found", description: "Endpoint or resource not found" },
-                { code: 429, title: "Too Many Requests", description: "Rate limit exceeded" },
-                { code: 500, title: "Internal Server Error", description: "Server error, please retry" },
-                { code: 503, title: "Service Unavailable", description: "Service temporarily unavailable" },
-              ].map((error) => (
-                <div key={error.code} className="p-4 rounded-lg bg-[#111111] border border-white/5">
-                  <div className="flex items-center gap-3 mb-1">
-                    <span className="px-2 py-0.5 rounded text-xs font-mono bg-red-500/20 text-red-400 border border-red-500/30">
-                      {error.code}
-                    </span>
-                    <span className="font-mono font-semibold">{error.title}</span>
-                  </div>
-                  <p className="text-sm text-zinc-400">{error.description}</p>
-                </div>
-              ))}
+            <div className="overflow-x-auto mb-10">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-white/[0.08]">
+                    <th className="text-left py-2 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Code</th>
+                    <th className="text-left py-2 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Status</th>
+                    <th className="text-left py-2 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Description</th>
+                  </tr>
+                </thead>
+                <tbody className="text-[13px]">
+                  {[
+                    { code: 400, title: "Bad Request", description: "Invalid parameters or malformed request" },
+                    { code: 401, title: "Unauthorized", description: "Missing or invalid API key" },
+                    { code: 403, title: "Forbidden", description: "Insufficient tier for this endpoint" },
+                    { code: 404, title: "Not Found", description: "Endpoint or resource not found" },
+                    { code: 429, title: "Too Many Requests", description: "Rate limit exceeded" },
+                    { code: 500, title: "Internal Server Error", description: "Server error, please retry" },
+                    { code: 503, title: "Service Unavailable", description: "Temporarily unavailable" },
+                  ].map((error) => (
+                    <tr key={error.code} className="border-b border-white/[0.04]">
+                      <td className="py-2.5 pr-6 font-mono text-red-400">{error.code}</td>
+                      <td className="py-2.5 pr-6 text-white">{error.title}</td>
+                      <td className="py-2.5 text-zinc-500">{error.description}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
 
-            <h3 className="text-lg font-mono font-semibold mt-8 mb-3">Error Response Format</h3>
+            <SubHeading>Error response format</SubHeading>
             <CodeBlock
               language="json"
               code={`{
@@ -1196,14 +933,14 @@ X-RateLimit-Remaining-Month: 62340`}
           </section>
 
           {/* Footer */}
-          <div className="mt-16 pt-8 border-t border-white/10 text-center text-sm text-zinc-500">
+          <div className="mt-16 pt-8 border-t border-white/[0.06] text-sm text-zinc-600 font-sans">
             <p>
               Questions?{" "}
               <a
-                href="mailto:support@owlsinsight.com"
-                className="text-[#00FF88] hover:text-[#00d4aa] transition-colors"
+                href="mailto:david@wisesportsai.com"
+                className="text-zinc-400 hover:text-white transition-colors"
               >
-                Contact Support
+                david@wisesportsai.com
               </a>
             </p>
           </div>

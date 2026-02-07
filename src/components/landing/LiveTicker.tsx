@@ -85,47 +85,56 @@ export function LiveTicker() {
         if (!response.ok) return items;
 
         const data = await response.json();
-        const events = data.events || data.data || data;
+        const bookData = data.data;
 
-        if (!events || !Array.isArray(events)) return items;
+        if (!bookData || typeof bookData !== "object") return items;
 
-        for (const event of events.slice(0, 6)) {
-          if (!event.bookmakers || event.bookmakers.length === 0) continue;
+        // API returns { data: { pinnacle: [...], fanduel: [...], ... } }
+        // Each bookmaker key has an array of events with that book's odds
+        const bookKeys = Object.keys(bookData);
+        // Pick a few random books for variety
+        const shuffledBooks = bookKeys.sort(() => Math.random() - 0.5);
 
-          // Pick a random bookmaker for variety
-          const bookIndex = Math.floor(Math.random() * Math.min(event.bookmakers.length, 4));
-          const book = event.bookmakers[bookIndex];
-          if (!book) continue;
+        for (const bookKey of shuffledBooks) {
+          const events = bookData[bookKey];
+          if (!Array.isArray(events)) continue;
 
-          const spreadsMarket = book.markets?.find((m: { key: string }) => m.key === "spreads");
-          if (!spreadsMarket?.outcomes?.length) continue;
+          for (const event of events.slice(0, 3)) {
+            if (!event.bookmakers || event.bookmakers.length === 0) continue;
 
-          const awaySpread = spreadsMarket.outcomes.find(
-            (o: { name: string }) => o.name === event.away_team
-          );
-          if (awaySpread?.point === undefined) continue;
+            const book = event.bookmakers[0];
+            if (!book) continue;
 
-          const point = awaySpread.point;
-          const line = point >= 0 ? `+${point.toFixed(1)}` : point.toFixed(1);
-          const itemId = `${event.id}-${book.key}`;
+            const spreadsMarket = book.markets?.find((m: { key: string }) => m.key === "spreads");
+            if (!spreadsMarket?.outcomes?.length) continue;
 
-          // Check for movement compared to previous fetch
-          const prevPoint = previousOdds.current.get(itemId);
-          let movement: "up" | "down" | "none" = "none";
-          if (prevPoint !== undefined) {
-            if (point > prevPoint) movement = "up";
-            else if (point < prevPoint) movement = "down";
+            const awaySpread = spreadsMarket.outcomes.find(
+              (o: { name: string }) => o.name === event.away_team
+            );
+            if (awaySpread?.point === undefined) continue;
+
+            const point = awaySpread.point;
+            const line = point >= 0 ? `+${point.toFixed(1)}` : point.toFixed(1);
+            const itemId = `${event.id}-${book.key}`;
+
+            // Check for movement compared to previous fetch
+            const prevPoint = previousOdds.current.get(itemId);
+            let movement: "up" | "down" | "none" = "none";
+            if (prevPoint !== undefined) {
+              if (point > prevPoint) movement = "up";
+              else if (point < prevPoint) movement = "down";
+            }
+            previousOdds.current.set(itemId, point);
+
+            items.push({
+              id: itemId,
+              sport: sport.toUpperCase(),
+              teams: `${shortenTeamName(event.away_team)} @ ${shortenTeamName(event.home_team)}`,
+              book: BOOK_ABBREV[book.key] || book.key.substring(0, 3).toUpperCase(),
+              line,
+              movement,
+            });
           }
-          previousOdds.current.set(itemId, point);
-
-          items.push({
-            id: itemId,
-            sport: sport.toUpperCase(),
-            teams: `${shortenTeamName(event.away_team)} @ ${shortenTeamName(event.home_team)}`,
-            book: BOOK_ABBREV[book.key] || book.key.substring(0, 3).toUpperCase(),
-            line,
-            movement,
-          });
         }
       } catch {
         // Silently fail for individual sports

@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Check } from "lucide-react";
+import { Check } from "@phosphor-icons/react";
 import Link from "next/link";
 
 const tiers = [
@@ -16,7 +16,7 @@ const tiers = [
       "REST API only",
       "Odds, spreads & totals",
       "Live scores",
-      "45-second data delay",
+      "Real-time odds tracking",
     ],
     cta: "Get Started",
     ctaVariant: "outline" as const,
@@ -32,8 +32,6 @@ const tiers = [
       "120 requests/minute",
       "REST API + WebSocket (2 connections)",
       "Player props access",
-      "EV calculations & arbitrage",
-      "14 days historical data",
       "Real-time data",
     ],
     cta: "Get Started",
@@ -51,8 +49,7 @@ const tiers = [
       "REST API + WebSocket (5 connections)",
       "15 concurrent requests",
       "Player props + WebSocket props",
-      "EV calculations & arbitrage",
-      "90 days historical data",
+      "Full historical odds & props",
       "Real-time data",
     ],
     cta: "Start Free Trial",
@@ -116,7 +113,7 @@ export function Pricing() {
               <ul className="space-y-3 mb-8">
                 {tier.features.map((feature) => (
                   <li key={feature} className="flex items-start gap-3 text-sm">
-                    <Check className="w-4 h-4 text-green-400 mt-0.5 shrink-0" />
+                    <Check size={16} weight="bold" className="text-green-400 mt-0.5 shrink-0" />
                     <span className="text-zinc-300">{feature}</span>
                   </li>
                 ))}
@@ -144,7 +141,7 @@ export function Pricing() {
           <p className="text-neutral-500">
             Have questions?{" "}
             <a
-              href="mailto:support@owlsinsight.com"
+              href="mailto:david@wisesportsai.com"
               className="text-[#00FF88] hover:text-[#00d4aa] transition-colors"
             >
               Contact us
