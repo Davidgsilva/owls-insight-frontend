@@ -13,8 +13,8 @@ interface User {
 }
 
 interface Subscription {
-  tier: "bench" | "rookie" | "mvp";
-  status: "active" | "past_due" | "canceled" | "trialing" | "paused";
+  tier: "free" | "bench" | "rookie" | "mvp";
+  status: "active" | "past_due" | "canceled" | "trialing" | "paused" | "inactive";
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean;
 }
@@ -147,7 +147,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (typeof window !== "undefined") {
       localStorage.removeItem(USER_STORAGE_KEY);
     }
-    router.push("/login");
+    router.push("/");
   }, [router]);
 
   const value = useMemo(() => ({

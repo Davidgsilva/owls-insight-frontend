@@ -40,7 +40,8 @@ export async function GET(request: NextRequest) {
 
   // Preserve tier param through OAuth flow (e.g., tier=mvp for free trial)
   const tier = request.nextUrl.searchParams.get('tier');
-  if (tier === 'mvp') {
+  const validTiers = ['bench', 'rookie', 'mvp'];
+  if (tier && validTiers.includes(tier)) {
     response.cookies.set('discord_oauth_tier', tier, {
       httpOnly: true,
       secure: isProduction,

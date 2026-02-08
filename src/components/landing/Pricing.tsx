@@ -120,7 +120,7 @@ export function Pricing() {
               </ul>
 
               {/* CTA Button */}
-              <Link href={tier.popular ? `/register?tier=${tier.name.toLowerCase()}` : '/register'} className="block">
+              <Link href={`/register?tier=${tier.name.toLowerCase()}`} className="block">
                 <Button
                   variant={tier.ctaVariant}
                   className={`w-full font-mono ${

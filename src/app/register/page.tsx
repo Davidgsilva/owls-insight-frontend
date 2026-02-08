@@ -90,7 +90,11 @@ function RegisterForm() {
   const searchParams = useSearchParams();
   const { register: registerUser } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const isMvpTrial = searchParams.get("tier") === "mvp";
+  const VALID_TIERS = ["bench", "rookie", "mvp"] as const;
+  type ValidTier = typeof VALID_TIERS[number];
+  const tierParam = searchParams.get("tier");
+  const selectedTier: ValidTier | null = tierParam && VALID_TIERS.includes(tierParam as ValidTier) ? (tierParam as ValidTier) : null;
+  const isMvpTrial = selectedTier === "mvp";
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -108,15 +112,15 @@ function RegisterForm() {
     try {
       await registerUser(data.email, data.password);
 
-      if (isMvpTrial) {
-        // Redirect to Stripe checkout for MVP trial
+      if (selectedTier) {
+        // Redirect to Stripe checkout for the selected tier
         const res = await fetch("/api/stripe/checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
           body: JSON.stringify({
-            tier: "mvp",
-            successUrl: `${window.location.origin}/dashboard?checkout=success&trial=true`,
+            tier: selectedTier,
+            successUrl: `${window.location.origin}/dashboard?checkout=success${isMvpTrial ? '&trial=true' : ''}`,
             cancelUrl: `${window.location.origin}/pricing?checkout=canceled`,
           }),
         });
@@ -126,7 +130,9 @@ function RegisterForm() {
           return;
         }
         // Checkout creation failed — notify and fall through to normal flow
-        toast.error("Couldn't start your free trial. You can start it from your billing page.");
+        toast.error(isMvpTrial
+          ? "Couldn't start your free trial. You can start it from your billing page."
+          : "Couldn't start checkout. You can subscribe from your billing page.");
       }
 
       toast.success("Account created! Check your email to verify.");
@@ -151,24 +157,26 @@ function RegisterForm() {
         <Card className="bg-[#111113] border-white/10">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-mono text-white">
-              {isMvpTrial ? "Start your free trial" : "Create an account"}
+              {isMvpTrial ? "Start your free trial" : selectedTier ? `Sign up for ${selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1)}` : "Create an account"}
             </CardTitle>
             <CardDescription className="text-zinc-400">
               {isMvpTrial
                 ? "Create an account to start your 7-day free MVP trial"
+                : selectedTier
+                ? `Create an account to subscribe to the ${selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1)} plan`
                 : "Get started with your API access today"}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {/* Discord OAuth */}
             <a
-              href={`/api/auth/discord${isMvpTrial ? '?tier=mvp' : ''}`}
+              href={`/api/auth/discord${selectedTier ? `?tier=${selectedTier}` : ''}`}
               className="w-full flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-md
                          bg-[#5865F2] hover:bg-[#4752C4] text-white font-semibold text-sm
                          transition-colors duration-150"
             >
               <DiscordIcon className="w-5 h-5" />
-              {isMvpTrial ? "Sign up with Discord & Start Trial" : "Sign up with Discord"}
+              {isMvpTrial ? "Sign up with Discord & Start Trial" : selectedTier ? "Sign up with Discord & Subscribe" : "Sign up with Discord"}
             </a>
 
             {/* Divider */}
@@ -202,6 +210,7 @@ function RegisterForm() {
                         <Input
                           type="email"
                           placeholder="you@example.com"
+                          autoComplete="off"
                           className="bg-[#0a0a0a] border-white/10 text-white placeholder:text-zinc-500"
                           {...field}
                         />
@@ -221,6 +230,7 @@ function RegisterForm() {
                         <Input
                           type="password"
                           placeholder="Create a strong password"
+                          autoComplete="new-password"
                           className="bg-[#0a0a0a] border-white/10 text-white placeholder:text-zinc-500"
                           {...field}
                         />
@@ -241,6 +251,7 @@ function RegisterForm() {
                         <Input
                           type="password"
                           placeholder="Confirm your password"
+                          autoComplete="new-password"
                           className="bg-[#0a0a0a] border-white/10 text-white placeholder:text-zinc-500"
                           {...field}
                         />
@@ -277,8 +288,8 @@ function RegisterForm() {
                   disabled={isLoading}
                 >
                   {isLoading
-                    ? (isMvpTrial ? "Starting trial..." : "Creating account...")
-                    : (isMvpTrial ? "Start 7-Day Free Trial" : "Create account")}
+                    ? (selectedTier ? "Setting up..." : "Creating account...")
+                    : (isMvpTrial ? "Start 7-Day Free Trial" : selectedTier ? "Create account & Subscribe" : "Create account")}
                 </Button>
               </form>
             </Form>

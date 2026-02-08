@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -58,6 +58,7 @@ interface UsageData {
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const tierLimits = {
+  free: { month: 0, minute: 0, wsPerMin: 0 },
   bench: { month: 10_000, minute: 20, wsPerMin: 0 },
   rookie: { month: 75_000, minute: 120, wsPerMin: 120 },
   mvp: { month: 300_000, minute: 400, wsPerMin: 400 },
@@ -220,9 +221,9 @@ export default function UsagePage() {
   const selectedDate = format(selectedDay, "yyyy-MM-dd");
   const isToday = selectedDate === format(new Date(), "yyyy-MM-dd");
 
-  const validTiers = ["bench", "rookie", "mvp"] as const;
+  const validTiers = ["free", "bench", "rookie", "mvp"] as const;
   const rawTier = subscription?.tier;
-  const tier = rawTier && validTiers.includes(rawTier) ? rawTier : "bench";
+  const tier = rawTier && validTiers.includes(rawTier) ? rawTier : "free";
   const limits = tierLimits[tier];
 
   // ─── Fetch usage stats (smooth update) ──────────────────────────────────
@@ -309,22 +310,11 @@ export default function UsagePage() {
   };
 
   const totalRequests = usageData?.totals?.totalRequests || 0;
-  const successRate = totalRequests > 0
-    ? ((usageData?.totals?.successfulRequests || 0) / totalRequests * 100).toFixed(1)
-    : "—";
-
   const avgResponseTime = currentUsage?.stats?.avgResponseTime;
 
   const wsStats = currentUsage?.websocket;
   const wsTotalEvents = usageData?.wsTotals?.totalEvents || wsStats?.totalEvents || 0;
   const wsEventTypes = usageData?.wsTotals?.eventTypes || wsStats?.eventTypes || {};
-
-  // Endpoint breakdown sorted
-  const endpoints = useMemo(() => {
-    if (!currentUsage?.stats?.endpoints) return [];
-    return Object.entries(currentUsage.stats.endpoints)
-      .sort(([, a], [, b]) => b - a);
-  }, [currentUsage]);
 
   const wsHourlyData = wsStats?.hourlyBreakdown || {};
 
@@ -380,7 +370,7 @@ export default function UsagePage() {
           {
             label: "Requests",
             value: totalRequests.toLocaleString(),
-            sub: `${successRate}% success`,
+            sub: "today",
             accent: false,
           },
           {
@@ -530,29 +520,10 @@ export default function UsagePage() {
               </div>
             )}
 
-            {/* Endpoints — compact inline rows */}
-            {endpoints.length > 0 && (
-              <div className="p-4 space-y-2">
-                <div className="flex items-baseline justify-between mb-1">
-                  <span className="text-[13px] text-zinc-500 font-sans">Endpoints</span>
-                  <span className="text-[11px] text-zinc-600 font-mono">requests</span>
-                </div>
-                {endpoints.map(([endpoint, count]) => (
-                  <div key={endpoint} className="flex items-center justify-between gap-3">
-                    <code className="text-[11px] text-zinc-400 font-mono truncate">
-                      {shortEndpoint(endpoint)}
-                    </code>
-                    <span className="text-[11px] text-zinc-500 font-mono tabular-nums shrink-0">
-                      {count.toLocaleString()}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-
           </CardContent>
         </Card>
       </div>
+
     </div>
   );
 }

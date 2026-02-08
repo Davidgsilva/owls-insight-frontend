@@ -79,19 +79,22 @@ function DashboardContent() {
   const [keys, setKeys] = useState<KeysData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Handle Discord OAuth redirect with trial intent
+  // Handle Discord OAuth redirect with checkout intent
   useEffect(() => {
-    if (searchParams.get("start_trial") === "mvp") {
+    const checkoutTier = searchParams.get("start_checkout") || searchParams.get("start_trial");
+    const validCheckoutTiers = ["bench", "rookie", "mvp"];
+    if (checkoutTier && validCheckoutTiers.includes(checkoutTier)) {
       // Remove param from URL to prevent re-triggering
       window.history.replaceState({}, "", "/dashboard");
-      // Redirect to Stripe checkout for MVP trial
+      // Redirect to Stripe checkout for the selected tier
+      const isTrial = checkoutTier === "mvp";
       fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
-          tier: "mvp",
-          successUrl: `${window.location.origin}/dashboard?checkout=success&trial=true`,
+          tier: checkoutTier,
+          successUrl: `${window.location.origin}/dashboard?checkout=success${isTrial ? '&trial=true' : ''}`,
           cancelUrl: `${window.location.origin}/pricing?checkout=canceled`,
         }),
       })
@@ -100,7 +103,7 @@ function DashboardContent() {
           if (data.url) window.location.href = data.url;
         })
         .catch(() => {
-          // Checkout failed silently — user can start trial from billing page
+          // Checkout failed silently — user can subscribe from billing page
         });
     }
   }, [searchParams]);
@@ -160,10 +163,11 @@ function DashboardContent() {
     };
   }, []);
 
-  const validTiers = ["bench", "rookie", "mvp"] as const;
+  const validTiers = ["free", "bench", "rookie", "mvp"] as const;
   const rawTier = subscription?.tier;
-  const tier = rawTier && validTiers.includes(rawTier) ? rawTier : "bench";
+  const tier = rawTier && validTiers.includes(rawTier) ? rawTier : "free";
   const tierLimits = {
+    free: { month: 0, minute: 0 },
     bench: { month: 10000, minute: 20 },
     rookie: { month: 75000, minute: 120 },
     mvp: { month: 300000, minute: 400 },
@@ -171,10 +175,10 @@ function DashboardContent() {
   const limits = tierLimits[tier];
 
   const monthUsed = usage?.rateLimits?.month?.count || 0;
-  const monthPct = ((monthUsed / limits.month) * 100).toFixed(1);
+  const monthPct = limits.month > 0 ? ((monthUsed / limits.month) * 100).toFixed(1) : "0.0";
 
   return (
-    <div className="max-w-5xl space-y-8">
+    <div className="max-w-5xl mx-auto space-y-8">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-mono font-bold text-white tracking-tight">
@@ -230,7 +234,9 @@ function DashboardContent() {
                   ? "bg-purple-500/15 text-purple-400 border-purple-500/25"
                   : tier === "rookie"
                   ? "bg-[#06b6d4]/15 text-[#06b6d4] border-[#06b6d4]/25"
-                  : "bg-zinc-500/15 text-zinc-400 border-zinc-500/25"
+                  : tier === "bench"
+                  ? "bg-zinc-500/15 text-zinc-400 border-zinc-500/25"
+                  : "bg-zinc-800/50 text-zinc-500 border-zinc-700/25"
               )}
             >
               {tier.toUpperCase()}
@@ -240,7 +246,9 @@ function DashboardContent() {
                 ? "Full access"
                 : tier === "rookie"
                 ? "Standard access"
-                : "Basic access"}
+                : tier === "bench"
+                ? "Basic access"
+                : "No active subscription"}
             </p>
           </div>
         </div>
@@ -306,10 +314,10 @@ function DashboardContent() {
             <div className="relative flex items-center justify-between p-6">
               <div>
                 <h2 className="text-sm font-mono font-semibold text-white">
-                  Upgrade to {tier === "bench" ? "Rookie or MVP" : "MVP"}
+                  {tier === "free" ? "Subscribe to get started" : `Upgrade to ${tier === "bench" ? "Rookie or MVP" : "MVP"}`}
                 </h2>
                 <p className="text-sm text-zinc-500 mt-1 font-sans">
-                  More requests, WebSocket access, and historical data
+                  {tier === "free" ? "Choose a plan to get API access" : "More requests, WebSocket access, and historical data"}
                 </p>
               </div>
               <span className="shrink-0 ml-4 text-xs font-mono font-medium text-purple-400 bg-purple-500/10 border border-purple-500/20 rounded-md px-3 py-1.5 group-hover:bg-purple-500/20 transition-colors duration-200">

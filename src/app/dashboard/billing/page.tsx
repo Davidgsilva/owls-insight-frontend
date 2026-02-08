@@ -57,9 +57,9 @@ export default function BillingPage() {
   const [isLoading, setIsLoading] = useState<string | null>(null);
 
   // Validate tier from API to prevent runtime errors
-  const validTiers = ["bench", "rookie", "mvp"] as const;
+  const validTiers = ["free", "bench", "rookie", "mvp"] as const;
   const rawTier = subscription?.tier;
-  const currentTier = rawTier && validTiers.includes(rawTier) ? rawTier : "bench";
+  const currentTier = rawTier && validTiers.includes(rawTier) ? rawTier : "free";
 
   function getTrialDaysRemaining(): number | null {
     if (subscription?.status !== "trialing" || !subscription.currentPeriodEnd) return null;
@@ -158,17 +158,21 @@ export default function BillingPage() {
                     ? "bg-purple-500/20 text-purple-400 border-purple-500/30"
                     : currentTier === "rookie"
                     ? "bg-blue-500/20 text-blue-400 border-blue-500/30"
-                    : "bg-zinc-500/20 text-zinc-400 border-zinc-500/30"
+                    : currentTier === "bench"
+                    ? "bg-zinc-500/20 text-zinc-400 border-zinc-500/30"
+                    : "bg-zinc-800/50 text-zinc-500 border-zinc-700/30"
                 } border`}
               >
                 {currentTier.toUpperCase()}
               </Badge>
               <div>
                 <p className="text-white font-semibold">
-                  {tiers[currentTier].price}/month
+                  {currentTier === "free" ? "No active plan" : `${tiers[currentTier].price}/month`}
                 </p>
                 <p className="text-zinc-500 text-sm">
-                  {isTrialing && trialDays !== null
+                  {currentTier === "free"
+                    ? "Subscribe to get API access"
+                    : isTrialing && trialDays !== null
                     ? `Free trial — ${trialDays} day${trialDays !== 1 ? "s" : ""} remaining`
                     : subscription?.status === "active"
                     ? "Active"
@@ -176,15 +180,17 @@ export default function BillingPage() {
                 </p>
               </div>
             </div>
-            <Button
-              onClick={handleManageBilling}
-              disabled={isLoading === "portal"}
-              variant="outline"
-              className="border-white/10 text-white hover:bg-white/5"
-            >
-              {isLoading === "portal" ? "Loading..." : "Manage Billing"}
-              <ArrowSquareOut size={16} className="ml-2" />
-            </Button>
+            {currentTier !== "free" && (
+              <Button
+                onClick={handleManageBilling}
+                disabled={isLoading === "portal"}
+                variant="outline"
+                className="border-white/10 text-white hover:bg-white/5"
+              >
+                {isLoading === "portal" ? "Loading..." : "Manage Billing"}
+                <ArrowSquareOut size={16} className="ml-2" />
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -227,6 +233,7 @@ export default function BillingPage() {
             ([tier, config]) => {
               const isCurrent = tier === currentTier;
               const isUpgrade =
+                currentTier === "free" ||
                 (tier === "rookie" && currentTier === "bench") ||
                 (tier === "mvp" && (currentTier === "bench" || currentTier === "rookie"));
 

@@ -8,10 +8,30 @@ const isProduction = process.env.NODE_ENV === 'production' || !process.env.DISCO
 const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI
   || 'https://owlsinsight.com/api/auth/discord/callback';
 
+const ALLOWED_ORIGINS = new Set([
+  'https://owlsinsight.com',
+  'https://www.owlsinsight.com',
+  'http://localhost:3000',
+]);
+
+/** Derive the public origin from headers, validated against allowlist to prevent open redirects */
+function getOrigin(request: NextRequest): string {
+  const host = request.headers.get('x-forwarded-host') || request.headers.get('host');
+  const proto = request.headers.get('x-forwarded-proto') || 'https';
+  if (host) {
+    const candidate = `${proto}://${host}`;
+    if (ALLOWED_ORIGINS.has(candidate)) {
+      return candidate;
+    }
+  }
+  return new URL(DISCORD_REDIRECT_URI).origin;
+}
+
 /** Redirect to login with error, always clearing OAuth cookies */
 function errorRedirect(request: NextRequest, error: string): NextResponse {
+  const origin = getOrigin(request);
   const response = NextResponse.redirect(
-    new URL(`/login?error=${encodeURIComponent(error)}`, request.url)
+    new URL(`/login?error=${encodeURIComponent(error)}`, origin)
   );
   response.cookies.set('discord_oauth_state', '', { expires: new Date(0), path: '/' });
   response.cookies.set('discord_oauth_tier', '', { expires: new Date(0), path: '/' });
@@ -65,14 +85,16 @@ export async function GET(request: NextRequest) {
       return errorRedirect(request, data.error || 'discord_auth_failed');
     }
 
-    // Check if a tier was preserved through the OAuth flow (e.g., MVP trial)
+    // Check if a tier was preserved through the OAuth flow
     const oauthTier = request.cookies.get('discord_oauth_tier')?.value;
+    const validTiers = ['bench', 'rookie', 'mvp'];
 
     // Determine redirect destination
-    let redirectUrl = new URL('/dashboard', request.url);
-    if (oauthTier === 'mvp') {
-      // Redirect to Stripe checkout for MVP trial after Discord signup
-      redirectUrl = new URL('/dashboard?start_trial=mvp', request.url);
+    const origin = getOrigin(request);
+    let redirectUrl = new URL('/dashboard', origin);
+    if (oauthTier && validTiers.includes(oauthTier)) {
+      // Redirect to Stripe checkout after Discord signup
+      redirectUrl = new URL(`/dashboard?start_checkout=${oauthTier}`, origin);
     }
 
     const redirectResponse = NextResponse.redirect(redirectUrl);

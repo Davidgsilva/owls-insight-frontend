@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,21 +29,23 @@ import { useAuth } from "@/hooks/useAuth";
 interface APIKey {
   id: string;
   name: string | null;
-  tier: "bench" | "rookie" | "mvp";
+  tier: "free" | "bench" | "rookie" | "mvp";
   isActive: boolean;
   createdAt: string;
   lastUsedAt: string | null;
 }
 
-const tierColors = {
+const tierColors: Record<string, string> = {
+  free: "bg-zinc-800/50 text-zinc-500 border-zinc-700/30",
   bench: "bg-zinc-500/20 text-zinc-400 border-zinc-500/30",
   rookie: "bg-blue-500/20 text-blue-400 border-blue-500/30",
   mvp: "bg-purple-500/20 text-purple-400 border-purple-500/30",
 };
 
 export default function APIKeysPage() {
-  const { user } = useAuth();
+  const { user, subscription } = useAuth();
   const isVerified = user?.emailVerified ?? false;
+  const isFreeTier = !subscription?.tier || subscription.tier === "free";
   const [keys, setKeys] = useState<APIKey[]>([]);
   const [maxKeys, setMaxKeys] = useState(5);
   const [isLoading, setIsLoading] = useState(true);
@@ -161,16 +164,34 @@ export default function APIKeysPage() {
         </div>
         <Button
           onClick={() => setShowGenerateModal(true)}
-          disabled={keys.length >= maxKeys || !isVerified}
+          disabled={keys.length >= maxKeys || !isVerified || isFreeTier}
           className="bg-[#00FF88] hover:bg-[#00d474] text-[#0a0a0a] font-semibold"
-          title={!isVerified ? "Verify your email to generate API keys" : undefined}
+          title={isFreeTier ? "Subscribe to a plan to generate API keys" : !isVerified ? "Verify your email to generate API keys" : undefined}
         >
           <Plus size={16} className="mr-2" />
           Generate New Key
         </Button>
       </div>
 
-      {!isVerified && (
+      {isFreeTier && (
+        <div className="rounded-lg border border-purple-500/20 bg-purple-500/5 px-4 py-3 flex items-center justify-between">
+          <div>
+            <p className="text-sm text-purple-200 font-medium">
+              Subscription required
+            </p>
+            <p className="text-xs text-zinc-400 mt-0.5">
+              Subscribe to a paid plan to generate API keys and access the API.
+            </p>
+          </div>
+          <Link href="/dashboard/billing">
+            <Button size="sm" className="bg-purple-500 hover:bg-purple-600 text-white font-semibold shrink-0">
+              View Plans
+            </Button>
+          </Link>
+        </div>
+      )}
+
+      {!isVerified && !isFreeTier && (
         <div className="rounded-lg border border-yellow-500/20 bg-yellow-500/5 px-4 py-3">
           <p className="text-sm text-yellow-200">
             Please verify your email before generating API keys.

@@ -14,7 +14,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SignOut, GearSix, User } from "@phosphor-icons/react";
 import Link from "next/link";
 
-const tierColors = {
+const tierColors: Record<string, string> = {
+  free: "bg-zinc-800/50 text-zinc-500 border-zinc-700/30",
   bench: "bg-zinc-500/20 text-zinc-400 border-zinc-500/30",
   rookie: "bg-blue-500/20 text-blue-400 border-blue-500/30",
   mvp: "bg-purple-500/20 text-purple-400 border-purple-500/30",
@@ -30,7 +31,7 @@ export function Header() {
       ? user.email.substring(0, 2).toUpperCase()
       : "??";
 
-  const tier = subscription?.tier || "bench";
+  const tier = subscription?.tier || "free";
 
   return (
     <header className="h-16 border-b border-white/5 bg-[#0a0a0a] px-6 flex items-center justify-between">
