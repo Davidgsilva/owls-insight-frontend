@@ -29,15 +29,25 @@ function getOrigin(request: NextRequest): string {
   return new URL(DISCORD_REDIRECT_URI).origin;
 }
 
+/**
+ * Build a raw 307 redirect Response. NextResponse.redirect() rewrites the
+ * Location header to the server's bind address (HOSTNAME:PORT) in standalone
+ * mode, so we construct the Response manually to preserve the correct origin.
+ */
+function rawRedirect(url: string, cookies: NextResponse): Response {
+  const headers = new Headers(cookies.headers);
+  headers.set('Location', url);
+  return new Response(null, { status: 307, headers });
+}
+
 /** Redirect to login with error, always clearing OAuth cookies */
-function errorRedirect(request: NextRequest, error: string): NextResponse {
+function errorRedirect(request: NextRequest, error: string): Response {
   const origin = getOrigin(request);
-  const response = NextResponse.redirect(
-    new URL(`/login?error=${encodeURIComponent(error)}`, origin)
-  );
-  response.cookies.set('discord_oauth_state', '', { expires: new Date(0), path: '/' });
-  response.cookies.set('discord_oauth_tier', '', { expires: new Date(0), path: '/' });
-  return response;
+  const url = new URL(`/login?error=${encodeURIComponent(error)}`, origin).toString();
+  const nr = new NextResponse(null);
+  nr.cookies.set('discord_oauth_state', '', { expires: new Date(0), path: '/' });
+  nr.cookies.set('discord_oauth_tier', '', { expires: new Date(0), path: '/' });
+  return rawRedirect(url, nr);
 }
 
 export async function GET(request: NextRequest) {
@@ -95,14 +105,13 @@ export async function GET(request: NextRequest) {
     const origin = getOrigin(request);
     let redirectUrl = new URL('/dashboard', origin);
     if (oauthTier && validTiers.includes(oauthTier)) {
-      // Redirect to Stripe checkout after Discord signup
       redirectUrl = new URL(`/dashboard?start_checkout=${oauthTier}`, origin);
     }
 
-    const redirectResponse = NextResponse.redirect(redirectUrl);
+    const nr = new NextResponse(null);
 
     if (data.token) {
-      redirectResponse.cookies.set('token', data.token, {
+      nr.cookies.set('token', data.token, {
         httpOnly: true,
         secure: isProduction,
         sameSite: 'lax',
@@ -112,16 +121,16 @@ export async function GET(request: NextRequest) {
     }
 
     // Clear the state and tier cookies
-    redirectResponse.cookies.set('discord_oauth_state', '', {
+    nr.cookies.set('discord_oauth_state', '', {
       expires: new Date(0),
       path: '/',
     });
-    redirectResponse.cookies.set('discord_oauth_tier', '', {
+    nr.cookies.set('discord_oauth_tier', '', {
       expires: new Date(0),
       path: '/',
     });
 
-    return redirectResponse;
+    return rawRedirect(redirectUrl.toString(), nr);
   } catch (err) {
     console.error('Discord callback proxy error:', err);
     return errorRedirect(request, 'service_unavailable');
