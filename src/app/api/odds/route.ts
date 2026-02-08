@@ -1,0 +1,30 @@
+import { NextRequest, NextResponse } from "next/server";
+
+const API_SERVER_URL = process.env.API_SERVER_URL || "http://owls-insight-api-server";
+const API_KEY = process.env.OWLS_INSIGHT_API_KEY || "";
+
+const VALID_SPORTS = ["nba", "ncaab", "nfl", "nhl", "ncaaf", "mlb"];
+
+// GET /api/odds?sport=nba — proxies odds requests with server-side API key
+export async function GET(request: NextRequest) {
+  try {
+    const sport = request.nextUrl.searchParams.get("sport") || "nba";
+
+    if (!VALID_SPORTS.includes(sport)) {
+      return NextResponse.json({ error: "Invalid sport" }, { status: 400 });
+    }
+
+    const response = await fetch(`${API_SERVER_URL}/api/v1/${sport}/odds`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${API_KEY}`,
+      },
+    });
+
+    const data = await response.json();
+    return NextResponse.json(data, { status: response.status });
+  } catch (error) {
+    console.error("Odds proxy error:", error);
+    return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
+  }
+}

@@ -21,8 +21,22 @@ spec:
           ports:
             - containerPort: 3000
           env:
-            - name: NEXT_PUBLIC_API_URL
-              value: "https://api.owlsinsight.com"
+            - name: API_SERVER_URL
+              value: "http://owls-insight-api-server"
+            - name: INTERNAL_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: frontend-secrets
+                  key: INTERNAL_AUTH_SECRET
+            - name: OWLS_INSIGHT_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: frontend-secrets
+                  key: OWLS_INSIGHT_API_KEY
+            - name: DISCORD_CLIENT_ID
+              value: "1469225809653792852"
+            - name: DISCORD_REDIRECT_URI
+              value: "https://owlsinsight.com/api/auth/discord/callback"
           resources:
             requests:
               memory: "256Mi"

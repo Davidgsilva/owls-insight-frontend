@@ -2,11 +2,7 @@
 FROM node:20-slim AS builder
 WORKDIR /app
 
-# Build-time args for Next.js public env vars (baked into client bundle)
-ARG NEXT_PUBLIC_OWLS_INSIGHT_API_URL
-ARG NEXT_PUBLIC_OWLS_INSIGHT_API_KEY
-ENV NEXT_PUBLIC_OWLS_INSIGHT_API_URL=$NEXT_PUBLIC_OWLS_INSIGHT_API_URL
-ENV NEXT_PUBLIC_OWLS_INSIGHT_API_KEY=$NEXT_PUBLIC_OWLS_INSIGHT_API_KEY
+# API key injected at runtime via K8s env vars (server-side only, not baked into bundle)
 
 # Copy package files
 COPY package*.json ./

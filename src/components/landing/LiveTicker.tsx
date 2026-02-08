@@ -67,20 +67,13 @@ export function LiveTicker() {
   const [isLoading, setIsLoading] = useState(true);
   const previousOdds = useRef<Map<string, number>>(new Map());
 
-  // Fetch real odds data from multiple sports
+  // Fetch real odds data from multiple sports via server-side proxy
   useEffect(() => {
-    const API_URL = process.env.NEXT_PUBLIC_OWLS_INSIGHT_API_URL || "https://ws.owlsinsight.com";
-    const API_KEY = process.env.NEXT_PUBLIC_OWLS_INSIGHT_API_KEY || "";
-
     async function fetchSportOdds(sport: string): Promise<OddsUpdate[]> {
       const items: OddsUpdate[] = [];
 
       try {
-        const response = await fetch(`${API_URL}/api/v1/${sport}/odds`, {
-          headers: {
-            Authorization: `Bearer ${API_KEY}`,
-          },
-        });
+        const response = await fetch(`/api/odds?sport=${sport}`);
 
         if (!response.ok) return items;
 
