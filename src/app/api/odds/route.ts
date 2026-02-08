@@ -8,6 +8,10 @@ const VALID_SPORTS = ["nba", "ncaab", "nfl", "nhl", "ncaaf", "mlb"];
 // GET /api/odds?sport=nba — proxies odds requests with server-side API key
 export async function GET(request: NextRequest) {
   try {
+    if (!API_KEY) {
+      return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
+    }
+
     const sport = request.nextUrl.searchParams.get("sport") || "nba";
 
     if (!VALID_SPORTS.includes(sport)) {
@@ -22,7 +26,14 @@ export async function GET(request: NextRequest) {
     });
 
     const data = await response.json();
-    return NextResponse.json(data, { status: response.status });
+    const res = NextResponse.json(data, { status: response.status });
+
+    // Cache for 15 seconds so concurrent visitors share the same response
+    if (response.ok) {
+      res.headers.set("Cache-Control", "public, s-maxage=15, stale-while-revalidate=10");
+    }
+
+    return res;
   } catch (error) {
     console.error("Odds proxy error:", error);
     return NextResponse.json({ error: "Service unavailable" }, { status: 503 });

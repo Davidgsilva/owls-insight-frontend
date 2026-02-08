@@ -16,11 +16,15 @@ export async function DELETE(
       return NextResponse.json({ error: 'Invalid key ID' }, { status: 400 });
     }
 
+    if (!INTERNAL_AUTH_SECRET) {
+      return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
+    }
+
     const authHeader = request.headers.get('authorization');
     const cookieHeader = request.headers.get('cookie');
 
     const headers: Record<string, string> = {
-      'X-Internal-Auth': INTERNAL_AUTH_SECRET || '',
+      'X-Internal-Auth': INTERNAL_AUTH_SECRET,
     };
 
     if (authHeader) headers['Authorization'] = authHeader;

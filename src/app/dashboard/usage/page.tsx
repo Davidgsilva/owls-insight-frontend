@@ -153,7 +153,7 @@ export default function UsagePage() {
 
   // Fetch 7-day chart data
   useEffect(() => {
-    const controller = new AbortController();
+    let cancelled = false;
 
     async function fetchChartData() {
       setIsChartLoading(true);
@@ -164,10 +164,11 @@ export default function UsagePage() {
           dates.map((date) =>
             fetch(`/api/usage?date=${date}`, {
               credentials: "include",
-              signal: controller.signal,
             }).then((res) => res.json()).catch(() => null)
           )
         );
+
+        if (cancelled) return;
 
         const points: DailyDataPoint[] = dates.map((date, i) => {
           const data = responses[i];
@@ -182,42 +183,51 @@ export default function UsagePage() {
 
         setChartData(points);
       } catch (error) {
-        if (error instanceof Error && error.name === "AbortError") return;
+        if (cancelled) return;
         console.error("Failed to fetch chart data:", error);
       } finally {
-        setIsChartLoading(false);
+        if (!cancelled) setIsChartLoading(false);
       }
     }
 
     fetchChartData();
-    return () => controller.abort();
+    const interval = setInterval(fetchChartData, 30_000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, []);
 
   // Fetch single-day data
   useEffect(() => {
-    const controller = new AbortController();
+    let cancelled = false;
 
     async function fetchUsage() {
       setIsLoading(true);
       try {
         const res = await fetch(`/api/usage?date=${selectedDate}`, {
           credentials: "include",
-          signal: controller.signal,
         });
         const data = await res.json();
-        if (data.success) {
+        if (!cancelled && data.success) {
           setUsageData(data);
         }
       } catch (error) {
-        if (error instanceof Error && error.name === "AbortError") return;
+        if (cancelled) return;
         console.error("Failed to fetch usage:", error);
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     }
 
     fetchUsage();
-    return () => controller.abort();
+    const interval = setInterval(fetchUsage, 30_000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, [selectedDate]);
 
   const currentUsage = usageData?.usage?.[0];

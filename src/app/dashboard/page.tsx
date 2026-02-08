@@ -106,14 +106,17 @@ function DashboardContent() {
   }, [searchParams]);
 
   useEffect(() => {
-    const controller = new AbortController();
+    let cancelled = false;
 
     async function fetchData() {
+      const controller = new AbortController();
       try {
         const [usageRes, keysRes] = await Promise.all([
           fetch("/api/usage", { credentials: "include", signal: controller.signal }),
           fetch("/api/auth/keys", { credentials: "include", signal: controller.signal }),
         ]);
+
+        if (cancelled) return;
 
         if (usageRes.ok) {
           const usageData = await usageRes.json();
@@ -129,6 +132,8 @@ function DashboardContent() {
           }
         }
 
+        if (cancelled) return;
+
         if (keysRes.ok) {
           const keysData = await keysRes.json();
           if (keysData.success) {
@@ -142,12 +147,17 @@ function DashboardContent() {
         if (error instanceof Error && error.name === "AbortError") return;
         console.error("Failed to fetch dashboard data:", error);
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     }
 
     fetchData();
-    return () => controller.abort();
+    const interval = setInterval(fetchData, 30_000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, []);
 
   const validTiers = ["bench", "rookie", "mvp"] as const;

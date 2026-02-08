@@ -8,12 +8,16 @@ const API_SERVER_URL = process.env.API_SERVER_URL || 'http://owls-insight-api-se
 // GET /api/auth/keys - List API keys
 export async function GET(request: NextRequest) {
   try {
+    if (!INTERNAL_AUTH_SECRET) {
+      return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
+    }
+
     // Forward auth headers from client
     const authHeader = request.headers.get('authorization');
     const cookieHeader = request.headers.get('cookie');
 
     const headers: Record<string, string> = {
-      'X-Internal-Auth': INTERNAL_AUTH_SECRET || '',
+      'X-Internal-Auth': INTERNAL_AUTH_SECRET,
     };
 
     if (authHeader) headers['Authorization'] = authHeader;
@@ -38,6 +42,10 @@ export async function GET(request: NextRequest) {
 // POST /api/auth/keys - Generate new API key
 export async function POST(request: NextRequest) {
   try {
+    if (!INTERNAL_AUTH_SECRET) {
+      return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
+    }
+
     const body = await request.json().catch(() => ({}));
 
     // Forward auth headers from client
@@ -46,7 +54,7 @@ export async function POST(request: NextRequest) {
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'X-Internal-Auth': INTERNAL_AUTH_SECRET || '',
+      'X-Internal-Auth': INTERNAL_AUTH_SECRET,
     };
 
     if (authHeader) headers['Authorization'] = authHeader;
