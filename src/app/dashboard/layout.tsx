@@ -38,7 +38,7 @@ export default function DashboardLayout({
       <Sidebar />
       <div className="flex-1 flex flex-col">
         <Header />
-        <main className="flex-1 p-6 overflow-auto flex flex-col items-center">
+        <main className="flex-1 p-6 overflow-auto flex flex-col">
           <EmailVerificationBanner />
           {children}
         </main>

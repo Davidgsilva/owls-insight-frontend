@@ -30,14 +30,14 @@ function getOrigin(request: NextRequest): string {
 }
 
 /**
- * Build a raw 307 redirect Response. NextResponse.redirect() rewrites the
+ * Build a raw 302 redirect Response. NextResponse.redirect() rewrites the
  * Location header to the server's bind address (HOSTNAME:PORT) in standalone
  * mode, so we construct the Response manually to preserve the correct origin.
  */
 function rawRedirect(url: string, cookies: NextResponse): Response {
   const headers = new Headers(cookies.headers);
   headers.set('Location', url);
-  return new Response(null, { status: 307, headers });
+  return new Response(null, { status: 302, headers });
 }
 
 /** Redirect to login with error, always clearing OAuth cookies */

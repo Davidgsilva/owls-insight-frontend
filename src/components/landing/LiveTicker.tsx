@@ -138,6 +138,7 @@ export function LiveTicker() {
     }
 
     async function fetchAllOdds() {
+      setError(null);
       try {
         // Fetch from multiple sports in parallel
         const sports = ["nba", "ncaab", "nhl", "nfl"];
