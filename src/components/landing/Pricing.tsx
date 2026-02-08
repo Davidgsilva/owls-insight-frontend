@@ -16,7 +16,6 @@ const tiers = [
       "REST API only",
       "Odds, spreads & totals",
       "Live scores",
-      "Real-time odds tracking",
     ],
     cta: "Get Started",
     ctaVariant: "outline" as const,
@@ -32,7 +31,6 @@ const tiers = [
       "120 requests/minute",
       "REST API + WebSocket (2 connections)",
       "Player props access",
-      "Real-time data",
     ],
     cta: "Get Started",
     ctaVariant: "outline" as const,
@@ -48,9 +46,8 @@ const tiers = [
       "400 requests/minute",
       "REST API + WebSocket (5 connections)",
       "15 concurrent requests",
-      "Player props + WebSocket props",
+      "Player props & live odds via WebSocket",
       "Full historical odds & props",
-      "Real-time data",
     ],
     cta: "Start Free Trial",
     ctaVariant: "default" as const,
@@ -123,7 +120,7 @@ export function Pricing() {
               </ul>
 
               {/* CTA Button */}
-              <Link href={`/register?tier=${tier.name.toLowerCase()}`} className="block">
+              <Link href={tier.popular ? `/register?tier=${tier.name.toLowerCase()}` : '/register'} className="block">
                 <Button
                   variant={tier.ctaVariant}
                   className={`w-full font-mono ${

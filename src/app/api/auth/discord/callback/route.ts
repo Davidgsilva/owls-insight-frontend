@@ -8,12 +8,13 @@ const isProduction = process.env.NODE_ENV === 'production' || !process.env.DISCO
 const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI
   || 'https://owlsinsight.com/api/auth/discord/callback';
 
-/** Redirect to login with error, always clearing the state cookie */
+/** Redirect to login with error, always clearing OAuth cookies */
 function errorRedirect(request: NextRequest, error: string): NextResponse {
   const response = NextResponse.redirect(
     new URL(`/login?error=${encodeURIComponent(error)}`, request.url)
   );
   response.cookies.set('discord_oauth_state', '', { expires: new Date(0), path: '/' });
+  response.cookies.set('discord_oauth_tier', '', { expires: new Date(0), path: '/' });
   return response;
 }
 
@@ -64,8 +65,17 @@ export async function GET(request: NextRequest) {
       return errorRedirect(request, data.error || 'discord_auth_failed');
     }
 
-    // Success - set JWT cookie and redirect to dashboard
-    const redirectResponse = NextResponse.redirect(new URL('/dashboard', request.url));
+    // Check if a tier was preserved through the OAuth flow (e.g., MVP trial)
+    const oauthTier = request.cookies.get('discord_oauth_tier')?.value;
+
+    // Determine redirect destination
+    let redirectUrl = new URL('/dashboard', request.url);
+    if (oauthTier === 'mvp') {
+      // Redirect to Stripe checkout for MVP trial after Discord signup
+      redirectUrl = new URL('/dashboard?start_trial=mvp', request.url);
+    }
+
+    const redirectResponse = NextResponse.redirect(redirectUrl);
 
     if (data.token) {
       redirectResponse.cookies.set('token', data.token, {
@@ -77,8 +87,12 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Clear the state cookie
+    // Clear the state and tier cookies
     redirectResponse.cookies.set('discord_oauth_state', '', {
+      expires: new Date(0),
+      path: '/',
+    });
+    redirectResponse.cookies.set('discord_oauth_tier', '', {
       expires: new Date(0),
       path: '/',
     });

@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -71,11 +72,38 @@ function UsageBar({ used, total, loading }: { used: number; total: number; loadi
   );
 }
 
-export default function DashboardPage() {
+function DashboardContent() {
   const { user, subscription } = useAuth();
+  const searchParams = useSearchParams();
   const [usage, setUsage] = useState<UsageData | null>(null);
   const [keys, setKeys] = useState<KeysData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Handle Discord OAuth redirect with trial intent
+  useEffect(() => {
+    if (searchParams.get("start_trial") === "mvp") {
+      // Remove param from URL to prevent re-triggering
+      window.history.replaceState({}, "", "/dashboard");
+      // Redirect to Stripe checkout for MVP trial
+      fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          tier: "mvp",
+          successUrl: `${window.location.origin}/dashboard?checkout=success&trial=true`,
+          cancelUrl: `${window.location.origin}/pricing?checkout=canceled`,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.url) window.location.href = data.url;
+        })
+        .catch(() => {
+          // Checkout failed silently — user can start trial from billing page
+        });
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -282,5 +310,13 @@ export default function DashboardPage() {
         </section>
       )}
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense>
+      <DashboardContent />
+    </Suspense>
   );
 }

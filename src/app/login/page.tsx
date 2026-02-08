@@ -154,7 +154,15 @@ function LoginContent() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-zinc-300">Password</FormLabel>
+                      <div className="flex items-center justify-between">
+                        <FormLabel className="text-zinc-300">Password</FormLabel>
+                        <Link
+                          href="/forgot-password"
+                          className="text-xs text-zinc-400 hover:text-[#00FF88] transition-colors"
+                        >
+                          Forgot your password?
+                        </Link>
+                      </div>
                       <FormControl>
                         <Input
                           type="password"
