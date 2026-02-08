@@ -1,234 +1,306 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { ChartBar, Lightning, Clock, CheckCircle, XCircle, TrendUp, CalendarBlank } from "@phosphor-icons/react";
 import { format } from "date-fns";
-import {
-  ResponsiveContainer,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Area,
-  AreaChart,
-} from "recharts";
 
-interface UsageStats {
-  totalRequests: number;
-  successfulRequests: number;
-  failedRequests: number;
-  avgResponseTime: number;
-  endpoints: Record<string, number>;
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+interface LogEntry {
+  apiKeyId: string;
+  endpoint: string;
+  method: string;
+  statusCode: number;
+  timestamp: string;
+  responseTime: number;
 }
 
-interface RateLimits {
-  minute: { count: number; limit: number };
-  month: { count: number; limit: number };
+interface WsStats {
+  totalEvents: number;
+  hourlyBreakdown: Record<string, number>;
+  eventTypes: Record<string, number>;
 }
 
 interface UsageData {
   date: string;
-  totals: UsageStats;
+  totals: {
+    totalRequests: number;
+    successfulRequests: number;
+    failedRequests: number;
+  };
+  wsTotals?: {
+    totalEvents: number;
+    eventTypes: Record<string, number>;
+  };
   usage: Array<{
     apiKeyId: string;
     keyName: string;
     tier: string;
-    stats: UsageStats;
-    currentRateLimits: RateLimits;
+    stats: {
+      totalRequests: number;
+      successfulRequests: number;
+      failedRequests: number;
+      avgResponseTime: number;
+      endpoints: Record<string, number>;
+    };
+    currentRateLimits: {
+      minute: { count: number; limit: number };
+      month: { count: number; limit: number };
+    };
+    websocket?: WsStats;
   }>;
 }
 
-interface DailyDataPoint {
-  date: string;
-  label: string;
-  total: number;
-  successful: number;
-  failed: number;
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+const tierLimits = {
+  bench: { month: 10_000, minute: 20, wsPerMin: 0 },
+  rookie: { month: 75_000, minute: 120, wsPerMin: 120 },
+  mvp: { month: 300_000, minute: 400, wsPerMin: 400 },
+} as const;
+
+function statusColor(code: number): string {
+  if (code >= 200 && code < 300) return "text-[#00FF88]";
+  if (code >= 300 && code < 400) return "text-[#06b6d4]";
+  if (code === 429) return "text-amber-400";
+  return "text-red-400";
 }
 
-function ProgressBar({
+function statusDot(code: number): string {
+  if (code >= 200 && code < 300) return "bg-[#00FF88]";
+  if (code >= 300 && code < 400) return "bg-[#06b6d4]";
+  if (code === 429) return "bg-amber-400";
+  return "bg-red-400";
+}
+
+function methodColor(method: string): string {
+  switch (method.toUpperCase()) {
+    case "GET": return "text-[#06b6d4]";
+    case "POST": return "text-[#00FF88]";
+    case "DELETE": return "text-red-400";
+    case "PUT": case "PATCH": return "text-amber-400";
+    default: return "text-zinc-400";
+  }
+}
+
+function formatMs(ms: number): string {
+  if (ms < 1) return "<1ms";
+  if (ms < 1000) return `${Math.round(ms)}ms`;
+  return `${(ms / 1000).toFixed(1)}s`;
+}
+
+function formatTime(ts: string): string {
+  const d = new Date(ts);
+  return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+}
+
+function shortEndpoint(endpoint: string): string {
+  return endpoint.replace(/^\/api\/v1/, "");
+}
+
+// WS event name → readable label
+const wsEventLabels: Record<string, string> = {
+  "odds-update": "Odds",
+  "scores-update": "Scores",
+  "player-props-update": "Props",
+  "bet365-props-update": "Bet365",
+  "fanduel-props-update": "FanDuel",
+  "draftkings-props-update": "DraftKings",
+  "betmgm-props-update": "BetMGM",
+  "caesars-props-update": "Caesars",
+};
+
+// ─── Gauge Component ─────────────────────────────────────────────────────────
+
+function Gauge({
   value,
   max,
-  color = "green",
+  label,
+  sublabel,
 }: {
   value: number;
   max: number;
-  color?: "green" | "yellow" | "red";
+  label: string;
+  sublabel: string;
 }) {
-  const percentage = max > 0 ? Math.min((value / max) * 100, 100) : 0;
-
-  const bgColor =
-    color === "red"
-      ? "bg-red-500"
-      : color === "yellow"
-      ? "bg-yellow-500"
-      : "bg-[#00FF88]";
+  const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0;
+  const color = pct > 90 ? "#ef4444" : pct > 70 ? "#eab308" : "#00FF88";
+  const remaining = max - value;
 
   return (
-    <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
-      <div
-        className={`h-full ${bgColor} transition-all duration-300`}
-        style={{ width: `${percentage}%` }}
-      />
+    <div className="space-y-3">
+      <div className="flex items-baseline justify-between">
+        <span className="text-[13px] text-zinc-500 font-sans">{label}</span>
+        <span className="text-[11px] text-zinc-600 font-mono">{sublabel}</span>
+      </div>
+      <div className="flex items-baseline gap-2">
+        <span className="text-[28px] font-mono font-bold text-white leading-none tabular-nums">
+          {value.toLocaleString()}
+        </span>
+        <span className="text-sm text-zinc-600 font-mono">/ {max.toLocaleString()}</span>
+      </div>
+      <div className="h-1 bg-zinc-800/80 rounded-full overflow-hidden">
+        <div
+          className="h-full rounded-full transition-all duration-700 ease-out"
+          style={{ width: `${pct}%`, backgroundColor: color }}
+        />
+      </div>
+      <span className="text-[11px] text-zinc-600 font-mono">{remaining.toLocaleString()} remaining</span>
     </div>
   );
 }
 
-function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number; dataKey: string }>; label?: string }) {
-  if (!active || !payload?.length) return null;
+// ─── Hourly Heatmap Row ──────────────────────────────────────────────────────
 
-  const colorMap: Record<string, string> = {
-    total: "#06b6d4",
-    successful: "#00FF88",
-    failed: "#ef4444",
-  };
-  const labelMap: Record<string, string> = {
-    total: "Total",
-    successful: "Successful",
-    failed: "Failed",
-  };
+function HourlyHeatmap({
+  data,
+  label,
+  color,
+}: {
+  data: Record<string, number>;
+  label: string;
+  color: string;
+}) {
+  const hours = Array.from({ length: 24 }, (_, i) => i);
+  const values = hours.map((h) => data[`hour_${h}`] || 0);
+  const max = Math.max(...values, 1);
 
   return (
-    <div className="bg-[#18181b]/95 backdrop-blur-sm border border-white/10 rounded-lg px-4 py-3 shadow-2xl shadow-black/50">
-      <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider mb-2">{label}</p>
-      <div className="space-y-1">
-        {payload.map((entry) => (
-          <div key={entry.dataKey} className="flex items-center justify-between gap-6">
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: colorMap[entry.dataKey] }} />
-              <span className="text-xs text-zinc-400">{labelMap[entry.dataKey] || entry.dataKey}</span>
+    <div className="space-y-2">
+      <span className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider">{label}</span>
+      <div className="flex gap-[2px]">
+        {hours.map((h) => {
+          const v = values[h];
+          const opacity = max > 0 ? Math.max(v / max, 0.06) : 0.06;
+          return (
+            <div
+              key={h}
+              className="flex-1 h-6 rounded-[2px] relative group cursor-default"
+              style={{ backgroundColor: color, opacity: v > 0 ? opacity : 0.06 }}
+            >
+              {v > 0 && (
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 bg-[#1a1a1a] border border-white/10 rounded text-[10px] font-mono text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                  {h}:00 — {v.toLocaleString()}
+                </div>
+              )}
             </div>
-            <span className="text-sm font-mono font-medium" style={{ color: colorMap[entry.dataKey] }}>
-              {entry.value.toLocaleString()}
-            </span>
-          </div>
-        ))}
+          );
+        })}
+      </div>
+      <div className="flex justify-between text-[9px] text-zinc-700 font-mono">
+        <span>0:00</span>
+        <span>6:00</span>
+        <span>12:00</span>
+        <span>18:00</span>
+        <span>23:00</span>
       </div>
     </div>
   );
 }
 
-function getLastNDays(n: number): string[] {
-  const dates: string[] = [];
-  for (let i = n - 1; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    dates.push(d.toISOString().split("T")[0]);
-  }
-  return dates;
-}
-
-function formatDateLabel(dateStr: string): string {
-  const d = new Date(dateStr + "T00:00:00");
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
+// ─── Main Page ───────────────────────────────────────────────────────────────
 
 export default function UsagePage() {
   const { subscription } = useAuth();
+
+  // State
   const [usageData, setUsageData] = useState<UsageData | null>(null);
-  const [chartData, setChartData] = useState<DailyDataPoint[]>([]);
-  const [isChartLoading, setIsChartLoading] = useState(true);
-  const [isLoading, setIsLoading] = useState(true);
+  const [logs, setLogs] = useState<LogEntry[]>([]);
   const [selectedDay, setSelectedDay] = useState<Date>(new Date());
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLogsLoading, setIsLogsLoading] = useState(true);
+  const logsRef = useRef<LogEntry[]>([]);
+  const lastFetchRef = useRef<string>("");
 
   const selectedDate = format(selectedDay, "yyyy-MM-dd");
+  const isToday = selectedDate === format(new Date(), "yyyy-MM-dd");
 
-  // Validate tier from API to prevent runtime errors
   const validTiers = ["bench", "rookie", "mvp"] as const;
   const rawTier = subscription?.tier;
   const tier = rawTier && validTiers.includes(rawTier) ? rawTier : "bench";
-  const tierLimits = {
-    bench: { month: 10000, minute: 20 },
-    rookie: { month: 75000, minute: 120 },
-    mvp: { month: 300000, minute: 400 },
-  };
   const limits = tierLimits[tier];
 
-  // Fetch 7-day chart data
-  useEffect(() => {
-    let cancelled = false;
+  // ─── Fetch usage stats (smooth update) ──────────────────────────────────
 
-    async function fetchChartData() {
-      setIsChartLoading(true);
-      const dates = getLastNDays(7);
-
-      try {
-        const responses = await Promise.all(
-          dates.map((date) =>
-            fetch(`/api/usage?date=${date}`, {
-              credentials: "include",
-            }).then((res) => res.json()).catch(() => null)
-          )
-        );
-
-        if (cancelled) return;
-
-        const points: DailyDataPoint[] = dates.map((date, i) => {
-          const data = responses[i];
-          return {
-            date,
-            label: formatDateLabel(date),
-            total: data?.totals?.totalRequests || 0,
-            successful: data?.totals?.successfulRequests || 0,
-            failed: data?.totals?.failedRequests || 0,
-          };
-        });
-
-        setChartData(points);
-      } catch (error) {
-        if (cancelled) return;
-        console.error("Failed to fetch chart data:", error);
-      } finally {
-        if (!cancelled) setIsChartLoading(false);
+  const fetchUsage = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/usage?date=${selectedDate}`, { credentials: "include" });
+      const data = await res.json();
+      if (data.success) {
+        setUsageData(data);
       }
+    } catch (error) {
+      console.error("Failed to fetch usage:", error);
+    } finally {
+      setIsLoading(false);
     }
+  }, [selectedDate]);
 
-    fetchChartData();
-    const interval = setInterval(fetchChartData, 30_000);
+  // ─── Fetch logs (append new entries, don't replace) ─────────────────────
 
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-    };
+  const fetchLogs = useCallback(async (initial = false) => {
+    try {
+      const since = initial ? "" : `&since=${logsRef.current.length > 0 ? new Date(logsRef.current[0].timestamp).getTime() + 1 : ""}`;
+      const url = `/api/usage/logs?limit=100${since && logsRef.current.length > 0 ? since : ""}`;
+      const res = await fetch(url, { credentials: "include" });
+      const data = await res.json();
+
+      if (data.success && data.logs) {
+        if (initial || logsRef.current.length === 0) {
+          logsRef.current = data.logs;
+          setLogs(data.logs);
+        } else {
+          // Append only truly new entries (by timestamp dedup)
+          const existingTs = new Set(logsRef.current.map((l: LogEntry) => l.timestamp));
+          const newEntries = data.logs.filter((l: LogEntry) => !existingTs.has(l.timestamp));
+          if (newEntries.length > 0) {
+            const merged = [...newEntries, ...logsRef.current].slice(0, 200);
+            logsRef.current = merged;
+            setLogs(merged);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch logs:", error);
+    } finally {
+      setIsLogsLoading(false);
+    }
   }, []);
 
-  // Fetch single-day data
-  useEffect(() => {
-    let cancelled = false;
+  // ─── Effects ────────────────────────────────────────────────────────────
 
-    async function fetchUsage() {
-      setIsLoading(true);
-      try {
-        const res = await fetch(`/api/usage?date=${selectedDate}`, {
-          credentials: "include",
-        });
-        const data = await res.json();
-        if (!cancelled && data.success) {
-          setUsageData(data);
-        }
-      } catch (error) {
-        if (cancelled) return;
-        console.error("Failed to fetch usage:", error);
-      } finally {
-        if (!cancelled) setIsLoading(false);
-      }
+  useEffect(() => {
+    setIsLoading(true);
+    fetchUsage();
+
+    const interval = setInterval(fetchUsage, 15_000);
+    return () => clearInterval(interval);
+  }, [fetchUsage]);
+
+  useEffect(() => {
+    // Reset logs when date changes
+    if (lastFetchRef.current !== selectedDate) {
+      logsRef.current = [];
+      setLogs([]);
+      setIsLogsLoading(true);
+      lastFetchRef.current = selectedDate;
     }
 
-    fetchUsage();
-    const interval = setInterval(fetchUsage, 30_000);
+    fetchLogs(true);
 
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-    };
-  }, [selectedDate]);
+    // Only poll for new logs on today's date
+    if (isToday) {
+      const interval = setInterval(() => fetchLogs(false), 10_000);
+      return () => clearInterval(interval);
+    }
+  }, [fetchLogs, selectedDate, isToday]);
+
+  // ─── Derived data ──────────────────────────────────────────────────────
 
   const currentUsage = usageData?.usage?.[0];
   const rateLimits = currentUsage?.currentRateLimits || {
@@ -236,49 +308,58 @@ export default function UsagePage() {
     month: { count: 0, limit: limits.month },
   };
 
-  const monthPercentage = (rateLimits.month.count / limits.month) * 100;
-  const monthColor = monthPercentage > 90 ? "red" : monthPercentage > 70 ? "yellow" : "green";
+  const totalRequests = usageData?.totals?.totalRequests || 0;
+  const successRate = totalRequests > 0
+    ? ((usageData?.totals?.successfulRequests || 0) / totalRequests * 100).toFixed(1)
+    : "—";
 
-  const minutePercentage = (rateLimits.minute.count / limits.minute) * 100;
-  const minuteColor = minutePercentage > 90 ? "red" : minutePercentage > 70 ? "yellow" : "green";
+  const avgResponseTime = currentUsage?.stats?.avgResponseTime;
 
-  const weekTotal = useMemo(
-    () => chartData.reduce((sum, d) => sum + d.total, 0),
-    [chartData]
-  );
+  const wsStats = currentUsage?.websocket;
+  const wsTotalEvents = usageData?.wsTotals?.totalEvents || wsStats?.totalEvents || 0;
+  const wsEventTypes = usageData?.wsTotals?.eventTypes || wsStats?.eventTypes || {};
+
+  // Endpoint breakdown sorted
+  const endpoints = useMemo(() => {
+    if (!currentUsage?.stats?.endpoints) return [];
+    return Object.entries(currentUsage.stats.endpoints)
+      .sort(([, a], [, b]) => b - a);
+  }, [currentUsage]);
+
+  const wsHourlyData = wsStats?.hourlyBreakdown || {};
+
+  // ─── Render ────────────────────────────────────────────────────────────
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-5 max-w-[1400px]">
+      {/* Header */}
+      <div className="flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-mono font-bold text-white">Usage</h1>
-          <p className="text-zinc-400 mt-1">
-            Monitor your API usage and rate limits
+          <h1 className="text-xl font-mono font-bold text-white tracking-tight">Usage</h1>
+          <p className="text-[13px] text-zinc-500 mt-0.5 font-sans">
+            API consumption and WebSocket events
           </p>
         </div>
+
         <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              className="bg-[#0a0a0a] border-white/10 text-white hover:bg-white/5 hover:text-white font-mono text-sm gap-2 px-3"
+              className="bg-transparent border-white/8 text-zinc-300 hover:bg-white/5 hover:text-white font-mono text-[13px] px-3 h-8"
             >
-              <CalendarBlank size={16} className="text-zinc-400" />
               {format(selectedDay, "MMM d, yyyy")}
+              {isToday && (
+                <span className="ml-2 text-[10px] text-[#00FF88] font-sans uppercase tracking-wider">
+                  live
+                </span>
+              )}
             </Button>
           </PopoverTrigger>
-          <PopoverContent
-            align="end"
-            className="w-auto p-0 bg-[#111113] border-white/10"
-          >
+          <PopoverContent align="end" className="w-auto p-0 bg-[#111113] border-white/10">
             <Calendar
               mode="single"
               selected={selectedDay}
-              onSelect={(day) => {
-                if (day) {
-                  setSelectedDay(day);
-                  setCalendarOpen(false);
-                }
-              }}
+              onSelect={(day) => { if (day) { setSelectedDay(day); setCalendarOpen(false); }}}
               disabled={{ after: new Date() }}
               className="bg-[#111113] text-white"
               classNames={{
@@ -293,283 +374,185 @@ export default function UsagePage() {
         </Popover>
       </div>
 
-      {/* 7-Day Usage Chart */}
-      <Card className="bg-[#111113] border-white/5 overflow-hidden relative">
-        {/* Subtle ambient glow behind chart */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/3 w-[60%] h-[40%] bg-[#06b6d4]/[0.03] rounded-full blur-3xl" />
-          <div className="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[40%] h-[30%] bg-[#00FF88]/[0.02] rounded-full blur-3xl" />
-        </div>
-        <CardHeader className="relative">
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-lg font-mono text-white flex items-center gap-2">
-                <TrendUp size={20} weight="duotone" className="text-[#00FF88]" />
-                7-Day Usage Trend
-              </CardTitle>
-              <CardDescription className="text-zinc-500">
-                Daily request volume over the past week
-              </CardDescription>
-            </div>
-            <div className="text-right">
-              <p className="text-2xl font-mono font-bold text-white">
-                {isChartLoading ? "..." : weekTotal.toLocaleString()}
-              </p>
-              <p className="text-xs text-zinc-500">total this week</p>
-            </div>
+      {/* Stats Strip */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {[
+          {
+            label: "Requests",
+            value: totalRequests.toLocaleString(),
+            sub: `${successRate}% success`,
+            accent: false,
+          },
+          {
+            label: "Avg Latency",
+            value: avgResponseTime ? formatMs(avgResponseTime) : "—",
+            sub: "response time",
+            accent: false,
+          },
+          {
+            label: "WS Events",
+            value: wsTotalEvents.toLocaleString(),
+            sub: `${Object.keys(wsEventTypes).length} event types`,
+            accent: true,
+          },
+          {
+            label: "Rate Limit",
+            value: `${rateLimits.minute.count}`,
+            sub: `/ ${limits.minute} per min`,
+            accent: false,
+          },
+        ].map((stat) => (
+          <div
+            key={stat.label}
+            className="px-4 py-3 rounded-lg bg-[#111113] border border-white/[0.04] transition-colors"
+          >
+            <span className="text-[11px] text-zinc-500 font-sans block mb-1">{stat.label}</span>
+            <span className={`text-lg font-mono font-bold block leading-tight tabular-nums ${stat.accent ? "text-[#06b6d4]" : "text-white"}`}>
+              {isLoading ? "..." : stat.value}
+            </span>
+            <span className="text-[10px] text-zinc-600 font-mono">{isLoading ? "" : stat.sub}</span>
           </div>
-        </CardHeader>
-        <CardContent className="relative">
-          {isChartLoading ? (
-            <div className="flex items-center justify-center py-16">
-              <div className="w-6 h-6 border-2 border-[#00FF88] border-t-transparent rounded-full animate-spin" />
-            </div>
-          ) : (
-            <div className="h-72">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData} margin={{ top: 8, right: 12, left: -12, bottom: 4 }}>
-                  <defs>
-                    <linearGradient id="totalGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#06b6d4" stopOpacity={0.25} />
-                      <stop offset="50%" stopColor="#06b6d4" stopOpacity={0.08} />
-                      <stop offset="100%" stopColor="#06b6d4" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="successGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#00FF88" stopOpacity={0.15} />
-                      <stop offset="50%" stopColor="#00FF88" stopOpacity={0.05} />
-                      <stop offset="100%" stopColor="#00FF88" stopOpacity={0} />
-                    </linearGradient>
-                    <filter id="glow">
-                      <feGaussianBlur stdDeviation="2" result="blur" />
-                      <feMerge>
-                        <feMergeNode in="blur" />
-                        <feMergeNode in="SourceGraphic" />
-                      </feMerge>
-                    </filter>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff06" vertical={false} />
-                  <XAxis
-                    dataKey="label"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: "#52525b", fontSize: 11, fontFamily: "'JetBrains Mono', monospace" }}
-                    dy={10}
-                  />
-                  <YAxis
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: "#52525b", fontSize: 11, fontFamily: "'JetBrains Mono', monospace" }}
-                    width={48}
-                    tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(1)}k` : String(v)}
-                  />
-                  <Tooltip content={<ChartTooltip />} cursor={{ stroke: "#ffffff08", strokeWidth: 1 }} />
-                  <Area
-                    type="monotone"
-                    dataKey="total"
-                    stroke="#06b6d4"
-                    strokeWidth={2}
-                    fill="url(#totalGradient)"
-                    dot={false}
-                    activeDot={{ fill: "#06b6d4", strokeWidth: 2, stroke: "#111113", r: 5, filter: "url(#glow)" }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="successful"
-                    stroke="#00FF88"
-                    strokeWidth={2}
-                    fill="url(#successGradient)"
-                    dot={false}
-                    activeDot={{ fill: "#00FF88", strokeWidth: 2, stroke: "#111113", r: 5, filter: "url(#glow)" }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="failed"
-                    stroke="#ef4444"
-                    strokeWidth={1.5}
-                    strokeDasharray="5 5"
-                    dot={false}
-                    activeDot={{ fill: "#ef4444", strokeWidth: 2, stroke: "#111113", r: 4 }}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          )}
-          {/* Legend */}
-          <div className="flex items-center gap-5 mt-3 pt-3 border-t border-white/5">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(6,182,212,0.5)]" />
-              <span className="text-[11px] text-zinc-500 font-mono">Total</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#00FF88] shadow-[0_0_6px_rgba(0,255,136,0.4)]" />
-              <span className="text-[11px] text-zinc-500 font-mono">Successful</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full border border-dashed border-red-500" />
-              <span className="text-[11px] text-zinc-500 font-mono">Failed</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Rate Limit Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="bg-[#111113] border-white/5">
-          <CardHeader>
-            <CardTitle className="text-lg font-mono text-white flex items-center gap-2">
-              <Lightning size={20} weight="duotone" className="text-[#00FF88]" />
-              Monthly Usage
-            </CardTitle>
-            <CardDescription className="text-zinc-500">
-              Requests this billing period
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-end justify-between">
-              <div>
-                <span className="text-3xl font-mono font-bold text-white">
-                  {rateLimits.month.count.toLocaleString()}
-                </span>
-                <span className="text-zinc-500 ml-2">
-                  / {limits.month.toLocaleString()}
-                </span>
-              </div>
-              <span className={`text-sm ${monthColor === "red" ? "text-red-400" : monthColor === "yellow" ? "text-yellow-400" : "text-[#00FF88]"}`}>
-                {monthPercentage.toFixed(1)}%
-              </span>
-            </div>
-            <ProgressBar value={rateLimits.month.count} max={limits.month} color={monthColor} />
-            <p className="text-xs text-zinc-500">
-              {(limits.month - rateLimits.month.count).toLocaleString()} requests remaining
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-[#111113] border-white/5">
-          <CardHeader>
-            <CardTitle className="text-lg font-mono text-white flex items-center gap-2">
-              <Clock size={20} weight="duotone" className="text-[#00FF88]" />
-              Rate Limit
-            </CardTitle>
-            <CardDescription className="text-zinc-500">
-              Current requests per minute
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-end justify-between">
-              <div>
-                <span className="text-3xl font-mono font-bold text-white">
-                  {rateLimits.minute.count}
-                </span>
-                <span className="text-zinc-500 ml-2">
-                  / {limits.minute}
-                </span>
-              </div>
-              <span className={`text-sm ${minuteColor === "red" ? "text-red-400" : minuteColor === "yellow" ? "text-yellow-400" : "text-[#00FF88]"}`}>
-                {minutePercentage.toFixed(0)}%
-              </span>
-            </div>
-            <ProgressBar value={rateLimits.minute.count} max={limits.minute} color={minuteColor} />
-            <p className="text-xs text-zinc-500">
-              Resets every minute
-            </p>
-          </CardContent>
-        </Card>
+        ))}
       </div>
 
-      {/* Daily Stats */}
-      <Card className="bg-[#111113] border-white/5">
-        <CardHeader>
-          <CardTitle className="text-lg font-mono text-white flex items-center gap-2">
-            <ChartBar size={20} weight="duotone" className="text-[#00FF88]" />
-            Daily Statistics
-          </CardTitle>
-          <CardDescription className="text-zinc-500">
-            Usage breakdown for {selectedDate}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="w-6 h-6 border-2 border-[#00FF88] border-t-transparent rounded-full animate-spin" />
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-start">
+
+        {/* Left Column: Request Timeline (3/5) */}
+        <Card className="lg:col-span-3 bg-[#111113] border-white/[0.04] overflow-hidden">
+          <div className="px-5 pt-4 pb-2 flex items-baseline justify-between border-b border-white/[0.04]">
+            <div>
+              <h2 className="text-[13px] font-mono font-medium text-white">Request Log</h2>
+              <span className="text-[11px] text-zinc-600 font-sans">
+                {logs.length > 0 ? `${logs.length} recent calls` : "No requests yet"}
+              </span>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="p-4 bg-[#0a0a0a] rounded-lg border border-white/5">
-                <div className="flex items-center gap-2 text-zinc-400 text-sm mb-2">
-                  <ChartBar size={16} weight="duotone" />
-                  Total Requests
-                </div>
-                <p className="text-2xl font-mono font-bold text-white">
-                  {(usageData?.totals?.totalRequests || 0).toLocaleString()}
-                </p>
+            {isToday && logs.length > 0 && (
+              <span className="flex items-center gap-1.5 text-[10px] text-zinc-600 font-mono">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#00FF88] animate-pulse" />
+                streaming
+              </span>
+            )}
+          </div>
+          <CardContent className="p-0">
+            {isLogsLoading ? (
+              <div className="flex items-center justify-center py-16">
+                <div className="w-5 h-5 border-[1.5px] border-zinc-700 border-t-[#00FF88] rounded-full animate-spin" />
               </div>
-
-              <div className="p-4 bg-[#0a0a0a] rounded-lg border border-white/5">
-                <div className="flex items-center gap-2 text-zinc-400 text-sm mb-2">
-                  <CheckCircle size={16} weight="duotone" className="text-green-400" />
-                  Successful
-                </div>
-                <p className="text-2xl font-mono font-bold text-green-400">
-                  {(usageData?.totals?.successfulRequests || 0).toLocaleString()}
-                </p>
+            ) : logs.length === 0 ? (
+              <div className="py-16 text-center">
+                <p className="text-zinc-600 text-sm font-sans">No API calls recorded for this date</p>
               </div>
-
-              <div className="p-4 bg-[#0a0a0a] rounded-lg border border-white/5">
-                <div className="flex items-center gap-2 text-zinc-400 text-sm mb-2">
-                  <XCircle size={16} weight="duotone" className="text-red-400" />
-                  Failed
-                </div>
-                <p className="text-2xl font-mono font-bold text-red-400">
-                  {(usageData?.totals?.failedRequests || 0).toLocaleString()}
-                </p>
-              </div>
-
-              <div className="p-4 bg-[#0a0a0a] rounded-lg border border-white/5">
-                <div className="flex items-center gap-2 text-zinc-400 text-sm mb-2">
-                  <Clock size={16} weight="duotone" />
-                  Avg Response
-                </div>
-                <p className="text-2xl font-mono font-bold text-white">
-                  {currentUsage?.stats?.avgResponseTime
-                    ? `${currentUsage.stats.avgResponseTime.toFixed(0)}ms`
-                    : "N/A"}
-                </p>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Endpoint Breakdown */}
-      {currentUsage?.stats?.endpoints && Object.keys(currentUsage.stats.endpoints).length > 0 && (
-        <Card className="bg-[#111113] border-white/5">
-          <CardHeader>
-            <CardTitle className="text-lg font-mono text-white">
-              Endpoint Breakdown
-            </CardTitle>
-            <CardDescription className="text-zinc-500">
-              Requests by endpoint
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {Object.entries(currentUsage.stats.endpoints)
-                .sort(([, a], [, b]) => b - a)
-                .map(([endpoint, count]) => (
-                  <div key={endpoint} className="flex items-center justify-between">
-                    <code className="text-sm text-zinc-400 font-mono">
-                      {endpoint}
+            ) : (
+              <div className="divide-y divide-white/[0.03] max-h-[520px] overflow-y-auto">
+                {logs.map((log, i) => (
+                  <div
+                    key={`${log.timestamp}-${i}`}
+                    className="group px-5 py-2.5 flex items-center gap-4 hover:bg-white/[0.02] transition-colors"
+                  >
+                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusDot(log.statusCode)}`} />
+                    <span className="text-[11px] text-zinc-600 font-mono w-[68px] shrink-0 tabular-nums">
+                      {formatTime(log.timestamp)}
+                    </span>
+                    <span className={`text-[11px] font-mono font-medium w-[36px] shrink-0 ${methodColor(log.method)}`}>
+                      {log.method}
+                    </span>
+                    <code className="text-[12px] text-zinc-300 font-mono truncate flex-1 group-hover:text-white transition-colors">
+                      {shortEndpoint(log.endpoint)}
                     </code>
-                    <span className="text-white font-mono">
+                    <span className={`text-[11px] font-mono tabular-nums ${statusColor(log.statusCode)}`}>
+                      {log.statusCode}
+                    </span>
+                    <span className="text-[11px] text-zinc-600 font-mono w-[52px] text-right tabular-nums">
+                      {formatMs(log.responseTime)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Right Column: Single consolidated card (2/5), sticky */}
+        <Card className="lg:col-span-2 lg:sticky lg:top-4 bg-[#111113] border-white/[0.04] overflow-hidden">
+          <CardContent className="p-0 divide-y divide-white/[0.04]">
+
+            {/* Quotas section */}
+            <div className="p-4 space-y-4">
+              <Gauge value={rateLimits.month.count} max={limits.month} label="Monthly Quota" sublabel={tier.toUpperCase()} />
+              <Gauge value={rateLimits.minute.count} max={limits.minute} label="Rate Limit" sublabel="per minute" />
+            </div>
+
+            {/* WebSocket Events — compact, only for Rookie/MVP */}
+            {(tier === "rookie" || tier === "mvp") && (
+              <div className="p-4 space-y-3">
+                <div className="flex items-baseline justify-between">
+                  <span className="text-[13px] text-zinc-500 font-sans">WebSocket Events</span>
+                  <span className="text-[11px] text-zinc-600 font-mono">today</span>
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-[28px] font-mono font-bold text-[#06b6d4] leading-none tabular-nums">
+                    {isLoading ? "..." : wsTotalEvents.toLocaleString()}
+                  </span>
+                </div>
+
+                {Object.keys(wsEventTypes).length > 0 ? (
+                  <div className="space-y-1">
+                    {Object.entries(wsEventTypes)
+                      .sort(([, a], [, b]) => b - a)
+                      .map(([event, count]) => {
+                        const pct = (count / (wsTotalEvents || 1)) * 100;
+                        return (
+                          <div key={event} className="flex items-center gap-2">
+                            <span className="text-[10px] text-zinc-500 font-mono w-16 shrink-0 truncate">
+                              {wsEventLabels[event] || event}
+                            </span>
+                            <div className="flex-1 h-[3px] bg-zinc-800/60 rounded-full overflow-hidden">
+                              <div
+                                className="h-full rounded-full bg-[#06b6d4] transition-all duration-500"
+                                style={{ width: `${pct}%`, opacity: Math.max(pct / 100, 0.3) }}
+                              />
+                            </div>
+                            <span className="text-[10px] text-zinc-600 font-mono tabular-nums w-10 text-right">
+                              {count.toLocaleString()}
+                            </span>
+                          </div>
+                        );
+                      })}
+                  </div>
+                ) : !isLoading ? (
+                  <p className="text-[11px] text-zinc-600 font-sans">No events recorded</p>
+                ) : null}
+
+                {Object.keys(wsHourlyData).length > 0 && (
+                  <HourlyHeatmap data={wsHourlyData} label="By hour" color="#06b6d4" />
+                )}
+              </div>
+            )}
+
+            {/* Endpoints — compact inline rows */}
+            {endpoints.length > 0 && (
+              <div className="p-4 space-y-2">
+                <div className="flex items-baseline justify-between mb-1">
+                  <span className="text-[13px] text-zinc-500 font-sans">Endpoints</span>
+                  <span className="text-[11px] text-zinc-600 font-mono">requests</span>
+                </div>
+                {endpoints.map(([endpoint, count]) => (
+                  <div key={endpoint} className="flex items-center justify-between gap-3">
+                    <code className="text-[11px] text-zinc-400 font-mono truncate">
+                      {shortEndpoint(endpoint)}
+                    </code>
+                    <span className="text-[11px] text-zinc-500 font-mono tabular-nums shrink-0">
                       {count.toLocaleString()}
                     </span>
                   </div>
                 ))}
-            </div>
+              </div>
+            )}
+
           </CardContent>
         </Card>
-      )}
+      </div>
     </div>
   );
 }
