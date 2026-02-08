@@ -22,7 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Key, Plus, Copy, Warning } from "@phosphor-icons/react";
+import { Key, Plus, Copy, Warning, Trash } from "@phosphor-icons/react";
 import { useAuth } from "@/hooks/useAuth";
 
 interface APIKey {
@@ -51,6 +51,9 @@ export default function APIKeysPage() {
   const [showNewKeyModal, setShowNewKeyModal] = useState(false);
   const [newKeyName, setNewKeyName] = useState("");
   const [newKey, setNewKey] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [keyToDelete, setKeyToDelete] = useState<APIKey | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -110,6 +113,32 @@ export default function APIKeysPage() {
       toast.success("Copied to clipboard");
     } catch {
       toast.error("Failed to copy - try selecting and copying manually");
+    }
+  }
+
+  async function deleteKey() {
+    if (!keyToDelete) return;
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`/api/auth/keys/${keyToDelete.id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to delete key");
+      }
+
+      setShowDeleteModal(false);
+      setKeyToDelete(null);
+      fetchKeys();
+      toast.success("API key deleted");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to delete key");
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -182,6 +211,7 @@ export default function APIKeysPage() {
                   <TableHead className="text-zinc-400">Created</TableHead>
                   <TableHead className="text-zinc-400">Last Used</TableHead>
                   <TableHead className="text-zinc-400">Status</TableHead>
+                  <TableHead className="text-zinc-400 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -216,6 +246,19 @@ export default function APIKeysPage() {
                           Inactive
                         </Badge>
                       )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setKeyToDelete(key);
+                          setShowDeleteModal(true);
+                        }}
+                        className="text-zinc-500 hover:text-red-400 hover:bg-red-500/10"
+                      >
+                        <Trash size={16} />
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -259,6 +302,41 @@ export default function APIKeysPage() {
               className="bg-[#00FF88] hover:bg-[#00d474] text-[#0a0a0a] font-semibold"
             >
               {isGenerating ? "Generating..." : "Generate Key"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Key Confirmation Modal */}
+      <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+        <DialogContent className="bg-[#111113] border-white/10">
+          <DialogHeader>
+            <DialogTitle className="text-white font-mono flex items-center gap-2">
+              <Warning size={20} weight="duotone" className="text-red-400" />
+              Delete API Key
+            </DialogTitle>
+            <DialogDescription className="text-zinc-400">
+              Are you sure you want to permanently delete{" "}
+              <span className="text-white font-medium">
+                {keyToDelete?.name || "this key"}
+              </span>
+              ? Any applications using this key will immediately lose access. This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteModal(false)}
+              className="border-white/10 text-white hover:bg-white/5"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={deleteKey}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700 text-white font-semibold"
+            >
+              {isDeleting ? "Deleting..." : "Delete Key"}
             </Button>
           </DialogFooter>
         </DialogContent>

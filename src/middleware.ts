@@ -5,7 +5,9 @@ import type { NextRequest } from "next/server";
 const protectedRoutes = ["/dashboard"];
 
 // Routes that should redirect to dashboard if already logged in
-const authRoutes = ["/login", "/register"];
+// Note: /register is intentionally excluded — a stale token cookie would cause
+// /register → /dashboard → /login redirect chain, breaking "Start Free Trial" buttons
+const authRoutes = ["/login"];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -16,7 +18,7 @@ export function middleware(request: NextRequest) {
     pathname.startsWith(route)
   );
 
-  // Check if it's an auth route (login/register)
+  // Check if it's an auth route (login only)
   const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
 
   // Redirect to login if accessing protected route without token
@@ -35,5 +37,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/login", "/register"],
+  matcher: ["/dashboard/:path*", "/login"],
 };
