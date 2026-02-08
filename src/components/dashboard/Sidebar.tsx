@@ -32,10 +32,7 @@ export function Sidebar() {
     <div className="flex flex-col h-full bg-[#0a0a0a] border-r border-white/5 w-64">
       {/* Logo */}
       <div className="p-6 border-b border-white/5">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-[#00FF88]/10 border border-[#00FF88]/20 flex items-center justify-center">
-            <span className="text-[#00FF88] font-mono font-bold text-sm">OI</span>
-          </div>
+        <Link href="/" className="flex items-center">
           <span className="font-mono text-lg font-semibold text-white">Owls Insight</span>
         </Link>
       </div>

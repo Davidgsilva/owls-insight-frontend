@@ -151,10 +151,7 @@ function ResetPasswordContent() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2">
-            <div className="w-10 h-10 rounded-lg bg-[#00FF88]/10 border border-[#00FF88]/20 flex items-center justify-center">
-              <span className="text-[#00FF88] font-mono font-bold text-lg">OI</span>
-            </div>
+          <Link href="/" className="inline-flex items-center">
             <span className="font-mono text-xl font-semibold text-white">Owls Insight</span>
           </Link>
         </div>
