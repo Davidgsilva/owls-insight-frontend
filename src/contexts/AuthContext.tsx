@@ -134,6 +134,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [validateSession]);
 
   const logout = useCallback(async () => {
+    // Navigate away from /dashboard BEFORE clearing auth state,
+    // otherwise the dashboard layout's !isAuthenticated guard
+    // fires router.replace("/login") and wins the race.
+    router.push("/");
     try {
       await fetch("/api/auth/logout", {
         method: "POST",
@@ -147,7 +151,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (typeof window !== "undefined") {
       localStorage.removeItem(USER_STORAGE_KEY);
     }
-    router.push("/");
   }, [router]);
 
   const value = useMemo(() => ({
