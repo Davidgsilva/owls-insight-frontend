@@ -11,6 +11,7 @@ const sections = [
   { id: "odds-api", label: "Odds" },
   { id: "props-api", label: "Player Props" },
   { id: "scores-api", label: "Live Scores" },
+  { id: "kalshi-api", label: "Kalshi Markets" },
   { id: "history-api", label: "Historical Data" },
   { id: "websocket", label: "WebSocket" },
   { id: "usage-api", label: "Usage" },
@@ -228,7 +229,7 @@ export default function DocsPage() {
               API Reference
             </h1>
             <p className="text-zinc-500 text-sm font-sans leading-relaxed mb-10">
-              REST API and WebSocket streaming for real-time sports betting odds from 7 sportsbooks.
+              REST API and WebSocket streaming for real-time sports betting odds from 7 sportsbooks and Kalshi prediction markets.
             </p>
 
             <div className="rounded-lg bg-[#111113] border border-white/[0.06] px-5 py-4 mb-10">
@@ -543,6 +544,200 @@ export default function DocsPage() {
   ]
 }`}
             />
+          </section>
+
+          {/* ─── Kalshi Markets API ──────────────────────────────────── */}
+          <section id="kalshi-api" className="mb-20">
+            <SectionHeading>Kalshi Markets API</SectionHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-6">
+              Raw prediction market data from Kalshi, a CFTC-regulated event contract exchange.
+              Returns full market objects with 50+ fields including liquidity, open interest, volume,
+              order book depth, settlement rules, and price history.
+            </p>
+
+            <SubHeading>Endpoints</SubHeading>
+            <div className="mb-8">
+              <Endpoint method="GET" path="/api/v1/kalshi/{sport}/markets" description="Prediction markets for a sport (game outcomes, spreads, totals)" />
+              <Endpoint method="GET" path="/api/v1/kalshi/series/{seriesTicker}/markets" description="Markets for any Kalshi series ticker (Super Bowl, MVP, specials)" />
+              <Endpoint method="GET" path="/api/v1/kalshi/series" description="List all known series tickers and sport mappings" />
+            </div>
+
+            <SubHeading>Sports</SubHeading>
+            <div className="flex flex-wrap gap-2 mb-8">
+              {["nba", "ncaab", "nfl", "nhl", "mlb"].map((sport) => (
+                <code key={sport} className="text-[13px] font-mono text-zinc-300 bg-white/[0.04] px-2.5 py-1 rounded">
+                  {sport}
+                </code>
+              ))}
+            </div>
+
+            <SubHeading>Series tickers</SubHeading>
+            <div className="overflow-x-auto mb-8">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-white/[0.08]">
+                    <th className="text-left py-2 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Ticker</th>
+                    <th className="text-left py-2 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Sport</th>
+                    <th className="text-left py-2 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Description</th>
+                  </tr>
+                </thead>
+                <tbody className="text-[13px]">
+                  {[
+                    { ticker: "KXNBAGAME", sport: "nba", desc: "NBA game outcomes" },
+                    { ticker: "KXNCAAMBGAME", sport: "ncaab", desc: "NCAAB game outcomes" },
+                    { ticker: "KXNFLGAME", sport: "nfl", desc: "NFL regular season games" },
+                    { ticker: "KXNHLGAME", sport: "nhl", desc: "NHL game outcomes" },
+                    { ticker: "KXMLBGAME", sport: "mlb", desc: "MLB game outcomes" },
+                    { ticker: "KXSB", sport: "nfl", desc: "Super Bowl / Championship winner" },
+                    { ticker: "KXNFLSPREAD", sport: "nfl", desc: "NFL game spreads" },
+                    { ticker: "KXNFLTOTAL", sport: "nfl", desc: "NFL game totals" },
+                    { ticker: "KXNFLSBMVP", sport: "nfl", desc: "Super Bowl MVP" },
+                  ].map((s) => (
+                    <tr key={s.ticker} className="border-b border-white/[0.04]">
+                      <td className="py-2.5 pr-6 font-mono text-white">{s.ticker}</td>
+                      <td className="py-2.5 pr-6 text-zinc-300">{s.sport}</td>
+                      <td className="py-2.5 text-zinc-500">{s.desc}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <SubHeading>/{"{sport}"}/markets parameters</SubHeading>
+            <ParamTable
+              params={[
+                { name: "status", type: "string", required: false, description: "Market status: open, closed, settled, unopened, paused (default: open)" },
+                { name: "limit", type: "number", required: false, description: "Max markets per page (1-200, default: 200)" },
+                { name: "cursor", type: "string", required: false, description: "Pagination cursor from previous response" },
+              ]}
+            />
+
+            <SubHeading>/series/{"{seriesTicker}"}/markets parameters</SubHeading>
+            <ParamTable
+              params={[
+                { name: "status", type: "string", required: false, description: "Market status: open, closed, settled, unopened, paused (default: open)" },
+                { name: "limit", type: "number", required: false, description: "Max markets per page (1-200, default: 200)" },
+                { name: "cursor", type: "string", required: false, description: "Pagination cursor from previous response" },
+                { name: "event_ticker", type: "string", required: false, description: "Filter to a specific event within the series" },
+              ]}
+            />
+
+            <SubHeading>Example requests</SubHeading>
+            <CodeBlock
+              language="bash"
+              code={`# NBA prediction markets
+curl -H "Authorization: Bearer YOUR_API_KEY" \\
+  "https://api.owlsinsight.com/api/v1/kalshi/nba/markets"
+
+# Super Bowl MVP markets
+curl -H "Authorization: Bearer YOUR_API_KEY" \\
+  "https://api.owlsinsight.com/api/v1/kalshi/series/KXNFLSBMVP/markets"
+
+# NFL spreads filtered by event
+curl -H "Authorization: Bearer YOUR_API_KEY" \\
+  "https://api.owlsinsight.com/api/v1/kalshi/series/KXNFLSPREAD/markets?event_ticker=KXNFLSPREAD-26FEB08SEANE"
+
+# List all series tickers
+curl -H "Authorization: Bearer YOUR_API_KEY" \\
+  "https://api.owlsinsight.com/api/v1/kalshi/series"`}
+            />
+
+            <SubHeading>Markets response</SubHeading>
+            <CodeBlock
+              language="json"
+              code={`{
+  "series_ticker": "KXNBAGAME",
+  "sport": "nba",
+  "status": "open",
+  "markets": [
+    {
+      "ticker": "KXNBAGAME-26FEB08-BOS-DEN",
+      "event_ticker": "KXNBAGAME-26FEB08-BOS-DEN",
+      "market_type": "binary",
+      "title": "Celtics vs. Nuggets: Celtics",
+      "subtitle": "Celtics vs. Nuggets",
+      "status": "open",
+      "yes_bid": 59,
+      "yes_ask": 61,
+      "no_bid": 39,
+      "no_ask": 41,
+      "last_price": 60,
+      "previous_yes_bid": 58,
+      "previous_yes_ask": 60,
+      "volume": 8234,
+      "volume_24h": 2150,
+      "open_interest": 5600,
+      "liquidity": 32000,
+      "close_time": "2026-02-09T01:10:00Z",
+      "expiration_time": "2026-02-09T06:00:00Z",
+      "settlement_timer_seconds": 3600,
+      "rules_primary": "This market will resolve to Yes if...",
+      "price_ranges": [],
+      "result": "",
+      "can_close_early": true,
+      "... (54 fields total)"
+    }
+  ],
+  "cursor": "next_page_cursor",
+  "count": 28,
+  "cached": false,
+  "cache_age_seconds": 0
+}`}
+            />
+
+            <SubHeading>Series listing response</SubHeading>
+            <CodeBlock
+              language="json"
+              code={`{
+  "sport_series": [
+    { "sport": "nba", "series_ticker": "KXNBAGAME" },
+    { "sport": "ncaab", "series_ticker": "KXNCAAMBGAME" },
+    { "sport": "nfl", "series_ticker": "KXNFLGAME" },
+    { "sport": "mlb", "series_ticker": "KXMLBGAME" }
+  ],
+  "special_series": [
+    { "series_ticker": "KXSB", "description": "Big Game / Championship Winner", "sport": "nfl" },
+    { "series_ticker": "KXNFLSPREAD", "description": "NFL Game Spreads", "sport": "nfl" },
+    { "series_ticker": "KXNFLTOTAL", "description": "NFL Game Totals", "sport": "nfl" },
+    { "series_ticker": "KXNFLSBMVP", "description": "Big Game MVP", "sport": "nfl" }
+  ],
+  "all_known_tickers": [
+    "KXNBAGAME", "KXNCAAMBGAME", "KXNFLGAME", "KXNHLGAME", "KXMLBGAME"
+  ]
+}`}
+            />
+
+            <SubHeading>Key fields</SubHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-4">
+              Kalshi markets are binary contracts priced in cents (0-100). Each market has Yes/No sides with bid/ask spreads.
+            </p>
+            <div className="overflow-x-auto mb-8">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-white/[0.08]">
+                    <th className="text-left py-2 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Field</th>
+                    <th className="text-left py-2 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Description</th>
+                  </tr>
+                </thead>
+                <tbody className="text-[13px]">
+                  {[
+                    { field: "yes_bid / yes_ask", desc: "Best bid and ask prices for Yes contracts (cents, 0-100)" },
+                    { field: "last_price", desc: "Last traded price (approximates implied probability)" },
+                    { field: "volume", desc: "Total contracts traded since market open" },
+                    { field: "volume_24h", desc: "Contracts traded in the last 24 hours" },
+                    { field: "open_interest", desc: "Outstanding unsettled contracts" },
+                    { field: "liquidity", desc: "Depth of the order book (cents)" },
+                    { field: "settlement_timer_seconds", desc: "Seconds after close before settlement" },
+                    { field: "rules_primary", desc: "Full settlement rules text" },
+                  ].map((row) => (
+                    <tr key={row.field} className="border-b border-white/[0.04]">
+                      <td className="py-2.5 pr-6 font-mono text-white whitespace-nowrap">{row.field}</td>
+                      <td className="py-2.5 text-zinc-400">{row.desc}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </section>
 
           {/* ─── Historical Data API ───────────────────────────────── */}
