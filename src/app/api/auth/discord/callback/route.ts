@@ -3,7 +3,7 @@ import crypto from 'crypto';
 
 const INTERNAL_AUTH_SECRET = process.env.INTERNAL_AUTH_SECRET;
 const API_SERVER_URL = process.env.API_SERVER_URL || 'http://owls-insight-api-server';
-const isProduction = process.env.NODE_ENV === 'production' || !process.env.DISCORD_REDIRECT_URI?.includes('localhost');
+const isProduction = process.env.NODE_ENV === 'production';
 
 const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI
   || 'https://owlsinsight.com/api/auth/discord/callback';
@@ -17,7 +17,9 @@ const ALLOWED_ORIGINS = new Set([
 /** Derive the public origin from headers, validated against allowlist to prevent open redirects */
 function getOrigin(request: NextRequest): string {
   const host = request.headers.get('x-forwarded-host') || request.headers.get('host');
-  const proto = request.headers.get('x-forwarded-proto') || 'https';
+  // Default to http for local dev hosts, https for production
+  const proto = request.headers.get('x-forwarded-proto')
+    || (host?.match(/^(localhost|0\.0\.0\.0)(:|$)/) ? 'http' : 'https');
   if (host) {
     const candidate = `${proto}://${host}`;
     if (ALLOWED_ORIGINS.has(candidate)) {

@@ -22,10 +22,19 @@ export async function GET(request: NextRequest) {
       method: "GET",
       headers: {
         "Authorization": `Bearer ${API_KEY}`,
+        "Accept": "application/json",
+        "Accept-Encoding": "identity",
       },
     });
 
-    const data = await response.json();
+    const text = await response.text();
+    let data: unknown;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      console.error("Upstream returned non-JSON:", text.slice(0, 200));
+      return NextResponse.json({ error: "Upstream returned invalid response" }, { status: 502 });
+    }
     const res = NextResponse.json(data, { status: response.status });
 
     // Cache for 15 seconds so concurrent visitors share the same response

@@ -73,6 +73,10 @@ function LoginContent() {
     },
   });
 
+  // Clear form on mount to prevent browser autofill
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { form.reset({ email: "", password: "" }); }, []);
+
   async function onSubmit(data: LoginFormData) {
     setIsLoading(true);
     try {
@@ -126,7 +130,7 @@ function LoginContent() {
             </div>
 
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" autoComplete="off">
                 <FormField
                   control={form.control}
                   name="email"
@@ -137,6 +141,7 @@ function LoginContent() {
                         <Input
                           type="email"
                           placeholder="you@example.com"
+                          autoComplete="off"
                           className="bg-[#0a0a0a] border-white/10 text-white placeholder:text-zinc-500"
                           {...field}
                         />
@@ -164,6 +169,7 @@ function LoginContent() {
                         <Input
                           type="password"
                           placeholder="Enter your password"
+                          autoComplete="off"
                           className="bg-[#0a0a0a] border-white/10 text-white placeholder:text-zinc-500"
                           {...field}
                         />
