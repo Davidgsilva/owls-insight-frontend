@@ -65,6 +65,7 @@ function shortenTeamName(fullName: string): string {
 export function LiveTicker() {
   const [odds, setOdds] = useState<OddsUpdate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const previousOdds = useRef<Map<string, number>>(new Map());
 
   // Fetch real odds data from multiple sports via server-side proxy
@@ -129,8 +130,8 @@ export function LiveTicker() {
             });
           }
         }
-      } catch {
-        // Silently fail for individual sports
+      } catch (err) {
+        console.warn(`Ticker: Failed to fetch ${sport}:`, err);
       }
 
       return items;
@@ -154,8 +155,9 @@ export function LiveTicker() {
         if (allItems.length > 0) {
           setOdds(allItems.slice(0, 20)); // Limit to 20 items
         }
-      } catch (error) {
-        console.warn("Ticker: Error fetching odds:", error);
+      } catch (err) {
+        console.warn("Ticker: Error fetching odds:", err);
+        setError(String(err));
       } finally {
         setIsLoading(false);
       }
@@ -183,12 +185,14 @@ export function LiveTicker() {
     }
   }, [odds]);
 
-  // Don't render anything if no data
+  // Show loading/empty state
   if (isLoading || odds.length === 0) {
     return (
       <div className="w-full overflow-hidden bg-[#111111] border-y border-white/5">
         <div className="flex items-center justify-center py-2">
-          <span className="text-xs font-mono text-zinc-600">Loading live odds...</span>
+          <span className="text-xs font-mono text-zinc-600">
+            {isLoading ? "Loading live odds..." : error ? `Error: ${error}` : "No live odds available"}
+          </span>
         </div>
       </div>
     );
