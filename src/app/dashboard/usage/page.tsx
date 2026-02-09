@@ -230,7 +230,8 @@ export default function UsagePage() {
 
   const fetchUsage = useCallback(async () => {
     try {
-      const res = await fetch(`/api/usage?date=${selectedDate}`, { credentials: "include" });
+      const tz = -new Date().getTimezoneOffset(); // UTC offset in minutes (e.g. -300 for EST)
+      const res = await fetch(`/api/usage?date=${selectedDate}&tz=${tz}`, { credentials: "include" });
       const data = await res.json();
       if (data.success) {
         setUsageData(data);

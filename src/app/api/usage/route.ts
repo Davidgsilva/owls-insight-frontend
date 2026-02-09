@@ -12,9 +12,11 @@ export async function GET(request: NextRequest) {
     const cookies = request.headers.get("cookie") || "";
     const searchParams = request.nextUrl.searchParams;
     const date = searchParams.get("date");
+    const tz = searchParams.get("tz");
 
     const url = new URL(`${API_SERVER_URL}/api/v1/usage`);
     if (date) url.searchParams.set("date", date);
+    if (tz) url.searchParams.set("tz", tz);
 
     const response = await fetch(url.toString(), {
       method: "GET",
