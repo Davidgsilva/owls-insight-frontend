@@ -49,13 +49,13 @@ export function middleware(request: NextRequest) {
     const origin = getOrigin(request);
     const loginUrl = new URL("/login", origin);
     loginUrl.searchParams.set("redirect", pathname);
-    return new Response(null, { status: 302, headers: { Location: loginUrl.toString() } });
+    return new Response(null, { status: 302, headers: { Location: loginUrl.toString(), 'Cache-Control': 'no-store' } });
   }
 
   // Redirect to dashboard if accessing auth routes with valid token
   if (isAuthRoute && token) {
     const origin = getOrigin(request);
-    return new Response(null, { status: 302, headers: { Location: new URL("/dashboard", origin).toString() } });
+    return new Response(null, { status: 302, headers: { Location: new URL("/dashboard", origin).toString(), 'Cache-Control': 'no-store' } });
   }
 
   return NextResponse.next();

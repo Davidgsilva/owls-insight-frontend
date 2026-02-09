@@ -47,6 +47,34 @@ AWS EKS deployment configured:
 - ECR registry: `482566359918.dkr.ecr.us-east-1.amazonaws.com/owls-insight-frontend`
 - Environment variable: `NEXT_PUBLIC_API_URL` points to `https://api.owlsinsight.com`
 
+## Known Issues & Gotchas
+
+### NEVER use `NextResponse.redirect()` in standalone mode
+
+Next.js standalone mode rewrites the `Location` header in `NextResponse.redirect()` to the server's bind address (`0.0.0.0:3000`). This causes production redirects to go to `https://0.0.0.0:3000/...` instead of `https://owlsinsight.com/...`.
+
+**Always use raw `Response` objects for redirects:**
+
+```typescript
+// WRONG - will redirect to 0.0.0.0:3000 in production
+return NextResponse.redirect(new URL("/dashboard", origin));
+
+// CORRECT - preserves the intended URL
+return new Response(null, {
+  status: 302,
+  headers: { Location: new URL("/dashboard", origin).toString() },
+});
+
+// CORRECT with cookies - use NextResponse only for cookie-setting, then copy headers
+const nr = new NextResponse(null);
+nr.cookies.set('token', value, { httpOnly: true, secure: true, ... });
+const headers = new Headers(nr.headers);
+headers.set('Location', targetUrl);
+return new Response(null, { status: 302, headers });
+```
+
+This applies to both middleware (`src/middleware.ts`) and route handlers (`src/app/api/...`).
+
 ## UI Component Library
 
 Uses shadcn/ui pattern. Components in `src/components/ui/` are based on Radix UI primitives styled with Tailwind. The `cn()` utility from `@/lib/utils` merges Tailwind classes.

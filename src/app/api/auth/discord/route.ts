@@ -26,11 +26,14 @@ export async function GET(request: NextRequest) {
 
   const discordAuthUrl = `https://discord.com/oauth2/authorize?${params.toString()}`;
 
-  const response = NextResponse.redirect(discordAuthUrl);
+  // Use NextResponse only for cookie-setting, then copy headers into a raw
+  // Response. NextResponse.redirect() rewrites Location to the server's bind
+  // address (0.0.0.0:3000) in standalone mode.
+  const nr = new NextResponse(null);
 
   // Store state in httpOnly cookie for validation on callback
   // sameSite must be 'lax' to survive the cross-origin redirect from Discord
-  response.cookies.set('discord_oauth_state', state, {
+  nr.cookies.set('discord_oauth_state', state, {
     httpOnly: true,
     secure: isProduction,
     sameSite: 'lax',
@@ -42,7 +45,7 @@ export async function GET(request: NextRequest) {
   const tier = request.nextUrl.searchParams.get('tier');
   const validTiers = ['bench', 'rookie', 'mvp'];
   if (tier && validTiers.includes(tier)) {
-    response.cookies.set('discord_oauth_tier', tier, {
+    nr.cookies.set('discord_oauth_tier', tier, {
       httpOnly: true,
       secure: isProduction,
       sameSite: 'lax',
@@ -51,5 +54,7 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  return response;
+  const headers = new Headers(nr.headers);
+  headers.set('Location', discordAuthUrl);
+  return new Response(null, { status: 302, headers });
 }
