@@ -344,6 +344,15 @@ export default function BillingPage() {
               for assistance.
             </p>
           </div>
+          <div>
+            <h3 className="text-white font-medium">Need help?</h3>
+            <p className="text-zinc-400 text-sm mt-1">
+              For any questions about billing, API access, or technical support, reach out to{" "}
+              <a href="mailto:david@wisesportsai.com" className="text-[#00FF88] hover:underline">
+                david@wisesportsai.com
+              </a>.
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>
