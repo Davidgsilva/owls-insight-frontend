@@ -72,19 +72,31 @@ kubectl get deployment owls-insight-frontend -n owls-insight-prod -o jsonpath='{
 
 # 5. Build, push, deploy
 aws ecr get-login-password --region us-east-1 --profile wisesports | docker login --username AWS --password-stdin 482566359918.dkr.ecr.us-east-1.amazonaws.com
-docker build -t 482566359918.dkr.ecr.us-east-1.amazonaws.com/owls-insight-frontend:v1.X.X .
+docker build --no-cache -t 482566359918.dkr.ecr.us-east-1.amazonaws.com/owls-insight-frontend:v1.X.X .
 docker push 482566359918.dkr.ecr.us-east-1.amazonaws.com/owls-insight-frontend:v1.X.X
 kubectl set image deployment/owls-insight-frontend -n owls-insight-prod frontend=482566359918.dkr.ecr.us-east-1.amazonaws.com/owls-insight-frontend:v1.X.X
 kubectl rollout status deployment/owls-insight-frontend -n owls-insight-prod --timeout=90s
+
+# 6. POST-DEPLOY VERIFICATION — MANDATORY
+# After deployment, verify the live site reflects your changes.
+# Pick a specific text string or element you changed and confirm it appears:
+curl -s https://owlsinsight.com | grep -o "expected text snippet"
+# If the old content still appears, the build used stale cache — rebuild with --no-cache
 ```
 
+**MANDATORY: ALWAYS use `--no-cache` when building Docker images.** Docker's build cache can silently serve stale `COPY . .` and `npm run build` layers even when source files have changed, resulting in old code being deployed. This has caused production incidents. There is NO safe scenario to skip `--no-cache` for this project.
+
 **NEVER:**
+- Build without `--no-cache` — Docker cache WILL serve stale code
 - Build and deploy without checking `git status` and `git log` first
 - Reuse an existing image tag — always increment the version
 - Deploy from a stale working directory without pulling latest changes
 - Skip `kubectl rollout status` — always verify the rollout succeeded
+- Skip post-deploy verification — always confirm the live site has your changes
 
-**What happened (Feb 2026):** A Claude Code session built and deployed the frontend from an older commit, overwriting a newer production version with stale code. This rolled back features and bug fixes that were already live. Always verify HEAD contains all expected changes before building.
+**Incidents (Feb 2026):**
+1. A Claude Code session built and deployed the frontend from an older commit, overwriting a newer production version with stale code. This rolled back features and bug fixes that were already live. **Fix:** Always verify HEAD contains all expected changes before building.
+2. A Docker build used cached layers (`COPY . .` and `npm run build` both showed CACHED) despite source code having changed. The deployed image contained old code ("7 sportsbooks" instead of "6 sportsbooks"). **Fix:** Always use `docker build --no-cache`.
 
 ## Known Issues & Gotchas
 
