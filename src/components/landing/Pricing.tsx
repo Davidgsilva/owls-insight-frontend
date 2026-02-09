@@ -14,6 +14,7 @@ const tiers = [
       "10,000 requests/month",
       "20 requests/minute",
       "REST API only",
+      "All sportsbooks and prediction markets",
       "Odds, spreads & totals",
       "Live scores",
     ],

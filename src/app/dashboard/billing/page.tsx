@@ -18,7 +18,7 @@ const tiers = {
       "10,000 requests/month",
       "20 requests/minute",
       "REST API access",
-      "6 sportsbooks",
+      "All sportsbooks and prediction markets",
       "45-second data delay",
     ],
     color: "zinc",

@@ -12,10 +12,10 @@ import {
 const features = [
   {
     icon: Lightning,
-    title: "7-Book Aggregation",
+    title: "Multi-Book Aggregation",
     description:
-      "Pinnacle, FanDuel, DraftKings, BetMGM, Bet365, Caesars, and Kalshi — all normalized into a single, consistent API schema.",
-    highlight: "7 Books",
+      "Sportsbooks and prediction markets — all normalized into a single, consistent API schema.",
+    highlight: "Aggregated",
   },
   {
     icon: Broadcast,
@@ -50,7 +50,7 @@ const features = [
     title: "Multi-Sport Coverage",
     description:
       "NBA, NFL, NHL, MLB, NCAAB, and NCAAF. All major sports with consistent data schemas across markets.",
-    highlight: "6 Sports",
+    highlight: "Multi-Sport",
   },
 ];
 

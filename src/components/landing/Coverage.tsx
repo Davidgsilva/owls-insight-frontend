@@ -67,11 +67,11 @@ export function Coverage() {
             <span className="text-xs font-mono text-[#00FF88]">COVERAGE</span>
           </div>
           <h2 className="text-4xl font-mono font-bold mb-4">
-            7 Books. 6 Sports.{" "}
+            Every Book. Every Sport.{" "}
             <span className="text-[#00FF88] text-glow-primary">One API.</span>
           </h2>
           <p className="text-zinc-400 max-w-2xl mx-auto">
-            Normalized data from all major US sportsbooks, delivered in a
+            Normalized data from major sportsbooks and prediction markets, delivered in a
             consistent schema across every sport and market type.
           </p>
         </div>
@@ -80,7 +80,7 @@ export function Coverage() {
         <div className="mb-16">
           <h3 className="text-sm font-mono text-zinc-500 mb-6 flex items-center gap-2">
             <span className="w-8 h-px bg-zinc-700" />
-            SPORTSBOOKS
+            SOURCES
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {sportsbooks.map((book) => (
