@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
@@ -54,15 +54,25 @@ const tiers = {
 };
 
 export default function BillingPage() {
+  return (
+    <Suspense>
+      <BillingContent />
+    </Suspense>
+  );
+}
+
+function BillingContent() {
   const { subscription, refreshUser } = useAuth();
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const hasSynced = useRef(false);
 
-  // When returning from Stripe portal, sync subscription state directly from Stripe
-  // to avoid stale data due to webhook processing delay
+  // When returning from Stripe portal or checkout, sync subscription state
+  // directly from Stripe to avoid stale data due to webhook processing delay
   useEffect(() => {
-    if (searchParams.get("from") === "portal" && !hasSynced.current) {
+    const fromPortal = searchParams.get("from") === "portal";
+    const checkoutSuccess = searchParams.get("checkout") === "success";
+    if ((fromPortal || checkoutSuccess) && !hasSynced.current) {
       hasSynced.current = true;
       window.history.replaceState({}, "", "/dashboard/billing");
       fetch("/api/stripe/sync", { method: "POST", credentials: "include" })
@@ -86,7 +96,7 @@ export default function BillingPage() {
   const trialDays = getTrialDaysRemaining();
   const isTrialing = subscription?.status === "trialing";
   const trialCanceled = isTrialing && subscription?.cancelAtPeriodEnd;
-  const trialEligible = subscription?.trialEligible ?? (currentTier === "free");
+  const trialEligible = subscription ? (subscription.trialEligible ?? (subscription.tier === "free")) : false;
 
   async function handleUpgrade(tier: "bench" | "rookie" | "mvp") {
     setIsLoading(tier);
