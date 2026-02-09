@@ -193,6 +193,8 @@ export default function BillingPage() {
                     ? `Trial canceled — access until ${new Date(subscription!.currentPeriodEnd!).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
                     : isTrialing && trialDays !== null
                     ? `Free trial — ${trialDays} day${trialDays !== 1 ? "s" : ""} remaining`
+                    : subscription?.cancelAtPeriodEnd && subscription?.currentPeriodEnd
+                    ? `Cancels ${new Date(subscription.currentPeriodEnd).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
                     : subscription?.status === "active"
                     ? "Active"
                     : subscription?.status || "Active"}
@@ -213,38 +215,6 @@ export default function BillingPage() {
           </div>
         </CardContent>
       </Card>
-
-      {/* Trial Banner */}
-      {isTrialing && trialDays !== null && (
-        <Card className={trialCanceled ? "bg-zinc-500/5 border-zinc-500/20" : "bg-[#00FF88]/5 border-[#00FF88]/20"}>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className={`font-mono font-semibold text-lg ${trialCanceled ? "text-zinc-400" : "text-[#00FF88]"}`}>
-                  {trialCanceled ? "Trial Canceled" : "MVP Free Trial"}
-                </p>
-                <p className="text-zinc-400 text-sm mt-1">
-                  {trialCanceled
-                    ? `Your trial has been canceled. You'll retain MVP access until ${new Date(subscription!.currentPeriodEnd!).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}.`
-                    : trialDays > 0
-                    ? `Your trial ends on ${new Date(subscription!.currentPeriodEnd!).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}. Your card will be charged $49.99/mo after the trial.`
-                    : "Your trial has ended. Your card will be charged shortly."}
-                </p>
-              </div>
-              {!trialCanceled && (
-                <Button
-                  onClick={handleManageBilling}
-                  disabled={isLoading === "portal"}
-                  variant="outline"
-                  className="border-[#00FF88]/30 text-[#00FF88] hover:bg-[#00FF88]/10 shrink-0"
-                >
-                  {isLoading === "portal" ? "Loading..." : "Cancel Trial"}
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Free Trial Banner — shown to free users who haven't subscribed */}
       {trialEligible && (
