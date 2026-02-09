@@ -41,7 +41,7 @@ export function Hero() {
             {/* Subheadline */}
             <p className="text-lg text-zinc-400 leading-relaxed max-w-lg opacity-0 animate-fade-in-up stagger-2">
               Access live betting odds from{" "}
-              <span className="text-white font-medium">major sportsbooks</span>{" "}
+              <span className="text-white font-medium">major sportsbooks and prediction markets</span>{" "}
               via REST API and WebSocket. Built for traders, analysts, and betting
               platforms that demand speed and reliability.
             </p>
