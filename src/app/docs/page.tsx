@@ -16,6 +16,7 @@ const sections = [
   { id: "websocket", label: "WebSocket" },
   { id: "usage-api", label: "Usage" },
   { id: "rate-limits", label: "Rate Limits" },
+  { id: "coverage", label: "Coverage" },
   { id: "errors", label: "Errors" },
 ];
 
@@ -1077,6 +1078,149 @@ X-RateLimit-Remaining-Minute: 87
 X-RateLimit-Limit-Month: 75000
 X-RateLimit-Remaining-Month: 62340`}
             />
+          </section>
+
+          {/* ─── Coverage ──────────────────────────────────────────── */}
+          <section id="coverage" className="mb-20">
+            <SectionHeading>Coverage</SectionHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-6 leading-relaxed">
+              We aggregate odds from 7 sportsbooks across multiple sports. Coverage varies by sport, book, and market type.
+              We&apos;re continuously expanding coverage and improving data quality.
+            </p>
+
+            <SubHeading>Game odds</SubHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-4">
+              Pre-match and live odds including moneylines, spreads, and totals.
+            </p>
+            <div className="overflow-x-auto mb-10">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-white/[0.08]">
+                    <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Book</th>
+                    <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">NBA</th>
+                    <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">NCAAB</th>
+                    <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">NFL</th>
+                    <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">NHL</th>
+                    <th className="text-left py-2.5 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">MLB</th>
+                  </tr>
+                </thead>
+                <tbody className="text-[13px]">
+                  {[
+                    { book: "Pinnacle", nba: "strong", ncaab: "partial", nfl: "strong", nhl: "strong", mlb: "strong" },
+                    { book: "FanDuel", nba: "strong", ncaab: "strong", nfl: "strong", nhl: "strong", mlb: "strong" },
+                    { book: "DraftKings", nba: "strong", ncaab: "strong", nfl: "strong", nhl: "strong", mlb: "strong" },
+                    { book: "BetMGM", nba: "strong", ncaab: "partial", nfl: "strong", nhl: "partial", mlb: "soon" },
+                    { book: "Bet365", nba: "strong", ncaab: "partial", nfl: "strong", nhl: "partial", mlb: "soon" },
+                    { book: "Caesars", nba: "strong", ncaab: "partial", nfl: "strong", nhl: "partial", mlb: "soon" },
+                    { book: "Kalshi", nba: "strong", ncaab: "partial", nfl: "strong", nhl: "partial", mlb: "partial" },
+                  ].map((row) => (
+                    <tr key={row.book} className="border-b border-white/[0.04]">
+                      <td className="py-2.5 pr-4 font-mono text-white">{row.book}</td>
+                      {[row.nba, row.ncaab, row.nfl, row.nhl, row.mlb].map((status, i) => (
+                        <td key={i} className="py-2.5 pr-4">
+                          <span className={`inline-flex items-center gap-1.5 text-[12px] font-mono ${
+                            status === "strong"
+                              ? "text-[#00FF88]"
+                              : status === "partial"
+                              ? "text-amber-400"
+                              : "text-zinc-600"
+                          }`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${
+                              status === "strong"
+                                ? "bg-[#00FF88]"
+                                : status === "partial"
+                                ? "bg-amber-400"
+                                : "bg-zinc-700"
+                            }`} />
+                            {status === "strong" ? "Strong" : status === "partial" ? "Partial" : "Coming soon"}
+                          </span>
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <SubHeading>Player props</SubHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-4">
+              Player prop lines vary by sport and sportsbook. NBA has the deepest prop coverage.
+              We&apos;re actively working to expand prop coverage across all sports and books.
+            </p>
+            <div className="overflow-x-auto mb-10">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-white/[0.08]">
+                    <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Book</th>
+                    <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">NBA</th>
+                    <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">NCAAB</th>
+                    <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">NFL</th>
+                    <th className="text-left py-2.5 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">NHL</th>
+                  </tr>
+                </thead>
+                <tbody className="text-[13px]">
+                  {[
+                    { book: "FanDuel", nba: "strong", ncaab: "partial", nfl: "strong", nhl: "partial" },
+                    { book: "DraftKings", nba: "strong", ncaab: "partial", nfl: "strong", nhl: "partial" },
+                    { book: "Caesars", nba: "partial", ncaab: "soon", nfl: "partial", nhl: "soon" },
+                    { book: "Bet365", nba: "partial", ncaab: "soon", nfl: "partial", nhl: "soon" },
+                    { book: "Pinnacle", nba: "soon", ncaab: "soon", nfl: "soon", nhl: "soon" },
+                    { book: "BetMGM", nba: "soon", ncaab: "soon", nfl: "soon", nhl: "soon" },
+                  ].map((row) => (
+                    <tr key={row.book} className="border-b border-white/[0.04]">
+                      <td className="py-2.5 pr-4 font-mono text-white">{row.book}</td>
+                      {[row.nba, row.ncaab, row.nfl, row.nhl].map((status, i) => (
+                        <td key={i} className="py-2.5 pr-4">
+                          <span className={`inline-flex items-center gap-1.5 text-[12px] font-mono ${
+                            status === "strong"
+                              ? "text-[#00FF88]"
+                              : status === "partial"
+                              ? "text-amber-400"
+                              : "text-zinc-600"
+                          }`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${
+                              status === "strong"
+                                ? "bg-[#00FF88]"
+                                : status === "partial"
+                                ? "bg-amber-400"
+                                : "bg-zinc-700"
+                            }`} />
+                            {status === "strong" ? "Strong" : status === "partial" ? "Partial" : "Coming soon"}
+                          </span>
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <SubHeading>Legend</SubHeading>
+            <div className="flex flex-wrap gap-6 mb-10">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#00FF88]" />
+                <span className="text-[13px] text-zinc-400">Strong — reliable coverage for most games</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-amber-400" />
+                <span className="text-[13px] text-zinc-400">Partial — available but may not cover all games</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-zinc-700" />
+                <span className="text-[13px] text-zinc-400">Coming soon — actively being developed</span>
+              </div>
+            </div>
+
+            <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5">
+              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
+                Coverage is continuously improving. We add new sportsbooks, sports, and market types regularly.
+                Seasonal sports (NFL, MLB, NCAAF) are available during their respective seasons.
+                If you need specific coverage for your use case, reach out to{" "}
+                <a href="mailto:david@wisesportsai.com" className="text-[#00FF88] hover:underline">
+                  david@wisesportsai.com
+                </a>.
+              </p>
+            </div>
           </section>
 
           {/* ─── Errors ────────────────────────────────────────────── */}

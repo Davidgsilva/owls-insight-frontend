@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, CreditCard, Lightning, ArrowSquareOut } from "@phosphor-icons/react";
+import { Check, CreditCard, ArrowSquareOut } from "@phosphor-icons/react";
 
 const tiers = {
   bench: {
@@ -240,7 +240,7 @@ export default function BillingPage() {
               return (
                 <Card
                   key={tier}
-                  className={`bg-[#111113] ${
+                  className={`bg-[#111113] flex flex-col ${
                     isCurrent
                       ? "border-[#00FF88]/50 ring-1 ring-[#00FF88]/20"
                       : "border-white/5"
@@ -267,7 +267,7 @@ export default function BillingPage() {
                       {config.description}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="flex flex-col flex-1 space-y-4">
                     <ul className="space-y-2">
                       {config.features.map((feature) => (
                         <li
@@ -280,28 +280,29 @@ export default function BillingPage() {
                       ))}
                     </ul>
 
-                    {isCurrent ? (
-                      <Button disabled className="w-full" variant="outline">
-                        Current Plan
-                      </Button>
-                    ) : isUpgrade ? (
-                      <Button
-                        onClick={() => handleUpgrade(tier)}
-                        disabled={isLoading === tier}
-                        className="w-full bg-[#00FF88] hover:bg-[#00d474] text-[#0a0a0a] font-semibold"
-                      >
-                        {isLoading === tier ? "Loading..." : "Upgrade"}
-                        <Lightning size={16} weight="fill" className="ml-2" />
-                      </Button>
-                    ) : (
-                      <Button
-                        onClick={handleManageBilling}
-                        variant="outline"
-                        className="w-full border-white/10 text-white hover:bg-white/5"
-                      >
-                        Manage in Portal
-                      </Button>
-                    )}
+                    <div className="mt-auto pt-4">
+                      {isCurrent ? (
+                        <Button disabled className="w-full" variant="outline">
+                          Current Plan
+                        </Button>
+                      ) : isUpgrade ? (
+                        <Button
+                          onClick={() => handleUpgrade(tier)}
+                          disabled={isLoading === tier}
+                          className="w-full bg-[#00FF88] hover:bg-[#00d474] text-[#0a0a0a] font-semibold"
+                        >
+                          {isLoading === tier ? "Loading..." : "Upgrade"}
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={handleManageBilling}
+                          variant="outline"
+                          className="w-full border-white/10 text-white hover:bg-white/5"
+                        >
+                          Manage in Portal
+                        </Button>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               );
@@ -336,7 +337,11 @@ export default function BillingPage() {
             <h3 className="text-white font-medium">Do you offer refunds?</h3>
             <p className="text-zinc-400 text-sm mt-1">
               We offer a pro-rated refund within the first 7 days if you&apos;re not satisfied.
-              Contact support for assistance.
+              Contact us at{" "}
+              <a href="mailto:david@wisesportsai.com" className="text-[#00FF88] hover:underline">
+                david@wisesportsai.com
+              </a>{" "}
+              for assistance.
             </p>
           </div>
         </CardContent>
