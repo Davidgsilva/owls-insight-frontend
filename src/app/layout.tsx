@@ -6,7 +6,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 export const metadata: Metadata = {
   title: "Owls Insight — Sports Betting Odds API",
   description:
-    "Aggregated sports betting odds and player props API. Compare lines across major sportsbooks for NBA, NFL, NHL, MLB, and college sports.",
+    "Aggregated sports betting odds and player props API. Compare lines across major sportsbooks and prediction markets.",
   keywords: [
     "sports betting API",
     "odds API",
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Owls Insight — Sports Betting Odds API",
     description:
-      "Aggregated sports betting odds and player props API. Compare lines across major sportsbooks for NBA, NFL, NHL, MLB, and college sports.",
+      "Aggregated sports betting odds and player props API. Compare lines across major sportsbooks and prediction markets.",
     url: "https://owlsinsight.com",
     siteName: "Owls Insight",
     type: "website",
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Owls Insight — Sports Betting Odds API",
     description:
-      "Aggregated sports betting odds and player props API. Compare lines across major sportsbooks for NBA, NFL, NHL, MLB, and college sports.",
+      "Aggregated sports betting odds and player props API. Compare lines across major sportsbooks and prediction markets.",
   },
   robots: {
     index: true,
