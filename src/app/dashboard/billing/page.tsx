@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -55,6 +56,20 @@ const tiers = {
 export default function BillingPage() {
   const { subscription, refreshUser } = useAuth();
   const [isLoading, setIsLoading] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const hasSynced = useRef(false);
+
+  // When returning from Stripe portal, sync subscription state directly from Stripe
+  // to avoid stale data due to webhook processing delay
+  useEffect(() => {
+    if (searchParams.get("from") === "portal" && !hasSynced.current) {
+      hasSynced.current = true;
+      window.history.replaceState({}, "", "/dashboard/billing");
+      fetch("/api/stripe/sync", { method: "POST", credentials: "include" })
+        .catch(() => {})
+        .finally(() => refreshUser());
+    }
+  }, [searchParams, refreshUser]);
 
   // Validate tier from API to prevent runtime errors
   const validTiers = ["free", "bench", "rookie", "mvp"] as const;
@@ -70,6 +85,7 @@ export default function BillingPage() {
 
   const trialDays = getTrialDaysRemaining();
   const isTrialing = subscription?.status === "trialing";
+  const trialCanceled = isTrialing && subscription?.cancelAtPeriodEnd;
   const trialEligible = subscription?.trialEligible ?? (currentTier === "free");
 
   async function handleUpgrade(tier: "bench" | "rookie" | "mvp") {
@@ -110,7 +126,7 @@ export default function BillingPage() {
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
-          returnUrl: `${window.location.origin}/dashboard/billing`,
+          returnUrl: `${window.location.origin}/dashboard/billing?from=portal`,
         }),
       });
 
@@ -173,6 +189,8 @@ export default function BillingPage() {
                 <p className="text-zinc-500 text-sm">
                   {currentTier === "free"
                     ? "Subscribe to get API access"
+                    : trialCanceled && trialDays !== null
+                    ? `Trial canceled — access until ${new Date(subscription!.currentPeriodEnd!).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
                     : isTrialing && trialDays !== null
                     ? `Free trial — ${trialDays} day${trialDays !== 1 ? "s" : ""} remaining`
                     : subscription?.status === "active"
@@ -198,27 +216,31 @@ export default function BillingPage() {
 
       {/* Trial Banner */}
       {isTrialing && trialDays !== null && (
-        <Card className="bg-[#00FF88]/5 border-[#00FF88]/20">
+        <Card className={trialCanceled ? "bg-zinc-500/5 border-zinc-500/20" : "bg-[#00FF88]/5 border-[#00FF88]/20"}>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[#00FF88] font-mono font-semibold text-lg">
-                  MVP Free Trial
+                <p className={`font-mono font-semibold text-lg ${trialCanceled ? "text-zinc-400" : "text-[#00FF88]"}`}>
+                  {trialCanceled ? "Trial Canceled" : "MVP Free Trial"}
                 </p>
                 <p className="text-zinc-400 text-sm mt-1">
-                  {trialDays > 0
+                  {trialCanceled
+                    ? `Your trial has been canceled. You'll retain MVP access until ${new Date(subscription!.currentPeriodEnd!).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}.`
+                    : trialDays > 0
                     ? `Your trial ends on ${new Date(subscription!.currentPeriodEnd!).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}. Your card will be charged $49.99/mo after the trial.`
                     : "Your trial has ended. Your card will be charged shortly."}
                 </p>
               </div>
-              <Button
-                onClick={handleManageBilling}
-                disabled={isLoading === "portal"}
-                variant="outline"
-                className="border-[#00FF88]/30 text-[#00FF88] hover:bg-[#00FF88]/10 shrink-0"
-              >
-                {isLoading === "portal" ? "Loading..." : "Cancel Trial"}
-              </Button>
+              {!trialCanceled && (
+                <Button
+                  onClick={handleManageBilling}
+                  disabled={isLoading === "portal"}
+                  variant="outline"
+                  className="border-[#00FF88]/30 text-[#00FF88] hover:bg-[#00FF88]/10 shrink-0"
+                >
+                  {isLoading === "portal" ? "Loading..." : "Cancel Trial"}
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
