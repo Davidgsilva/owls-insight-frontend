@@ -4,9 +4,9 @@ import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
 
 export const metadata: Metadata = {
-  title: "Owls Insight",
+  title: "Owls Insight — Sports Betting Odds API",
   description:
-    "Professional-grade sports betting odds API with real-time WebSocket updates. Access odds from Pinnacle, FanDuel, DraftKings, BetMGM, Bet365, and Caesars across NBA, NFL, NHL, MLB, NCAAB, and NCAAF.",
+    "Aggregated sports betting odds and player props API. Compare lines across major sportsbooks for NBA, NFL, NHL, MLB, and college sports.",
   keywords: [
     "sports betting API",
     "odds API",
@@ -21,9 +21,9 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Owls Insight" }],
   openGraph: {
-    title: "Owls Insight",
+    title: "Owls Insight — Sports Betting Odds API",
     description:
-      "Professional-grade sports betting odds API with real-time WebSocket updates from 6 major sportsbooks.",
+      "Aggregated sports betting odds and player props API. Compare lines across major sportsbooks for NBA, NFL, NHL, MLB, and college sports.",
     url: "https://owlsinsight.com",
     siteName: "Owls Insight",
     type: "website",
@@ -31,9 +31,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Owls Insight",
+    title: "Owls Insight — Sports Betting Odds API",
     description:
-      "Professional-grade sports betting odds API with real-time WebSocket updates from 6 major sportsbooks.",
+      "Aggregated sports betting odds and player props API. Compare lines across major sportsbooks for NBA, NFL, NHL, MLB, and college sports.",
   },
   robots: {
     index: true,
