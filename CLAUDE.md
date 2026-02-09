@@ -43,9 +43,48 @@ src/
 AWS EKS deployment configured:
 - Dockerfile uses multi-stage build with `output: "standalone"`
 - K8s manifests in `k8s/` (deployment, service, ingress)
-- Namespace: `owls-insight-dev`
+- Namespace: `owls-insight-prod`
 - ECR registry: `482566359918.dkr.ecr.us-east-1.amazonaws.com/owls-insight-frontend`
 - Environment variable: `NEXT_PUBLIC_API_URL` points to `https://api.owlsinsight.com`
+
+### CRITICAL: Deploying the Frontend
+
+**ALWAYS use `--profile wisesports` for ALL AWS CLI commands.** Account `482566359918`.
+
+**Before building a Docker image, ALWAYS verify you are building from the correct commit:**
+
+```bash
+# 1. Check for uncommitted changes — commit or stash them first
+git status
+git log --oneline -5
+
+# 2. Confirm HEAD is what you expect to deploy
+# If the user has been making changes in this session, ALL changes must be
+# committed before building. Docker builds from the working directory — any
+# uncommitted files WILL be included, but any changes in other worktrees or
+# sessions that were committed but not pulled will be MISSING.
+
+# 3. Check what version is currently running
+kubectl get deployment owls-insight-frontend -n owls-insight-prod -o jsonpath='{.spec.template.spec.containers[0].image}'
+
+# 4. Bump the version tag (never reuse an existing tag)
+# Look at the current running tag and increment it
+
+# 5. Build, push, deploy
+aws ecr get-login-password --region us-east-1 --profile wisesports | docker login --username AWS --password-stdin 482566359918.dkr.ecr.us-east-1.amazonaws.com
+docker build -t 482566359918.dkr.ecr.us-east-1.amazonaws.com/owls-insight-frontend:v1.X.X .
+docker push 482566359918.dkr.ecr.us-east-1.amazonaws.com/owls-insight-frontend:v1.X.X
+kubectl set image deployment/owls-insight-frontend -n owls-insight-prod frontend=482566359918.dkr.ecr.us-east-1.amazonaws.com/owls-insight-frontend:v1.X.X
+kubectl rollout status deployment/owls-insight-frontend -n owls-insight-prod --timeout=90s
+```
+
+**NEVER:**
+- Build and deploy without checking `git status` and `git log` first
+- Reuse an existing image tag — always increment the version
+- Deploy from a stale working directory without pulling latest changes
+- Skip `kubectl rollout status` — always verify the rollout succeeded
+
+**What happened (Feb 2026):** A Claude Code session built and deployed the frontend from an older commit, overwriting a newer production version with stale code. This rolled back features and bug fixes that were already live. Always verify HEAD contains all expected changes before building.
 
 ## Known Issues & Gotchas
 
