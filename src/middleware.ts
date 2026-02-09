@@ -43,17 +43,19 @@ export function middleware(request: NextRequest) {
   const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
 
   // Redirect to login if accessing protected route without token
+  // Use raw Response to avoid NextResponse.redirect() rewriting Location
+  // to the server's bind address (0.0.0.0:3000) in standalone mode
   if (isProtectedRoute && !token) {
     const origin = getOrigin(request);
     const loginUrl = new URL("/login", origin);
     loginUrl.searchParams.set("redirect", pathname);
-    return NextResponse.redirect(loginUrl);
+    return new Response(null, { status: 302, headers: { Location: loginUrl.toString() } });
   }
 
   // Redirect to dashboard if accessing auth routes with valid token
   if (isAuthRoute && token) {
     const origin = getOrigin(request);
-    return NextResponse.redirect(new URL("/dashboard", origin));
+    return new Response(null, { status: 302, headers: { Location: new URL("/dashboard", origin).toString() } });
   }
 
   return NextResponse.next();
