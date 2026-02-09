@@ -230,7 +230,7 @@ export default function DocsPage() {
               API Reference
             </h1>
             <p className="text-zinc-500 text-sm font-sans leading-relaxed mb-10">
-              REST API and WebSocket streaming for real-time sports betting odds from 7 sportsbooks and Kalshi prediction markets.
+              REST API and WebSocket streaming for real-time sports betting odds from major sportsbooks and Kalshi prediction markets.
             </p>
 
             <div className="rounded-lg bg-[#111113] border border-white/[0.06] px-5 py-4 mb-10">
@@ -1084,7 +1084,7 @@ X-RateLimit-Remaining-Month: 62340`}
           <section id="coverage" className="mb-20">
             <SectionHeading>Coverage</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-6 leading-relaxed">
-              We aggregate odds from 7 sportsbooks across multiple sports. Coverage varies by sport, book, and market type.
+              We aggregate odds from multiple sportsbooks across multiple sports. Coverage varies by sport, book, and market type.
               We&apos;re continuously expanding coverage and improving data quality.
             </p>
 
