@@ -7,6 +7,7 @@ import {
   Key,
   ChartBar,
   CreditCard,
+  GearSix,
   FileText,
   SignOut,
 } from "@phosphor-icons/react";
@@ -18,6 +19,7 @@ const navigation = [
   { name: "API Keys", href: "/dashboard/keys", icon: Key },
   { name: "Usage", href: "/dashboard/usage", icon: ChartBar },
   { name: "Billing", href: "/dashboard/billing", icon: CreditCard },
+  { name: "Account", href: "/dashboard/account", icon: GearSix },
 ];
 
 const secondaryNavigation = [

@@ -9,6 +9,7 @@ interface User {
   emailVerified: boolean;
   discordUsername: string | null;
   discordAvatar: string | null;
+  hasPassword: boolean;
   createdAt: string;
 }
 
