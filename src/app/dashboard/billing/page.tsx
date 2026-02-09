@@ -70,6 +70,7 @@ export default function BillingPage() {
 
   const trialDays = getTrialDaysRemaining();
   const isTrialing = subscription?.status === "trialing";
+  const trialEligible = subscription?.trialEligible ?? (currentTier === "free");
 
   async function handleUpgrade(tier: "bench" | "rookie" | "mvp") {
     setIsLoading(tier);
@@ -223,6 +224,32 @@ export default function BillingPage() {
         </Card>
       )}
 
+      {/* Free Trial Banner — shown to free users who haven't subscribed */}
+      {trialEligible && (
+        <Card className="bg-gradient-to-r from-purple-500/10 to-[#00FF88]/10 border-purple-500/20">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-white font-mono font-semibold text-lg">
+                  Try MVP free for 7 days
+                </p>
+                <p className="text-zinc-400 text-sm mt-1">
+                  Get full API access with 300K requests/month, WebSocket streaming, player props, and historical data.
+                  Cancel anytime during the trial — you won&apos;t be charged.
+                </p>
+              </div>
+              <Button
+                onClick={() => handleUpgrade("mvp")}
+                disabled={isLoading === "mvp"}
+                className="bg-[#00FF88] hover:bg-[#00d474] text-[#0a0a0a] font-semibold shrink-0 ml-4"
+              >
+                {isLoading === "mvp" ? "Loading..." : "Start 7-Day Free Trial"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Available Plans */}
       <div>
         <h2 className="text-lg font-mono font-semibold text-white mb-4">
@@ -262,6 +289,9 @@ export default function BillingPage() {
                         {config.price}
                       </span>
                       <span className="text-zinc-500">/month</span>
+                      {tier === "mvp" && trialEligible && (
+                        <p className="text-xs text-[#00FF88] font-mono mt-1">7-day free trial</p>
+                      )}
                     </div>
                     <CardDescription className="text-zinc-500">
                       {config.description}
@@ -291,7 +321,11 @@ export default function BillingPage() {
                           disabled={isLoading === tier}
                           className="w-full bg-[#00FF88] hover:bg-[#00d474] text-[#0a0a0a] font-semibold"
                         >
-                          {isLoading === tier ? "Loading..." : "Upgrade"}
+                          {isLoading === tier
+                            ? "Loading..."
+                            : tier === "mvp" && trialEligible
+                            ? "Start 7-Day Free Trial"
+                            : "Upgrade"}
                         </Button>
                       ) : (
                         <Button

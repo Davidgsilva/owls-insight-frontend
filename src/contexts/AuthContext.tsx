@@ -17,6 +17,7 @@ interface Subscription {
   status: "active" | "past_due" | "canceled" | "trialing" | "paused" | "inactive";
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean;
+  trialEligible: boolean;
 }
 
 interface AuthContextType {
