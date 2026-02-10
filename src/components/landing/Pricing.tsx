@@ -141,12 +141,12 @@ export function Pricing() {
         <div className="mt-16 text-center">
           <p className="text-neutral-500">
             Have questions?{" "}
-            <a
-              href="mailto:david@wisesportsai.com"
+            <Link
+              href="/contact"
               className="text-[#00FF88] hover:text-[#00d4aa] transition-colors"
             >
               Contact us
-            </a>
+            </Link>
           </p>
         </div>
       </div>
