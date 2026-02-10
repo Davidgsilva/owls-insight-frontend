@@ -247,7 +247,13 @@
 }
 
 .animate-ticker {
-  animation: ticker 50s linear infinite;
+  animation: ticker 30s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-ticker {
+    animation-play-state: paused;
+  }
 }
 
 .animate-pulse-glow {

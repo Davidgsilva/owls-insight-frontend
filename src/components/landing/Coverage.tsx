@@ -1,41 +1,13 @@
 "use client";
 
 const sportsbooks = [
-  {
-    name: "Pinnacle",
-    description: "Sharp book, no limits",
-    logo: "https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://pinnacle.com&size=128",
-  },
-  {
-    name: "FanDuel",
-    description: "Top US retail book",
-    logo: "https://www.google.com/s2/favicons?domain=fanduel.com&sz=128",
-  },
-  {
-    name: "DraftKings",
-    description: "Full market coverage",
-    logo: "https://www.google.com/s2/favicons?domain=draftkings.com&sz=128",
-  },
-  {
-    name: "BetMGM",
-    description: "Vegas-backed lines",
-    logo: "https://www.google.com/s2/favicons?domain=betmgm.com&sz=128",
-  },
-  {
-    name: "Bet365",
-    description: "Global market leader",
-    logo: "https://www.google.com/s2/favicons?domain=bet365.com&sz=128",
-  },
-  {
-    name: "Caesars",
-    description: "Casino heritage",
-    logo: "https://www.google.com/s2/favicons?domain=caesars.com&sz=128",
-  },
-  {
-    name: "Kalshi",
-    description: "Prediction markets",
-    logo: "https://www.google.com/s2/favicons?domain=kalshi.com&sz=128",
-  },
+  { name: "Pinnacle", logo: "https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://pinnacle.com&size=128" },
+  { name: "FanDuel", logo: "https://www.google.com/s2/favicons?domain=fanduel.com&sz=128" },
+  { name: "DraftKings", logo: "https://www.google.com/s2/favicons?domain=draftkings.com&sz=128" },
+  { name: "BetMGM", logo: "https://www.google.com/s2/favicons?domain=betmgm.com&sz=128" },
+  { name: "Bet365", logo: "https://www.google.com/s2/favicons?domain=bet365.com&sz=128" },
+  { name: "Caesars", logo: "https://www.google.com/s2/favicons?domain=caesars.com&sz=128" },
+  { name: "Kalshi", logo: "https://www.google.com/s2/favicons?domain=kalshi.com&sz=128" },
 ];
 
 const sports = [
@@ -80,7 +52,7 @@ export function Coverage() {
             <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#050505] to-transparent z-10 pointer-events-none" />
             <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#050505] to-transparent z-10 pointer-events-none" />
 
-            <div className="flex animate-ticker w-max">
+            <div className="flex animate-ticker w-max" style={{ animationDuration: "50s" }}>
               {[...sportsbooks, ...sportsbooks].map((book, i) => (
                 <div
                   key={`${book.name}-${i}`}
@@ -110,7 +82,7 @@ export function Coverage() {
             <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#050505] to-transparent z-10 pointer-events-none" />
             <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#050505] to-transparent z-10 pointer-events-none" />
 
-            <div className="flex animate-ticker w-max" style={{ animationDirection: "reverse" }}>
+            <div className="flex animate-ticker w-max" style={{ animationDuration: "50s", animationDirection: "reverse" }}>
               {[...sports, ...sports].map((sport, i) => (
                 <div
                   key={`${sport.name}-${i}`}

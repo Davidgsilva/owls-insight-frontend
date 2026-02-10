@@ -75,11 +75,10 @@ export function Features() {
 
         {/* Features Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {features.map((feature, index) => (
+          {features.map((feature) => (
             <div
               key={feature.title}
               className="relative p-6 rounded-xl bg-[#111111] border border-white/5"
-              style={{ animationDelay: `${index * 0.1}s` }}
             >
               {/* Highlight badge */}
               <div className="absolute top-4 right-4">
