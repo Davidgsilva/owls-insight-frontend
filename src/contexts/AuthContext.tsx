@@ -88,9 +88,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch {
         localStorage.removeItem(USER_STORAGE_KEY);
       }
+      // Only validate with server if we have a stored session
+      validateSession();
+    } else {
+      // No stored session — skip the API call entirely
+      setIsLoading(false);
     }
-    // Validate session with server
-    validateSession();
   }, [validateSession]);
 
   const refreshUser = useCallback(async () => {
