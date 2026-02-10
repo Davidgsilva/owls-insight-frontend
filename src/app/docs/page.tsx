@@ -1155,21 +1155,22 @@ X-RateLimit-Remaining-Month: 62340`}
                     <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">NBA</th>
                     <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">NCAAB</th>
                     <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">NFL</th>
-                    <th className="text-left py-2.5 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">NHL</th>
+                    <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">NHL</th>
+                    <th className="text-left py-2.5 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">MLB</th>
                   </tr>
                 </thead>
                 <tbody className="text-[13px]">
                   {[
-                    { book: "FanDuel", nba: "strong", ncaab: "partial", nfl: "strong", nhl: "partial" },
-                    { book: "DraftKings", nba: "strong", ncaab: "partial", nfl: "strong", nhl: "partial" },
-                    { book: "Caesars", nba: "partial", ncaab: "soon", nfl: "partial", nhl: "soon" },
-                    { book: "Bet365", nba: "partial", ncaab: "soon", nfl: "partial", nhl: "soon" },
-                    { book: "Pinnacle", nba: "soon", ncaab: "soon", nfl: "soon", nhl: "soon" },
-                    { book: "BetMGM", nba: "soon", ncaab: "soon", nfl: "soon", nhl: "soon" },
+                    { book: "FanDuel", nba: "strong", ncaab: "partial", nfl: "partial", nhl: "partial", mlb: "soon" },
+                    { book: "DraftKings", nba: "strong", ncaab: "soon", nfl: "partial", nhl: "soon", mlb: "soon" },
+                    { book: "Caesars", nba: "strong", ncaab: "soon", nfl: "partial", nhl: "soon", mlb: "soon" },
+                    { book: "Pinnacle", nba: "partial", ncaab: "soon", nfl: "partial", nhl: "soon", mlb: "soon" },
+                    { book: "Bet365", nba: "partial", ncaab: "soon", nfl: "partial", nhl: "soon", mlb: "soon" },
+                    { book: "BetMGM", nba: "partial", ncaab: "soon", nfl: "soon", nhl: "soon", mlb: "soon" },
                   ].map((row) => (
                     <tr key={row.book} className="border-b border-white/[0.04]">
                       <td className="py-2.5 pr-4 font-mono text-white">{row.book}</td>
-                      {[row.nba, row.ncaab, row.nfl, row.nhl].map((status, i) => (
+                      {[row.nba, row.ncaab, row.nfl, row.nhl, row.mlb].map((status, i) => (
                         <td key={i} className="py-2.5 pr-4">
                           <span className={`inline-flex items-center gap-1.5 text-[12px] font-mono ${
                             status === "strong"
