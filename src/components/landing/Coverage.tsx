@@ -4,43 +4,36 @@ const sportsbooks = [
   {
     name: "Pinnacle",
     description: "Sharp book, no limits",
-    badge: "Sharp",
     logo: "https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://pinnacle.com&size=128",
   },
   {
     name: "FanDuel",
     description: "Top US retail book",
-    badge: "Props",
     logo: "https://www.google.com/s2/favicons?domain=fanduel.com&sz=128",
   },
   {
     name: "DraftKings",
     description: "Full market coverage",
-    badge: "Props",
     logo: "https://www.google.com/s2/favicons?domain=draftkings.com&sz=128",
   },
   {
     name: "BetMGM",
     description: "Vegas-backed lines",
-    badge: "Props",
     logo: "https://www.google.com/s2/favicons?domain=betmgm.com&sz=128",
   },
   {
     name: "Bet365",
     description: "Global market leader",
-    badge: "Props",
     logo: "https://www.google.com/s2/favicons?domain=bet365.com&sz=128",
   },
   {
     name: "Caesars",
     description: "Casino heritage",
-    badge: "Props",
     logo: "https://www.google.com/s2/favicons?domain=caesars.com&sz=128",
   },
   {
     name: "Kalshi",
     description: "Prediction markets",
-    badge: "Exchange",
     logo: "https://www.google.com/s2/favicons?domain=kalshi.com&sz=128",
   },
 ];
@@ -76,61 +69,64 @@ export function Coverage() {
           </p>
         </div>
 
-        {/* Sportsbooks Grid */}
+        {/* Sportsbooks Carousel */}
         <div className="mb-16">
           <h3 className="text-sm font-mono text-zinc-500 mb-6 flex items-center gap-2">
             <span className="w-8 h-px bg-zinc-700" />
             SOURCES
           </h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {sportsbooks.map((book) => (
-              <div
-                key={book.name}
-                className="group p-4 rounded-xl bg-[#111111] border border-white/5 hover:border-white/10 transition-all"
-              >
-                <div className="flex items-center justify-between mb-3">
+          <div className="relative overflow-hidden">
+            {/* Fade edges */}
+            <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#050505] to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#050505] to-transparent z-10 pointer-events-none" />
+
+            <div className="flex animate-ticker w-max">
+              {[...sportsbooks, ...sportsbooks].map((book, i) => (
+                <div
+                  key={`${book.name}-${i}`}
+                  className="flex items-center gap-3 px-6 py-3 mx-2 rounded-lg border border-white/[0.04] bg-white/[0.02] opacity-50"
+                >
                   <img
                     src={book.logo}
                     alt={`${book.name} logo`}
-                    className="w-8 h-8 rounded"
+                    className="w-6 h-6 rounded grayscale"
                   />
-                  <span className="text-xs font-mono text-[#00FF88]/60">
-                    {book.badge}
+                  <span className="text-sm font-mono text-zinc-500 whitespace-nowrap">
+                    {book.name}
                   </span>
                 </div>
-                <div className="text-sm text-white font-medium mb-1">
-                  {book.name}
-                </div>
-                <div className="text-xs text-zinc-500">{book.description}</div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Sports Grid */}
+        {/* Sports Carousel */}
         <div>
           <h3 className="text-sm font-mono text-zinc-500 mb-6 flex items-center gap-2">
             <span className="w-8 h-px bg-zinc-700" />
             SPORTS
           </h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {sports.map((sport) => (
-              <div
-                key={sport.name}
-                className="group p-4 rounded-xl bg-[#111111] border border-white/5 hover:border-[#00FF88]/20 transition-all text-center"
-              >
-                <div className="flex justify-center mb-2">
+          <div className="relative overflow-hidden">
+            <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#050505] to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#050505] to-transparent z-10 pointer-events-none" />
+
+            <div className="flex animate-ticker w-max" style={{ animationDirection: "reverse" }}>
+              {[...sports, ...sports].map((sport, i) => (
+                <div
+                  key={`${sport.name}-${i}`}
+                  className="flex items-center gap-3 px-6 py-3 mx-2 rounded-lg border border-white/[0.04] bg-white/[0.02] opacity-50"
+                >
                   <img
                     src={sport.logo}
                     alt={`${sport.name} logo`}
-                    className="w-8 h-8"
+                    className="w-6 h-6 grayscale"
                   />
+                  <span className="text-sm font-mono text-zinc-500 whitespace-nowrap">
+                    {sport.name}
+                  </span>
                 </div>
-                <div className="font-mono font-bold text-white">
-                  {sport.name}
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
 

@@ -78,23 +78,23 @@ export function Features() {
           {features.map((feature, index) => (
             <div
               key={feature.title}
-              className="group relative p-6 rounded-xl bg-[#111111] border border-white/5 card-hover"
+              className="relative p-6 rounded-xl bg-[#111111] border border-white/5"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               {/* Highlight badge */}
               <div className="absolute top-4 right-4">
-                <span className="text-xs font-mono text-[#00FF88]/60 group-hover:text-[#00FF88] transition-colors">
+                <span className="text-xs font-mono text-[#00FF88]/60">
                   {feature.highlight}
                 </span>
               </div>
 
               {/* Icon */}
-              <div className="w-12 h-12 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center mb-4 group-hover:border-[#00FF88]/30 group-hover:bg-[#00FF88]/5 transition-all">
-                <feature.icon size={24} weight="duotone" className="text-neutral-400 group-hover:text-[#00FF88] transition-colors" />
+              <div className="w-12 h-12 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center mb-4">
+                <feature.icon size={24} weight="duotone" className="text-neutral-400" />
               </div>
 
               {/* Content */}
-              <h3 className="text-lg font-mono font-semibold mb-2 group-hover:text-[#00FF88] transition-colors">
+              <h3 className="text-lg font-mono font-semibold mb-2">
                 {feature.title}
               </h3>
               <p className="text-sm text-zinc-500 leading-relaxed">
