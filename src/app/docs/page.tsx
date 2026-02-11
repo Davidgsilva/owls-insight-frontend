@@ -901,6 +901,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
               <Endpoint method="GET" path="/api/v1/history/odds" description="Historical odds snapshots for an archived game" tier="MVP" />
               <Endpoint method="GET" path="/api/v1/history/props" description="Historical props snapshots for an archived game" tier="MVP" />
               <Endpoint method="GET" path="/api/v1/history/stats" description="Historical player box scores for archived games" tier="MVP" />
+              <Endpoint method="GET" path="/api/v1/history/stats/averages" description="Rolling averages (L5/L10/L20) with optional H2H filtering" tier="Rookie+" />
             </div>
 
             <SubHeading>/history/games parameters</SubHeading>
@@ -1091,6 +1092,132 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
   }
 }`}
             />
+
+            <SubHeading>/history/stats/averages parameters</SubHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-4">
+              Compute rolling averages (last 5, 10, 20 games) for a player. Add the <code className="text-[13px] font-mono text-zinc-300">opponent</code> parameter for head-to-head averages against a specific team.
+              Shooting percentages are computed from totals (sum of makes / sum of attempts), not per-game averages.
+              Games where the player did not play are excluded.
+            </p>
+            <ParamTable
+              params={[
+                { name: "playerName", type: "string", required: true, description: "Player name (case-insensitive exact match)" },
+                { name: "sport", type: "string", required: false, description: "Filter by sport (nba, ncaab, nfl, nhl, ncaaf, mlb)" },
+                { name: "opponent", type: "string", required: false, description: "H2H filter by opponent team name (e.g. \"Boston Celtics\")" },
+                { name: "startDate", type: "string", required: false, description: "Start date (YYYY-MM-DD)" },
+                { name: "endDate", type: "string", required: false, description: "End date (YYYY-MM-DD)" },
+              ]}
+            />
+
+            <SubHeading>Averages example requests</SubHeading>
+            <CodeBlock
+              language="bash"
+              code={`# Rolling averages for a player
+curl -H "Authorization: Bearer YOUR_API_KEY" \\
+  "https://api.owlsinsight.com/api/v1/history/stats/averages?playerName=Jalen%20Brunson&sport=nba"
+
+# Head-to-head averages vs a specific team
+curl -H "Authorization: Bearer YOUR_API_KEY" \\
+  "https://api.owlsinsight.com/api/v1/history/stats/averages?playerName=Jalen%20Brunson&opponent=Boston%20Celtics"`}
+            />
+
+            <SubHeading>Averages response</SubHeading>
+            <CodeBlock
+              language="json"
+              code={`{
+  "success": true,
+  "data": {
+    "player": {
+      "name": "Jalen Brunson",
+      "team": "New York Knicks",
+      "position": "PG"
+    },
+    "opponent": null,
+    "averages": {
+      "last5": {
+        "gamesPlayed": 5,
+        "ppg": 28.4,
+        "rpg": 3.2,
+        "apg": 7.8,
+        "spg": 1.2,
+        "bpg": 0.4,
+        "topg": 2.2,
+        "fgPct": 0.512,
+        "threePct": 0.389,
+        "ftPct": 0.911,
+        "minutesAvg": 34.5,
+        "plusMinusAvg": 8.2
+      },
+      "last10": { "gamesPlayed": 10, "ppg": 27.1, "..." : "..." },
+      "last20": { "gamesPlayed": 20, "ppg": 26.8, "..." : "..." }
+    },
+    "gameLogs": [
+      {
+        "gameDate": "2026-02-10",
+        "opponent": "Indiana Pacers",
+        "homeAway": "home",
+        "teamScore": 134,
+        "stats": {
+          "minutes": "35:22",
+          "points": 31,
+          "rebounds": 4,
+          "assists": 9,
+          "steals": 2,
+          "blocks": 0,
+          "turnovers": 3,
+          "fouls": 2,
+          "plusMinus": 12,
+          "fg": { "made": 12, "attempted": 22 },
+          "threePoint": { "made": 3, "attempted": 7 },
+          "freeThrow": { "made": 4, "attempted": 4 }
+        }
+      }
+    ]
+  }
+}`}
+            />
+
+            <SubHeading>Averages fields</SubHeading>
+            <div className="overflow-x-auto mb-8">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-white/[0.08]">
+                    <th className="text-left py-2 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Field</th>
+                    <th className="text-left py-2 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Description</th>
+                  </tr>
+                </thead>
+                <tbody className="text-[13px]">
+                  {[
+                    { field: "ppg", desc: "Points per game" },
+                    { field: "rpg", desc: "Rebounds per game" },
+                    { field: "apg", desc: "Assists per game" },
+                    { field: "spg", desc: "Steals per game" },
+                    { field: "bpg", desc: "Blocks per game" },
+                    { field: "topg", desc: "Turnovers per game" },
+                    { field: "fgPct", desc: "Field goal percentage (0.0\u20131.0)" },
+                    { field: "threePct", desc: "Three-point percentage (0.0\u20131.0)" },
+                    { field: "ftPct", desc: "Free throw percentage (0.0\u20131.0)" },
+                    { field: "minutesAvg", desc: "Average minutes per game" },
+                    { field: "plusMinusAvg", desc: "Average plus/minus per game" },
+                  ].map((row) => (
+                    <tr key={row.field} className="border-b border-white/[0.04]">
+                      <td className="py-2.5 pr-6 font-mono text-white whitespace-nowrap">{row.field}</td>
+                      <td className="py-2.5 text-zinc-400">{row.desc}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5">
+              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
+                Windows that don&apos;t have enough games return <code className="text-[13px] font-mono text-zinc-300">null</code>.
+                For example, if a player has only 7 archived games, <code className="text-[13px] font-mono text-zinc-300">last5</code> and{" "}
+                <code className="text-[13px] font-mono text-zinc-300">last10</code> will have data (with <code className="text-[13px] font-mono text-zinc-300">gamesPlayed: 7</code> for last10),
+                but <code className="text-[13px] font-mono text-zinc-300">last20</code> will also show <code className="text-[13px] font-mono text-zinc-300">gamesPlayed: 7</code> since
+                fewer than 20 games are available. Up to 100 game logs are returned.
+              </p>
+            </div>
           </section>
 
           {/* ─── WebSocket API ─────────────────────────────────────── */}
