@@ -19,6 +19,14 @@ export async function GET(request: NextRequest) {
 
     const data = await response.json();
 
+    // If the token is invalid/expired, clear the httpOnly cookie so the
+    // middleware stops redirecting /login → /dashboard in a loop
+    if (response.status === 401) {
+      const res = NextResponse.json(data, { status: 401 });
+      res.cookies.set('token', '', { expires: new Date(0), path: '/' });
+      return res;
+    }
+
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
     console.error("Auth me proxy error:", error);
