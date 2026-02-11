@@ -75,7 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Hydrate user from localStorage on mount
+  // Hydrate user from localStorage on mount, then validate with server
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -88,12 +88,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch {
         localStorage.removeItem(USER_STORAGE_KEY);
       }
-      // Only validate with server if we have a stored session
-      validateSession();
-    } else {
-      // No stored session — skip the API call entirely
-      setIsLoading(false);
     }
+    // Always validate — the server may have set an httpOnly token cookie
+    // (e.g. Discord OAuth) that localStorage doesn't know about
+    validateSession();
   }, [validateSession]);
 
   const refreshUser = useCallback(async () => {
