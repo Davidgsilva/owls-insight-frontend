@@ -11,6 +11,7 @@ const sections = [
   { id: "odds-api", label: "Odds" },
   { id: "props-api", label: "Player Props" },
   { id: "scores-api", label: "Live Scores" },
+  { id: "stats-api", label: "Player Stats" },
   { id: "kalshi-api", label: "Kalshi Markets" },
   { id: "history-api", label: "Historical Data" },
   { id: "websocket", label: "WebSocket" },
@@ -547,6 +548,149 @@ export default function DocsPage() {
             />
           </section>
 
+          {/* ─── Player Stats API ──────────────────────────────────── */}
+          <section id="stats-api" className="mb-20">
+            <SectionHeading>Player Stats API</SectionHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-2">
+              Live and final box score data from ESPN. Returns per-player statistics including points, rebounds, assists, shooting splits, and more for today&apos;s games.
+            </p>
+            <p className="text-sm mb-6">
+              <TierBadge tier="Rookie+" />
+            </p>
+
+            <SubHeading>Endpoints</SubHeading>
+            <div className="mb-8">
+              <Endpoint method="GET" path="/api/v1/nba/stats" description="Box scores for today's NBA games (live and completed)" tier="Rookie+" />
+            </div>
+
+            <SubHeading>Parameters</SubHeading>
+            <ParamTable
+              params={[
+                { name: "date", type: "string", required: false, description: "Date in YYYY-MM-DD or YYYYMMDD format (defaults to today ET)" },
+                { name: "player", type: "string", required: false, description: "Filter by player name (partial match)" },
+              ]}
+            />
+
+            <SubHeading>Example request</SubHeading>
+            <CodeBlock
+              language="bash"
+              code={`# Today's box scores
+curl -H "Authorization: Bearer YOUR_API_KEY" \\
+  "https://api.owlsinsight.com/api/v1/nba/stats"
+
+# Specific date, filtered to a player
+curl -H "Authorization: Bearer YOUR_API_KEY" \\
+  "https://api.owlsinsight.com/api/v1/nba/stats?date=2026-02-10&player=Towns"`}
+            />
+
+            <SubHeading>Response</SubHeading>
+            <CodeBlock
+              language="json"
+              code={`{
+  "success": true,
+  "data": [
+    {
+      "gameId": "401810626",
+      "sport": "nba",
+      "name": "Indiana Pacers at New York Knicks",
+      "startTime": "2026-02-11T00:30Z",
+      "status": {
+        "state": "post",
+        "detail": "Final/OT",
+        "displayClock": "0:00",
+        "period": 0
+      },
+      "home": {
+        "team": {
+          "displayName": "New York Knicks",
+          "abbreviation": "NY"
+        },
+        "score": 134,
+        "players": [
+          {
+            "id": "3136195",
+            "name": "Karl-Anthony Towns",
+            "position": "C",
+            "jersey": "32",
+            "starter": true,
+            "didNotPlay": false,
+            "stats": {
+              "minutes": "32",
+              "points": 22,
+              "rebounds": 14,
+              "assists": 3,
+              "steals": 0,
+              "blocks": 0,
+              "turnovers": 5,
+              "fouls": 6,
+              "plusMinus": "+6",
+              "fieldGoals": "8-17",
+              "threePointers": "1-6",
+              "freeThrows": "5-6"
+            }
+          }
+        ]
+      },
+      "away": {
+        "team": {
+          "displayName": "Indiana Pacers",
+          "abbreviation": "IND"
+        },
+        "score": 130,
+        "players": [ ... ]
+      }
+    }
+  ],
+  "meta": {
+    "sport": "nba",
+    "date": "2026-02-10",
+    "gameCount": 4
+  }
+}`}
+            />
+
+            <SubHeading>Player stats fields</SubHeading>
+            <div className="overflow-x-auto mb-8">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-white/[0.08]">
+                    <th className="text-left py-2 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Field</th>
+                    <th className="text-left py-2 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Description</th>
+                  </tr>
+                </thead>
+                <tbody className="text-[13px]">
+                  {[
+                    { field: "minutes", desc: "Minutes played" },
+                    { field: "points", desc: "Total points scored" },
+                    { field: "rebounds", desc: "Total rebounds" },
+                    { field: "assists", desc: "Total assists" },
+                    { field: "steals", desc: "Total steals" },
+                    { field: "blocks", desc: "Total blocks" },
+                    { field: "turnovers", desc: "Total turnovers" },
+                    { field: "fouls", desc: "Personal fouls" },
+                    { field: "plusMinus", desc: "Plus/minus rating (e.g. \"+6\", \"-3\")" },
+                    { field: "fieldGoals", desc: "Field goals as \"made-attempted\" (e.g. \"8-17\")" },
+                    { field: "threePointers", desc: "Three-pointers as \"made-attempted\" (e.g. \"1-6\")" },
+                    { field: "freeThrows", desc: "Free throws as \"made-attempted\" (e.g. \"5-6\")" },
+                  ].map((row) => (
+                    <tr key={row.field} className="border-b border-white/[0.04]">
+                      <td className="py-2.5 pr-6 font-mono text-white whitespace-nowrap">{row.field}</td>
+                      <td className="py-2.5 text-zinc-400">{row.desc}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5">
+              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
+                Stats are sourced from ESPN and update in real-time during live games.
+                When a game completes, the final box score is automatically archived to the{" "}
+                <a href="#history-api" className="text-[#00FF88] hover:underline">Historical Data API</a> for long-term access.
+              </p>
+            </div>
+          </section>
+
           {/* ─── Kalshi Markets API ──────────────────────────────────── */}
           <section id="kalshi-api" className="mb-20">
             <SectionHeading>Kalshi Markets API</SectionHeading>
@@ -745,7 +889,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
           <section id="history-api" className="mb-20">
             <SectionHeading>Historical Data API</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-2">
-              Archived odds and props snapshots for completed games. Data is archived automatically when games finish.
+              Archived odds, props, and player stats for completed games. Data is archived automatically when games finish.
             </p>
             <p className="text-sm mb-6">
               <TierBadge tier="MVP" />
@@ -756,6 +900,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
               <Endpoint method="GET" path="/api/v1/history/games" description="List archived games with filtering and pagination" tier="MVP" />
               <Endpoint method="GET" path="/api/v1/history/odds" description="Historical odds snapshots for an archived game" tier="MVP" />
               <Endpoint method="GET" path="/api/v1/history/props" description="Historical props snapshots for an archived game" tier="MVP" />
+              <Endpoint method="GET" path="/api/v1/history/stats" description="Historical player box scores for archived games" tier="MVP" />
             </div>
 
             <SubHeading>/history/games parameters</SubHeading>
@@ -808,7 +953,8 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
         "gameDate": "2026-02-07T00:00:00.000Z",
         "archivedAt": "2026-02-07T05:54:48.000Z",
         "oddsSnapshots": 116364,
-        "propsSnapshots": 41650
+        "propsSnapshots": 41650,
+        "playerStats": 26
       }
     ],
     "pagination": { "total": 602, "limit": 50, "offset": 0 }
@@ -861,6 +1007,87 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
     ],
     "count": 1,
     "limit": 1000
+  }
+}`}
+            />
+
+            <SubHeading>/history/stats parameters</SubHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-4">
+              Query archived player box scores. At least one of <code className="text-[13px] font-mono text-zinc-300">eventId</code> or <code className="text-[13px] font-mono text-zinc-300">playerName</code> is required.
+            </p>
+            <ParamTable
+              params={[
+                { name: "eventId", type: "string", required: false, description: "Game identifier from /history/games" },
+                { name: "playerName", type: "string", required: false, description: "Player name (partial match supported)" },
+                { name: "sport", type: "string", required: false, description: "Filter by sport (nba, ncaab, nfl, nhl, ncaaf, mlb)" },
+                { name: "position", type: "string", required: false, description: "Filter by position (e.g. G, F, C)" },
+                { name: "startDate", type: "string", required: false, description: "Start date (YYYY-MM-DD)" },
+                { name: "endDate", type: "string", required: false, description: "End date (YYYY-MM-DD)" },
+                { name: "limit", type: "number", required: false, description: "Max results (1-5000, default 1000)" },
+                { name: "offset", type: "number", required: false, description: "Pagination offset (default 0)" },
+              ]}
+            />
+
+            <SubHeading>Stats example request</SubHeading>
+            <CodeBlock
+              language="bash"
+              code={`# Get all player stats for a specific game
+curl -H "Authorization: Bearer YOUR_API_KEY" \\
+  "https://api.owlsinsight.com/api/v1/history/stats?eventId=nba:Indiana%20Pacers@New%20York%20Knicks-20260210"
+
+# Query a player across multiple games
+curl -H "Authorization: Bearer YOUR_API_KEY" \\
+  "https://api.owlsinsight.com/api/v1/history/stats?playerName=Jalen%20Brunson&sport=nba&startDate=2026-02-01&endDate=2026-02-10"`}
+            />
+
+            <SubHeading>Stats response</SubHeading>
+            <CodeBlock
+              language="json"
+              code={`{
+  "success": true,
+  "data": {
+    "eventId": "nba:Indiana Pacers@New York Knicks-20260210",
+    "playerName": null,
+    "stats": [
+      {
+        "eventId": "nba:Indiana Pacers@New York Knicks-20260210",
+        "sport": "nba",
+        "espnGameId": "401810626",
+        "gameDate": "2026-02-10",
+        "team": {
+          "name": "New York Knicks",
+          "abbreviation": "NY",
+          "homeAway": "home",
+          "score": 134
+        },
+        "player": {
+          "espnId": "3136195",
+          "name": "Karl-Anthony Towns",
+          "position": "C",
+          "jersey": "32",
+          "starter": true,
+          "didNotPlay": false
+        },
+        "stats": {
+          "minutes": "32",
+          "points": 22,
+          "rebounds": 14,
+          "assists": 3,
+          "steals": 0,
+          "blocks": 0,
+          "turnovers": 5,
+          "fouls": 6,
+          "plusMinus": 6,
+          "fg": { "made": 8, "attempted": 17 },
+          "threePoint": { "made": 1, "attempted": 6 },
+          "freeThrow": { "made": 5, "attempted": 6 }
+        },
+        "recordedAt": "2026-02-10T06:15:00.000Z"
+      }
+    ],
+    "count": 26,
+    "limit": 1000,
+    "offset": 0
   }
 }`}
             />
@@ -1053,7 +1280,7 @@ socket.emit("subscribe:props", {
               <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5">
                 <p className="font-mono text-sm font-semibold text-white mb-2">Rookie</p>
                 <ul className="text-[13px] text-zinc-500 space-y-1">
-                  <li>REST + WebSocket (2 connections), player props, historical odds & props, real-time data</li>
+                  <li>REST + WebSocket (2 connections), player props, player stats, historical odds & props, real-time data</li>
                 </ul>
               </div>
               <div className="rounded-lg bg-[#111113] border border-purple-500/15 p-5">
@@ -1062,7 +1289,7 @@ socket.emit("subscribe:props", {
                   <span className="text-[10px] font-mono text-purple-400">Most Popular</span>
                 </div>
                 <ul className="text-[13px] text-zinc-500 space-y-1">
-                  <li>REST + WebSocket (5 connections), 15 concurrent requests, full props + WebSocket streaming, full historical odds & props, real-time data</li>
+                  <li>REST + WebSocket (5 connections), 15 concurrent requests, full props + WebSocket streaming, full historical odds/props/stats, real-time data</li>
                 </ul>
               </div>
             </div>
