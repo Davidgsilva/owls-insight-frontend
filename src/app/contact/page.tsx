@@ -12,7 +12,7 @@ export default function ContactPage() {
       <div className="max-w-2xl mx-auto px-6 py-24">
         <Link
           href="/#pricing"
-          className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-300 transition-colors mb-12"
+          className="flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-300 transition-colors mb-12 w-fit"
         >
           <ArrowLeft size={16} />
           Back to pricing
@@ -46,15 +46,22 @@ export default function ContactPage() {
             </div>
           </a>
 
-          <div className="flex items-center gap-4 p-5 rounded-xl border border-white/5 bg-[#111111]">
+          <a
+            href="https://discord.gg/sJkeamJeuc"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-4 p-5 rounded-xl border border-white/5 bg-[#111111] hover:border-[#5865F2]/30 transition-all group"
+          >
             <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-[#5865F2]/10">
               <DiscordLogo size={20} className="text-[#5865F2]" />
             </div>
             <div>
               <p className="text-sm text-zinc-500 mb-0.5">Discord</p>
-              <p className="font-mono text-[#5865F2]">phate_2142</p>
+              <p className="font-mono text-[#5865F2] group-hover:text-[#7289DA] transition-colors">
+                Join the Owls Insight channel
+              </p>
             </div>
-          </div>
+          </a>
         </div>
       </div>
     </div>
