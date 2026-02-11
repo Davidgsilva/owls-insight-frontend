@@ -32,12 +32,12 @@ export function Coverage() {
             <span className="text-xs font-mono text-[#00FF88]">COVERAGE</span>
           </div>
           <h2 className="text-4xl font-mono font-bold mb-4">
-            Every Book. Every Sport.{" "}
+            Aggregated Odds. Unified Schema.{" "}
             <span className="text-[#00FF88] text-glow-primary">One API.</span>
           </h2>
           <p className="text-zinc-400 max-w-2xl mx-auto">
-            Normalized data from major sportsbooks and prediction markets, delivered in a
-            consistent schema across every sport and market type.
+            Real-time data from major sportsbooks and prediction markets, normalized
+            and delivered consistently across every sport and market type.
           </p>
         </div>
 
