@@ -306,7 +306,7 @@ export default function DocsPage() {
                 </thead>
                 <tbody className="text-[13px]">
                   {[
-                    { key: "pinnacle", name: "Pinnacle", notes: "Sharp book, market-making reference" },
+                    { key: "pinnacle", name: "Pinnacle", notes: "Sharp book, real-time odds for NBA & NCAAB (Rookie+)" },
                     { key: "fanduel", name: "FanDuel", notes: "US retail leader, full props" },
                     { key: "draftkings", name: "DraftKings", notes: "Full market coverage" },
                     { key: "betmgm", name: "BetMGM", notes: "Vegas-backed lines" },
@@ -322,6 +322,20 @@ export default function DocsPage() {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            <div className="rounded-lg bg-[#111113] border border-emerald-500/15 p-5 mb-10">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-2 h-2 rounded-full bg-[#00FF88] animate-pulse" />
+                <p className="font-mono text-sm font-semibold text-white">Real-Time Pinnacle Odds</p>
+                <TierBadge tier="Rookie+" />
+              </div>
+              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
+                Pinnacle odds for <strong className="text-zinc-300">NBA</strong> and <strong className="text-zinc-300">NCAAB</strong> are
+                delivered in real-time via a direct market feed. Rookie and MVP tier subscribers receive sub-second
+                price updates for moneylines, spreads, and totals. More sports coming soon.
+                Bench tier receives standard delayed Pinnacle data.
+              </p>
             </div>
 
             <SubHeading>Parameters</SubHeading>
@@ -1341,12 +1355,23 @@ socket.emit("subscribe:props", {
           <section id="usage-api" className="mb-20">
             <SectionHeading>Usage API</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-6">
-              Monitor API usage and rate limit status.
+              Monitor API usage and rate limit status. Available via the dashboard (requires login session, not API key).
             </p>
+
+            <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5 mb-8">
+              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
+                Usage data is accessed through the{" "}
+                <a href="/dashboard" className="text-[#00FF88] hover:underline">dashboard</a>{" "}
+                using your login session. It is not available via API key authentication.
+                To check your current rate limit status programmatically, inspect the{" "}
+                <code className="text-[13px] font-mono text-zinc-300">X-RateLimit-*</code>{" "}
+                headers returned with every API response.
+              </p>
+            </div>
 
             <SubHeading>Endpoint</SubHeading>
             <div className="mb-8">
-              <Endpoint method="GET" path="/api/v1/usage" description="API usage statistics for today or a specific date" />
+              <Endpoint method="GET" path="/api/v1/usage" description="API usage statistics (dashboard session required)" />
             </div>
 
             <SubHeading>Parameters</SubHeading>
@@ -1437,13 +1462,13 @@ socket.emit("subscribe:props", {
               <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5">
                 <p className="font-mono text-sm font-semibold text-white mb-2">Bench</p>
                 <ul className="text-[13px] text-zinc-500 space-y-1">
-                  <li>REST API only, odds/spreads/totals, live scores, 45-second delay</li>
+                  <li>REST API only, odds/spreads/totals, live scores, Kalshi prediction markets, standard delayed Pinnacle odds</li>
                 </ul>
               </div>
               <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5">
                 <p className="font-mono text-sm font-semibold text-white mb-2">Rookie</p>
                 <ul className="text-[13px] text-zinc-500 space-y-1">
-                  <li>REST + WebSocket (2 connections), player props, player stats, historical odds & props, real-time data</li>
+                  <li>REST + WebSocket (2 connections), player props, player stats, prop line history, rolling averages, real-time Pinnacle odds (NBA &amp; NCAAB)</li>
                 </ul>
               </div>
               <div className="rounded-lg bg-[#111113] border border-purple-500/15 p-5">
@@ -1452,7 +1477,7 @@ socket.emit("subscribe:props", {
                   <span className="text-[10px] font-mono text-purple-400">Most Popular</span>
                 </div>
                 <ul className="text-[13px] text-zinc-500 space-y-1">
-                  <li>REST + WebSocket (5 connections), 15 concurrent requests, full props + WebSocket streaming, full historical odds/props/stats, real-time data</li>
+                  <li>REST + WebSocket (5 connections), 15 concurrent requests, full props + WebSocket streaming, full historical odds/props/stats, real-time Pinnacle odds (NBA &amp; NCAAB)</li>
                 </ul>
               </div>
             </div>
@@ -1463,10 +1488,10 @@ socket.emit("subscribe:props", {
             </p>
             <CodeBlock
               language="http"
-              code={`X-RateLimit-Limit-Minute: 120
-X-RateLimit-Remaining-Minute: 87
-X-RateLimit-Limit-Month: 75000
-X-RateLimit-Remaining-Month: 62340`}
+              code={`X-RateLimit-Remaining-Minute: 87
+X-RateLimit-Remaining-Month: 62340
+X-RateLimit-Reset-Minute: 1738348260
+X-RateLimit-Reset-Month: 2026-03-01T00:00:00.000Z`}
             />
           </section>
 
