@@ -1521,7 +1521,7 @@ X-RateLimit-Reset-Month: 2026-03-01T00:00:00.000Z`}
                 </thead>
                 <tbody className="text-[13px]">
                   {[
-                    { book: "Pinnacle", nba: "strong", ncaab: "partial", nfl: "strong", nhl: "strong", mlb: "strong" },
+                    { book: "Pinnacle", nba: "strong", ncaab: "strong", nfl: "strong", nhl: "strong", mlb: "strong" },
                     { book: "FanDuel", nba: "strong", ncaab: "strong", nfl: "strong", nhl: "strong", mlb: "strong" },
                     { book: "DraftKings", nba: "strong", ncaab: "strong", nfl: "strong", nhl: "strong", mlb: "strong" },
                     { book: "BetMGM", nba: "strong", ncaab: "partial", nfl: "strong", nhl: "partial", mlb: "soon" },
