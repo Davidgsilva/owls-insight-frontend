@@ -1298,7 +1298,7 @@ socket.on("connect", () => {
             <SubHeading>Events</SubHeading>
             <div className="space-y-0 mb-8">
               {[
-                { name: "odds-update", description: "Latest odds data, emitted every ~30 seconds", tier: undefined },
+                { name: "odds-update", description: "Latest odds data, emitted every ~3 seconds", tier: undefined },
                 { name: "scores-update", description: "Current scores during live games, every ~3 seconds", tier: undefined },
                 { name: "props-update", description: "Aggregated player props from all books, every ~45 seconds", tier: "Rookie+" },
               ].map((event) => (
