@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   keywords: [
     "sports betting API",
     "odds API",
-    "real-time odds",
+    "live odds",
     "betting data",
     "NBA odds",
     "NFL odds",

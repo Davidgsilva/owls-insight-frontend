@@ -31,10 +31,10 @@ export function Hero() {
 
             {/* Headline */}
             <h1 className="text-5xl lg:text-6xl font-mono font-bold leading-[1.1] tracking-tight opacity-0 animate-fade-in-up stagger-1">
-              Real-Time Odds.
+              Live Odds.
               <br />
               <span className="text-[#00FF88] text-glow-primary">
-                All Books. One API.
+                Top Books. One API.
               </span>
             </h1>
 

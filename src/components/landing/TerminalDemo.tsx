@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const API_RESPONSE = `{
   "event_id": "nba_20240315_lal_bos",
@@ -29,13 +29,14 @@ export function TerminalDemo() {
   const [displayedText, setDisplayedText] = useState("");
   const [cursorVisible, setCursorVisible] = useState(true);
   const [isTyping, setIsTyping] = useState(true);
+  const responseRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let index = 0;
     let animationId: number;
     let lastTime = 0;
-    const charsPerFrame = 3; // Type multiple chars per frame for smoother effect
-    const frameDelay = 16; // ~60fps
+    const charsPerFrame = 3;
+    const frameDelay = 16;
 
     const animate = (currentTime: number) => {
       if (currentTime - lastTime >= frameDelay) {
@@ -43,6 +44,10 @@ export function TerminalDemo() {
           index = Math.min(index + charsPerFrame, API_RESPONSE.length);
           setDisplayedText(API_RESPONSE.slice(0, index));
           lastTime = currentTime;
+          // Auto-scroll to bottom as text appears
+          if (responseRef.current) {
+            responseRef.current.scrollTop = responseRef.current.scrollHeight;
+          }
         } else {
           setIsTyping(false);
           return;
@@ -100,7 +105,7 @@ export function TerminalDemo() {
   };
 
   return (
-    <div className="rounded-xl overflow-hidden bg-[#0a0a0a] border border-white/10 shadow-2xl shadow-black/50">
+    <div className="rounded-xl overflow-hidden bg-[#0a0a0a] border border-white/10 shadow-2xl shadow-black/50 h-[480px] flex flex-col">
       {/* Terminal Header */}
       <div className="px-4 py-3 flex items-center gap-3 bg-[#111111] border-b border-white/5">
         <div className="flex gap-2">
@@ -116,8 +121,8 @@ export function TerminalDemo() {
         <div className="w-16" />
       </div>
 
-      {/* Terminal Body */}
-      <div className="p-4 font-mono text-xs leading-relaxed overflow-hidden max-h-[400px] bg-[#0a0a0a]">
+      {/* Terminal Body - flex-1 fills remaining space, scrolls when content overflows */}
+      <div ref={responseRef} className="p-4 font-mono text-xs leading-relaxed overflow-y-auto flex-1 bg-[#0a0a0a]">
         {/* Request line */}
         <div className="flex items-center gap-2 mb-4 pb-4 border-b border-white/5">
           <span className="text-[#00FF88]">$</span>

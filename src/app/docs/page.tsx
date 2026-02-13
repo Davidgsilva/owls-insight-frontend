@@ -306,7 +306,7 @@ export default function DocsPage() {
                 </thead>
                 <tbody className="text-[13px]">
                   {[
-                    { key: "pinnacle", name: "Pinnacle", notes: "Sharp book, real-time odds for NBA & NCAAB (Rookie+)" },
+                    { key: "pinnacle", name: "Pinnacle", notes: "Sharp book, fast refresh" },
                     { key: "fanduel", name: "FanDuel", notes: "US retail leader, full props" },
                     { key: "draftkings", name: "DraftKings", notes: "Full market coverage" },
                     { key: "betmgm", name: "BetMGM", notes: "Vegas-backed lines" },
@@ -327,14 +327,12 @@ export default function DocsPage() {
             <div className="rounded-lg bg-[#111113] border border-emerald-500/15 p-5 mb-10">
               <div className="flex items-center gap-2 mb-2">
                 <span className="w-2 h-2 rounded-full bg-[#00FF88] animate-pulse" />
-                <p className="font-mono text-sm font-semibold text-white">Real-Time Pinnacle Odds</p>
+                <p className="font-mono text-sm font-semibold text-white">Fast Pinnacle Odds</p>
                 <TierBadge tier="Rookie+" />
               </div>
               <p className="text-sm text-zinc-400 font-sans leading-relaxed">
-                Pinnacle odds for <strong className="text-zinc-300">NBA</strong> and <strong className="text-zinc-300">NCAAB</strong> are
-                delivered in real-time via a direct market feed. Rookie and MVP tier subscribers receive sub-second
-                price updates for moneylines, spreads, and totals. More sports coming soon.
-                Bench tier receives standard delayed Pinnacle data.
+                Pinnacle odds are refreshed with sub-second latency for moneylines, spreads, and totals across all sports.
+                All tiers receive fast Pinnacle data via REST and WebSocket.
               </p>
             </div>
 
@@ -415,10 +413,14 @@ export default function DocsPage() {
             <SubHeading>Endpoints</SubHeading>
             <div className="mb-8">
               <Endpoint method="GET" path="/api/v1/{sport}/props" description="Aggregated player props from all books" tier="Rookie+" />
-              <Endpoint method="GET" path="/api/v1/{sport}/props/bet365" description="Bet365 player props only" tier="Rookie+" />
               <Endpoint method="GET" path="/api/v1/{sport}/props/fanduel" description="FanDuel player props only" tier="Rookie+" />
+              <Endpoint method="GET" path="/api/v1/{sport}/props/draftkings" description="DraftKings player props only" tier="Rookie+" />
+              <Endpoint method="GET" path="/api/v1/{sport}/props/caesars" description="Caesars player props only" tier="Rookie+" />
+              <Endpoint method="GET" path="/api/v1/{sport}/props/betmgm" description="BetMGM player props only (live games)" tier="Rookie+" />
+              <Endpoint method="GET" path="/api/v1/{sport}/props/bet365" description="Bet365 player props only" tier="Rookie+" />
               <Endpoint method="GET" path="/api/v1/{sport}/props/history" description="Historical prop line movements" tier="Rookie+" />
-              <Endpoint method="GET" path="/api/v1/props/stats" description="Props cache statistics" tier="Rookie+" />
+              <Endpoint method="GET" path="/api/v1/props/{book}/stats" description="Per-book props cache statistics" tier="Rookie+" />
+              <Endpoint method="GET" path="/api/v1/props/stats" description="Aggregated props cache statistics" tier="Rookie+" />
             </div>
 
             <SubHeading>Parameters</SubHeading>
@@ -1300,7 +1302,12 @@ socket.on("connect", () => {
               {[
                 { name: "odds-update", description: "Latest odds data, emitted every ~3 seconds", tier: undefined },
                 { name: "scores-update", description: "Current scores during live games, every ~3 seconds", tier: undefined },
-                { name: "props-update", description: "Aggregated player props from all books, every ~45 seconds", tier: "Rookie+" },
+                { name: "player-props-update", description: "Aggregated player props (Pinnacle), every ~45 seconds", tier: "Rookie+" },
+                { name: "fanduel-props-update", description: "FanDuel player props, every ~45 seconds", tier: "Rookie+" },
+                { name: "draftkings-props-update", description: "DraftKings player props, every ~45 seconds", tier: "Rookie+" },
+                { name: "bet365-props-update", description: "Bet365 player props, every ~45 seconds", tier: "Rookie+" },
+                { name: "betmgm-props-update", description: "BetMGM player props (live games only), every ~45 seconds", tier: "Rookie+" },
+                { name: "caesars-props-update", description: "Caesars player props, every ~45 seconds", tier: "Rookie+" },
               ].map((event) => (
                 <div key={event.name} className="flex items-start gap-3 py-3 border-b border-white/[0.04]">
                   <code className="text-[13px] font-mono text-white shrink-0">{event.name}</code>
@@ -1329,8 +1336,13 @@ socket.on("scores-update", (data) => {
 });
 
 // Listen to player props (Rookie+ only)
-socket.on("props-update", (data) => {
-  console.log("Props games:", data.sports.nba?.length || 0);
+socket.on("player-props-update", (data) => {
+  console.log("Pinnacle props games:", data.sports.nba?.length || 0);
+});
+
+// Listen to per-book props
+socket.on("fanduel-props-update", (data) => {
+  console.log("FanDuel props games:", data.sports.nba?.length || 0);
 });`}
             />
 
@@ -1343,11 +1355,19 @@ socket.emit("subscribe", {
   markets: ["h2h", "spreads", "totals"]
 });
 
-// Subscribe to player props for specific sports
-socket.emit("subscribe:props", {
+// Subscribe to aggregated player props
+socket.emit("subscribe-props", {
   sports: ["nba"],
   categories: ["points", "rebounds", "assists"]
-});`}
+});
+
+// Subscribe to per-book props
+socket.emit("subscribe-fanduel-props", {
+  sports: ["nba"],
+  categories: ["points", "rebounds", "assists"]
+});
+// Also: subscribe-draftkings-props, subscribe-bet365-props,
+//       subscribe-betmgm-props, subscribe-caesars-props`}
             />
           </section>
 
@@ -1462,13 +1482,13 @@ socket.emit("subscribe:props", {
               <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5">
                 <p className="font-mono text-sm font-semibold text-white mb-2">Bench</p>
                 <ul className="text-[13px] text-zinc-500 space-y-1">
-                  <li>REST API only, odds/spreads/totals, live scores, Kalshi prediction markets, standard delayed Pinnacle odds</li>
+                  <li>REST API only, odds/spreads/totals, live scores, Kalshi prediction markets</li>
                 </ul>
               </div>
               <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5">
                 <p className="font-mono text-sm font-semibold text-white mb-2">Rookie</p>
                 <ul className="text-[13px] text-zinc-500 space-y-1">
-                  <li>REST + WebSocket (2 connections), player props, player stats, prop line history, rolling averages, real-time Pinnacle odds (NBA &amp; NCAAB)</li>
+                  <li>REST + WebSocket (2 connections), player props, player stats, prop line history, rolling averages</li>
                 </ul>
               </div>
               <div className="rounded-lg bg-[#111113] border border-purple-500/15 p-5">
@@ -1477,7 +1497,7 @@ socket.emit("subscribe:props", {
                   <span className="text-[10px] font-mono text-purple-400">Most Popular</span>
                 </div>
                 <ul className="text-[13px] text-zinc-500 space-y-1">
-                  <li>REST + WebSocket (5 connections), 15 concurrent requests, full props + WebSocket streaming, full historical odds/props/stats, real-time Pinnacle odds (NBA &amp; NCAAB)</li>
+                  <li>REST + WebSocket (5 connections), 15 concurrent requests, full props + WebSocket streaming, full historical odds/props/stats</li>
                 </ul>
               </div>
             </div>
