@@ -8,6 +8,7 @@ const sportsbooks = [
   { name: "Bet365", logo: "https://www.google.com/s2/favicons?domain=bet365.com&sz=128" },
   { name: "Caesars", logo: "https://www.google.com/s2/favicons?domain=caesars.com&sz=128" },
   { name: "Kalshi", logo: "https://www.google.com/s2/favicons?domain=kalshi.com&sz=128" },
+  { name: "1xBet", logo: "https://www.google.com/s2/favicons?domain=1xbet.com&sz=128" },
 ];
 
 const sports = [
@@ -17,6 +18,7 @@ const sports = [
   { name: "MLB", logo: "https://www.google.com/s2/favicons?domain=mlb.com&sz=128" },
   { name: "NCAAB", logo: "https://www.google.com/s2/favicons?domain=ncaa.com&sz=128" },
   { name: "NCAAF", logo: "https://www.google.com/s2/favicons?domain=ncaa.com&sz=128" },
+  { name: "CS2", logo: "https://www.google.com/s2/favicons?domain=counter-strike.net&sz=128" },
 ];
 
 export function Coverage() {

@@ -9,6 +9,7 @@ const sections = [
   { id: "getting-started", label: "Getting Started" },
   { id: "authentication", label: "Authentication" },
   { id: "odds-api", label: "Odds" },
+  { id: "esports-api", label: "Esports" },
   { id: "props-api", label: "Player Props" },
   { id: "scores-api", label: "Live Scores" },
   { id: "stats-api", label: "Player Stats" },
@@ -231,7 +232,7 @@ export default function DocsPage() {
               API Reference
             </h1>
             <p className="text-zinc-500 text-sm font-sans leading-relaxed mb-10">
-              REST API and WebSocket streaming for real-time sports betting odds from major sportsbooks and Kalshi prediction markets.
+              REST API and WebSocket streaming for real-time sports and esports betting odds from major sportsbooks, Kalshi prediction markets, and 1xBet.
             </p>
 
             <div className="rounded-lg bg-[#111113] border border-white/[0.06] px-5 py-4 mb-10">
@@ -287,7 +288,7 @@ export default function DocsPage() {
 
             <SubHeading>Sports</SubHeading>
             <div className="flex flex-wrap gap-2 mb-8">
-              {["nba", "ncaab", "nfl", "nhl", "ncaaf", "mlb"].map((sport) => (
+              {["nba", "ncaab", "nfl", "nhl", "ncaaf", "mlb", "cs2"].map((sport) => (
                 <code key={sport} className="text-[13px] font-mono text-zinc-300 bg-white/[0.04] px-2.5 py-1 rounded">
                   {sport}
                 </code>
@@ -313,6 +314,7 @@ export default function DocsPage() {
                     { key: "bet365", name: "Bet365", notes: "Global market leader" },
                     { key: "caesars", name: "Caesars", notes: "Casino heritage" },
                     { key: "kalshi", name: "Kalshi", notes: "CFTC-regulated prediction exchange" },
+                    { key: "1xbet", name: "1xBet", notes: "CS2 esports, live match odds" },
                   ].map((book) => (
                     <tr key={book.key} className="border-b border-white/[0.04]">
                       <td className="py-2.5 pr-6 font-mono text-white">{book.key}</td>
@@ -398,6 +400,90 @@ export default function DocsPage() {
   ]
 }`}
             />
+          </section>
+
+          {/* ─── Esports API ───────────────────────────────────────── */}
+          <section id="esports-api" className="mb-20">
+            <SectionHeading>Esports API</SectionHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-6 leading-relaxed">
+              Live CS2 (Counter-Strike 2) match odds from 1xBet. Moneylines, map handicaps, and map totals
+              updated every ~3 seconds during live matches. Available via REST and WebSocket.
+            </p>
+
+            <SubHeading>Endpoint</SubHeading>
+            <div className="mb-8">
+              <Endpoint method="GET" path="/api/v1/cs2/odds" description="Live CS2 match odds (moneylines, spreads, totals)" />
+            </div>
+
+            <SubHeading>Example request</SubHeading>
+            <CodeBlock
+              language="bash"
+              code={`curl -H "Authorization: Bearer YOUR_API_KEY" \\
+  "https://api.owlsinsight.com/api/v1/cs2/odds"`}
+            />
+
+            <SubHeading>Response</SubHeading>
+            <CodeBlock
+              language="json"
+              code={`{
+  "success": true,
+  "timestamp": "2026-02-12T15:30:00.000Z",
+  "data": [
+    {
+      "id": "485291",
+      "sport_key": "esports_cs2",
+      "sport_title": "CS2",
+      "commence_time": "2026-02-12T15:00:00.000Z",
+      "home_team": "Natus Vincere",
+      "away_team": "G2 Esports",
+      "status": "live",
+      "sport": "cs2",
+      "bookmakers": [
+        {
+          "key": "1xbet",
+          "title": "1xBet",
+          "last_update": "2026-02-12T15:30:00.000Z",
+          "markets": [
+            {
+              "key": "h2h",
+              "outcomes": [
+                { "name": "Natus Vincere", "price": -150 },
+                { "name": "G2 Esports", "price": 120 }
+              ]
+            },
+            {
+              "key": "spreads",
+              "outcomes": [
+                { "name": "Natus Vincere", "price": -110, "point": -1.5 },
+                { "name": "G2 Esports", "price": -110, "point": 1.5 }
+              ]
+            },
+            {
+              "key": "totals",
+              "outcomes": [
+                { "name": "Over", "price": -115, "point": 2.5 },
+                { "name": "Under", "price": -105, "point": 2.5 }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}`}
+            />
+
+            <div className="rounded-lg bg-[#111113] border border-purple-500/15 p-5 mt-8">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
+                <p className="font-mono text-sm font-semibold text-white">Real-time via WebSocket</p>
+              </div>
+              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
+                For real-time CS2 odds, subscribe to the <code className="text-[13px] font-mono text-zinc-300">esports-update</code> WebSocket event.
+                Opt in by emitting <code className="text-[13px] font-mono text-zinc-300">subscribe</code> with <code className="text-[13px] font-mono text-zinc-300">{`{ esports: true }`}</code>.
+                Updates are pushed every ~3 seconds during live matches.
+              </p>
+            </div>
           </section>
 
           {/* ─── Props API ─────────────────────────────────────────── */}
@@ -1308,6 +1394,7 @@ socket.on("connect", () => {
                 { name: "bet365-props-update", description: "Bet365 player props, every ~45 seconds", tier: "Rookie+" },
                 { name: "betmgm-props-update", description: "BetMGM player props (live games only), every ~45 seconds", tier: "Rookie+" },
                 { name: "caesars-props-update", description: "Caesars player props, every ~45 seconds", tier: "Rookie+" },
+                { name: "esports-update", description: "CS2 esports odds from 1xBet, every ~3 seconds", tier: undefined },
               ].map((event) => (
                 <div key={event.name} className="flex items-start gap-3 py-3 border-b border-white/[0.04]">
                   <code className="text-[13px] font-mono text-white shrink-0">{event.name}</code>
@@ -1343,6 +1430,14 @@ socket.on("player-props-update", (data) => {
 // Listen to per-book props
 socket.on("fanduel-props-update", (data) => {
   console.log("FanDuel props games:", data.sports.nba?.length || 0);
+});
+
+// Listen to CS2 esports odds (requires esports subscription)
+socket.on("esports-update", (data) => {
+  console.log("CS2 matches:", data.sports.cs2?.length || 0);
+  data.sports.cs2?.forEach(match => {
+    console.log(\`\${match.away_team} vs \${match.home_team}\`);
+  });
 });`}
             />
 
@@ -1367,7 +1462,12 @@ socket.emit("subscribe-fanduel-props", {
   categories: ["points", "rebounds", "assists"]
 });
 // Also: subscribe-draftkings-props, subscribe-bet365-props,
-//       subscribe-betmgm-props, subscribe-caesars-props`}
+//       subscribe-betmgm-props, subscribe-caesars-props
+
+// Subscribe to CS2 esports odds
+socket.emit("subscribe", {
+  esports: true
+});`}
             />
           </section>
 
@@ -1536,23 +1636,28 @@ X-RateLimit-Reset-Month: 2026-03-01T00:00:00.000Z`}
                     <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">NCAAB</th>
                     <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">NFL</th>
                     <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">NHL</th>
-                    <th className="text-left py-2.5 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">MLB</th>
+                    <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">MLB</th>
+                    <th className="text-left py-2.5 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">CS2</th>
                   </tr>
                 </thead>
                 <tbody className="text-[13px]">
                   {[
-                    { book: "Pinnacle", nba: "strong", ncaab: "strong", nfl: "strong", nhl: "strong", mlb: "strong" },
-                    { book: "FanDuel", nba: "strong", ncaab: "strong", nfl: "strong", nhl: "strong", mlb: "strong" },
-                    { book: "DraftKings", nba: "strong", ncaab: "strong", nfl: "strong", nhl: "strong", mlb: "strong" },
-                    { book: "BetMGM", nba: "strong", ncaab: "partial", nfl: "strong", nhl: "partial", mlb: "soon" },
-                    { book: "Bet365", nba: "strong", ncaab: "partial", nfl: "strong", nhl: "partial", mlb: "soon" },
-                    { book: "Caesars", nba: "strong", ncaab: "partial", nfl: "strong", nhl: "partial", mlb: "soon" },
-                    { book: "Kalshi", nba: "strong", ncaab: "partial", nfl: "strong", nhl: "partial", mlb: "partial" },
+                    { book: "Pinnacle", nba: "strong", ncaab: "strong", nfl: "strong", nhl: "strong", mlb: "strong", cs2: "none" },
+                    { book: "FanDuel", nba: "strong", ncaab: "strong", nfl: "strong", nhl: "strong", mlb: "strong", cs2: "none" },
+                    { book: "DraftKings", nba: "strong", ncaab: "strong", nfl: "strong", nhl: "strong", mlb: "strong", cs2: "none" },
+                    { book: "BetMGM", nba: "strong", ncaab: "partial", nfl: "strong", nhl: "partial", mlb: "soon", cs2: "none" },
+                    { book: "Bet365", nba: "strong", ncaab: "partial", nfl: "strong", nhl: "partial", mlb: "soon", cs2: "none" },
+                    { book: "Caesars", nba: "strong", ncaab: "partial", nfl: "strong", nhl: "partial", mlb: "soon", cs2: "none" },
+                    { book: "Kalshi", nba: "strong", ncaab: "partial", nfl: "strong", nhl: "partial", mlb: "partial", cs2: "none" },
+                    { book: "1xBet", nba: "none", ncaab: "none", nfl: "none", nhl: "none", mlb: "none", cs2: "strong" },
                   ].map((row) => (
                     <tr key={row.book} className="border-b border-white/[0.04]">
                       <td className="py-2.5 pr-4 font-mono text-white">{row.book}</td>
-                      {[row.nba, row.ncaab, row.nfl, row.nhl, row.mlb].map((status, i) => (
+                      {[row.nba, row.ncaab, row.nfl, row.nhl, row.mlb, row.cs2].map((status, i) => (
                         <td key={i} className="py-2.5 pr-4">
+                          {status === "none" ? (
+                            <span className="text-[12px] font-mono text-zinc-700">—</span>
+                          ) : (
                           <span className={`inline-flex items-center gap-1.5 text-[12px] font-mono ${
                             status === "strong"
                               ? "text-[#00FF88]"
@@ -1569,6 +1674,7 @@ X-RateLimit-Reset-Month: 2026-03-01T00:00:00.000Z`}
                             }`} />
                             {status === "strong" ? "Strong" : status === "partial" ? "Partial" : "Coming soon"}
                           </span>
+                          )}
                         </td>
                       ))}
                     </tr>

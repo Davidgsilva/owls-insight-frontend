@@ -49,7 +49,7 @@ const features = [
     icon: UsersThree,
     title: "Multi-Sport Coverage",
     description:
-      "NBA, NFL, NHL, MLB, NCAAB, and NCAAF. All major sports with consistent data schemas across markets.",
+      "NBA, NFL, NHL, MLB, NCAAB, NCAAF, and CS2 esports. All major sports with consistent data schemas across markets.",
     highlight: "Multi-Sport",
   },
 ];
