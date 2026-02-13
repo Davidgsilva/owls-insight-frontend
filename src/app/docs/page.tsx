@@ -1386,15 +1386,15 @@ socket.on("connect", () => {
             <SubHeading>Events</SubHeading>
             <div className="space-y-0 mb-8">
               {[
-                { name: "odds-update", description: "Latest odds data, emitted every ~3 seconds", tier: undefined },
-                { name: "scores-update", description: "Current scores during live games, every ~3 seconds", tier: undefined },
-                { name: "player-props-update", description: "Aggregated player props (Pinnacle), every ~45 seconds", tier: "Rookie+" },
-                { name: "fanduel-props-update", description: "FanDuel player props, every ~45 seconds", tier: "Rookie+" },
-                { name: "draftkings-props-update", description: "DraftKings player props, every ~45 seconds", tier: "Rookie+" },
-                { name: "bet365-props-update", description: "Bet365 player props, every ~45 seconds", tier: "Rookie+" },
-                { name: "betmgm-props-update", description: "BetMGM player props (live games only), every ~45 seconds", tier: "Rookie+" },
-                { name: "caesars-props-update", description: "Caesars player props, every ~45 seconds", tier: "Rookie+" },
-                { name: "esports-update", description: "CS2 esports odds from 1xBet, every ~3 seconds", tier: undefined },
+                { name: "odds-update", description: "Latest odds data, emitted every ~3 seconds (automatic)", tier: undefined },
+                { name: "scores-update", description: "Current scores during live games, every ~3 seconds (automatic)", tier: undefined },
+                { name: "player-props-update", description: "Pinnacle player props, streamed on change (requires subscribe-props)", tier: "Rookie+" },
+                { name: "fanduel-props-update", description: "FanDuel player props, streamed on change (requires subscribe-fanduel-props)", tier: "Rookie+" },
+                { name: "draftkings-props-update", description: "DraftKings player props, streamed on change (requires subscribe-draftkings-props)", tier: "Rookie+" },
+                { name: "bet365-props-update", description: "Bet365 player props, streamed on change (requires subscribe-bet365-props)", tier: "Rookie+" },
+                { name: "betmgm-props-update", description: "BetMGM player props (live games only), streamed on change (requires subscribe-betmgm-props)", tier: "Rookie+" },
+                { name: "caesars-props-update", description: "Caesars player props, streamed on change (requires subscribe-caesars-props)", tier: "Rookie+" },
+                { name: "esports-update", description: "CS2 esports odds from 1xBet, streamed on change (requires esports: true)", tier: undefined },
               ].map((event) => (
                 <div key={event.name} className="flex items-start gap-3 py-3 border-b border-white/[0.04]">
                   <code className="text-[13px] font-mono text-white shrink-0">{event.name}</code>
@@ -1404,10 +1404,13 @@ socket.on("connect", () => {
               ))}
             </div>
 
-            <SubHeading>Subscribing to events</SubHeading>
+            <SubHeading>Odds and scores (automatic)</SubHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-4">
+              Odds and scores are sent automatically after connecting. Use <code className="text-[13px] font-mono text-zinc-300">subscribe</code> to filter by sport or book.
+            </p>
             <CodeBlock
               language="javascript"
-              code={`// Listen to odds updates
+              code={`// Odds and scores arrive automatically after connecting
 socket.on("odds-update", (data) => {
   console.log("NBA games:", data.sports.nba?.length || 0);
   data.sports.nba?.forEach(game => {
@@ -1415,58 +1418,88 @@ socket.on("odds-update", (data) => {
   });
 });
 
-// Listen to live scores
 socket.on("scores-update", (data) => {
   data.sports.nba?.forEach(game => {
     console.log(\`\${game.awayTeam.abbreviation} \${game.awayTeam.score} - \${game.homeTeam.score} \${game.homeTeam.abbreviation}\`);
   });
 });
 
-// Listen to player props (Rookie+ only)
-socket.on("player-props-update", (data) => {
-  console.log("Pinnacle props games:", data.sports.nba?.length || 0);
-});
-
-// Listen to per-book props
-socket.on("fanduel-props-update", (data) => {
-  console.log("FanDuel props games:", data.sports.nba?.length || 0);
-});
-
-// Listen to CS2 esports odds (requires esports subscription)
-socket.on("esports-update", (data) => {
-  console.log("CS2 matches:", data.sports.cs2?.length || 0);
-  data.sports.cs2?.forEach(match => {
-    console.log(\`\${match.away_team} vs \${match.home_team}\`);
-  });
+// Optional: filter odds to specific sports/books
+socket.emit("subscribe", {
+  sports: ["nba", "ncaab"],
+  books: ["pinnacle", "fanduel", "draftkings", "betmgm", "bet365", "caesars"]
 });`}
             />
 
-            <SubHeading>Filtering</SubHeading>
+            <SubHeading>Player props (subscription required)</SubHeading>
+            <div className="rounded-lg bg-[#111113] border border-amber-500/20 p-5 mb-6">
+              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
+                Props are <strong className="text-zinc-200">not sent automatically</strong>. You must emit a subscribe event for each book
+                you want to receive. After subscribing, cached data is sent immediately and live updates stream continuously as lines change.
+              </p>
+            </div>
             <CodeBlock
               language="javascript"
-              code={`// Subscribe to specific sports
-socket.emit("subscribe", {
-  sports: ["nba", "nfl"],
-  markets: ["h2h", "spreads", "totals"]
+              code={`// Step 1: Set up listeners BEFORE subscribing
+socket.on("player-props-update", (data) => {
+  // Pinnacle props
+  console.log("Pinnacle props:", data.sports.nba?.length || 0, "games");
+});
+socket.on("fanduel-props-update", (data) => {
+  console.log("FanDuel props:", data.sports.nba?.length || 0, "games");
+});
+socket.on("draftkings-props-update", (data) => {
+  console.log("DraftKings props:", data.sports.nba?.length || 0, "games");
+});
+socket.on("bet365-props-update", (data) => {
+  console.log("Bet365 props:", data.sports.nba?.length || 0, "games");
+});
+socket.on("betmgm-props-update", (data) => {
+  console.log("BetMGM props:", data.sports.nba?.length || 0, "games");
+});
+socket.on("caesars-props-update", (data) => {
+  console.log("Caesars props:", data.sports.nba?.length || 0, "games");
 });
 
-// Subscribe to aggregated player props
-socket.emit("subscribe-props", {
-  sports: ["nba"],
-  categories: ["points", "rebounds", "assists"]
+// Step 2: Subscribe to each book you want (emit AFTER connect)
+socket.on("connect", () => {
+  const filter = { sports: ["nba", "ncaab", "nhl"] };
+
+  socket.emit("subscribe-props", filter);           // Pinnacle
+  socket.emit("subscribe-fanduel-props", filter);    // FanDuel
+  socket.emit("subscribe-draftkings-props", filter); // DraftKings
+  socket.emit("subscribe-bet365-props", filter);     // Bet365
+  socket.emit("subscribe-betmgm-props", filter);     // BetMGM
+  socket.emit("subscribe-caesars-props", filter);     // Caesars
 });
 
-// Subscribe to per-book props
-socket.emit("subscribe-fanduel-props", {
-  sports: ["nba"],
-  categories: ["points", "rebounds", "assists"]
-});
-// Also: subscribe-draftkings-props, subscribe-bet365-props,
-//       subscribe-betmgm-props, subscribe-caesars-props
+// Confirmation events (server replies after each subscribe)
+socket.on("props-subscribed", (sub) => console.log("Pinnacle props active:", sub));
+socket.on("fanduel-props-subscribed", (sub) => console.log("FanDuel props active:", sub));
+// Same pattern: draftkings-props-subscribed, bet365-props-subscribed,
+//               betmgm-props-subscribed, caesars-props-subscribed`}
+            />
 
-// Subscribe to CS2 esports odds
-socket.emit("subscribe", {
-  esports: true
+            <SubHeading>Props subscription parameters</SubHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-4">
+              All parameters are optional. Omit everything to receive all props.
+            </p>
+            <ParamTable
+              params={[
+                { name: "sports", type: "string[]", required: false, description: "Filter by sport: nba, ncaab, nfl, nhl, ncaaf, mlb" },
+                { name: "games", type: "string[]", required: false, description: "Filter by specific game IDs" },
+                { name: "categories", type: "string[]", required: false, description: "Filter by prop type: points, rebounds, assists, threes, blocks, steals, turnovers, goals, shots" },
+              ]}
+            />
+
+            <SubHeading>Esports</SubHeading>
+            <CodeBlock
+              language="javascript"
+              code={`// Esports requires opt-in via the subscribe event
+socket.emit("subscribe", { esports: true });
+
+socket.on("esports-update", (data) => {
+  console.log("CS2 matches:", data.sports.cs2?.length || 0);
 });`}
             />
           </section>
