@@ -358,46 +358,59 @@ export default function DocsPage() {
               language="json"
               code={`{
   "success": true,
-  "timestamp": "2026-01-31T18:30:00.000Z",
-  "sport": "nba",
-  "events": [
-    {
-      "id": "nba:BOS@LAL-20260131",
-      "commence_time": "2026-01-31T20:00:00Z",
-      "home_team": "Los Angeles Lakers",
-      "away_team": "Boston Celtics",
-      "bookmakers": [
-        {
-          "key": "pinnacle",
-          "title": "Pinnacle",
-          "last_update": "2026-01-31T18:29:45Z",
-          "markets": [
-            {
-              "key": "h2h",
-              "outcomes": [
-                { "name": "Los Angeles Lakers", "price": -150 },
-                { "name": "Boston Celtics", "price": 130 }
-              ]
-            },
-            {
-              "key": "spreads",
-              "outcomes": [
-                { "name": "Los Angeles Lakers", "price": -110, "point": -3.5 },
-                { "name": "Boston Celtics", "price": -110, "point": 3.5 }
-              ]
-            },
-            {
-              "key": "totals",
-              "outcomes": [
-                { "name": "Over", "price": -110, "point": 224.5 },
-                { "name": "Under", "price": -110, "point": 224.5 }
-              ]
-            }
-          ]
-        }
-      ]
-    }
-  ]
+  "data": {
+    "pinnacle": [
+      {
+        "id": "1624025571",
+        "sport_key": "basketball_nba",
+        "commence_time": "2026-01-31T20:00:00Z",
+        "home_team": "Los Angeles Lakers",
+        "away_team": "Boston Celtics",
+        "bookmakers": [
+          {
+            "key": "pinnacle",
+            "title": "Pinnacle",
+            "last_update": "2026-01-31T18:29:45Z",
+            "markets": [
+              {
+                "key": "h2h",
+                "outcomes": [
+                  { "name": "Los Angeles Lakers", "price": -150 },
+                  { "name": "Boston Celtics", "price": 130 }
+                ]
+              },
+              {
+                "key": "spreads",
+                "outcomes": [
+                  { "name": "Los Angeles Lakers", "price": -110, "point": -3.5 },
+                  { "name": "Boston Celtics", "price": -110, "point": 3.5 }
+                ]
+              },
+              {
+                "key": "totals",
+                "outcomes": [
+                  { "name": "Over", "price": -110, "point": 224.5 },
+                  { "name": "Under", "price": -110, "point": 224.5 }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "fanduel": [ ... ],
+    "draftkings": [ ... ]
+  },
+  "meta": {
+    "sport": "nba",
+    "sport_key": "basketball_nba",
+    "market": "all",
+    "timestamp": "2026-01-31T18:30:00.000Z",
+    "requestedBooks": ["pinnacle", "fanduel", "draftkings"],
+    "availableBooks": ["pinnacle", "fanduel", "draftkings", "betmgm", "bet365", "caesars", "kalshi"],
+    "booksReturned": ["pinnacle", "fanduel", "draftkings"],
+    "freshness": { "ageSeconds": 2, "stale": false, "threshold": 90 }
+  }
 }`}
             />
           </section>
@@ -427,49 +440,51 @@ export default function DocsPage() {
               language="json"
               code={`{
   "success": true,
-  "timestamp": "2026-02-12T15:30:00.000Z",
-  "data": [
-    {
-      "id": "485291",
-      "sport_key": "esports_cs2",
-      "sport_title": "CS2",
-      "commence_time": "2026-02-12T15:00:00.000Z",
-      "home_team": "Natus Vincere",
-      "away_team": "G2 Esports",
-      "status": "live",
-      "sport": "cs2",
-      "bookmakers": [
-        {
-          "key": "1xbet",
-          "title": "1xBet",
-          "last_update": "2026-02-12T15:30:00.000Z",
-          "markets": [
-            {
-              "key": "h2h",
-              "outcomes": [
-                { "name": "Natus Vincere", "price": -150 },
-                { "name": "G2 Esports", "price": 120 }
-              ]
-            },
-            {
-              "key": "spreads",
-              "outcomes": [
-                { "name": "Natus Vincere", "price": -110, "point": -1.5 },
-                { "name": "G2 Esports", "price": -110, "point": 1.5 }
-              ]
-            },
-            {
-              "key": "totals",
-              "outcomes": [
-                { "name": "Over", "price": -115, "point": 2.5 },
-                { "name": "Under", "price": -105, "point": 2.5 }
-              ]
-            }
-          ]
-        }
-      ]
-    }
-  ]
+  "data": {
+    "1xbet": [
+      {
+        "id": "695559710",
+        "sport_key": "esports_cs2",
+        "sport_title": "CS2",
+        "commence_time": "2026-02-12T15:00:00.000Z",
+        "home_team": "Natus Vincere",
+        "away_team": "G2 Esports",
+        "status": "live",
+        "sport": "cs2",
+        "bookmakers": [
+          {
+            "key": "1xbet",
+            "title": "1xBet",
+            "last_update": "2026-02-12T15:30:00.000Z",
+            "markets": [
+              {
+                "key": "h2h",
+                "outcomes": [
+                  { "name": "Natus Vincere", "price": -150 },
+                  { "name": "G2 Esports", "price": 120 }
+                ]
+              },
+              {
+                "key": "totals",
+                "outcomes": [
+                  { "name": "Over", "price": -115, "point": 2.5 },
+                  { "name": "Under", "price": -105, "point": 2.5 }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "meta": {
+    "sport": "cs2",
+    "sport_key": "esports_cs2",
+    "market": "all",
+    "timestamp": "2026-02-12T15:30:00.000Z",
+    "booksReturned": ["1xbet"],
+    "freshness": { "ageSeconds": 1, "stale": false, "threshold": 90 }
+  }
 }`}
             />
 
@@ -619,31 +634,36 @@ export default function DocsPage() {
   "success": true,
   "sport": "nba",
   "timestamp": "2026-01-31T20:15:00.000Z",
-  "count": 2,
+  "count": 1,
   "events": [
     {
-      "id": "401584721",
+      "id": "nba:BOS@LAL-20260131",
+      "sport": "nba",
       "name": "Boston Celtics at Los Angeles Lakers",
-      "shortName": "BOS @ LAL",
+      "startTime": "2026-01-31T20:00:00Z",
       "status": {
-        "type": "in",
-        "period": 3,
-        "clock": "8:42",
-        "displayClock": "8:42 - 3rd"
+        "state": "in",
+        "detail": "8:42 - 3rd Quarter",
+        "displayClock": "8:42",
+        "period": 3
       },
-      "homeTeam": {
-        "id": "13",
-        "name": "Lakers",
-        "abbreviation": "LAL",
+      "home": {
+        "homeAway": "home",
+        "team": {
+          "displayName": "Los Angeles Lakers",
+          "abbreviation": "LAL"
+        },
         "score": 78
       },
-      "awayTeam": {
-        "id": "2",
-        "name": "Celtics",
-        "abbreviation": "BOS",
+      "away": {
+        "homeAway": "away",
+        "team": {
+          "displayName": "Boston Celtics",
+          "abbreviation": "BOS"
+        },
         "score": 82
       },
-      "venue": "Crypto.com Arena"
+      "lastUpdated": "2026-01-31T20:15:00.000Z"
     }
   ]
 }`}
