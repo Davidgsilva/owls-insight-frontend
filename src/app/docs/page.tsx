@@ -1822,7 +1822,7 @@ X-RateLimit-Reset-Month: 2026-03-01T00:00:00.000Z`}
                     { code: 404, title: "Not Found", description: "Endpoint or resource not found" },
                     { code: 429, title: "Too Many Requests", description: "Rate limit exceeded" },
                     { code: 500, title: "Internal Server Error", description: "Server error, please retry" },
-                    { code: 503, title: "Service Unavailable", description: "Temporarily unavailable" },
+                    { code: 503, title: "Service Unavailable", description: "Rate limit system failure or server overload" },
                   ].map((error) => (
                     <tr key={error.code} className="border-b border-white/[0.04]">
                       <td className="py-2.5 pr-6 font-mono text-red-400">{error.code}</td>
