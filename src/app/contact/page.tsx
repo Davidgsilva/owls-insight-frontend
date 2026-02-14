@@ -47,7 +47,7 @@ export default function ContactPage() {
           </a>
 
           <a
-            href="https://discord.gg/sJkeamJeuc"
+            href="https://discord.gg/Dhau4fEu63"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-4 p-5 rounded-xl border border-white/5 bg-[#111111] hover:border-[#5865F2]/30 transition-all group"
