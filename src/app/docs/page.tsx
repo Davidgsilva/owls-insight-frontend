@@ -314,7 +314,7 @@ export default function DocsPage() {
                     { key: "bet365", name: "Bet365", notes: "Global market leader" },
                     { key: "caesars", name: "Caesars", notes: "Casino heritage" },
                     { key: "kalshi", name: "Kalshi", notes: "CFTC-regulated prediction exchange" },
-                    { key: "1xbet", name: "1xBet", notes: "CS2 esports, live match odds" },
+                    { key: "1xbet", name: "1xBet", notes: "CS2 esports, live + prematch odds" },
                   ].map((book) => (
                     <tr key={book.key} className="border-b border-white/[0.04]">
                       <td className="py-2.5 pr-6 font-mono text-white">{book.key}</td>
@@ -335,6 +335,7 @@ export default function DocsPage() {
               <p className="text-sm text-zinc-400 font-sans leading-relaxed">
                 Pinnacle odds are refreshed with sub-second latency for moneylines, spreads, and totals across all sports.
                 All tiers receive fast Pinnacle data via REST and WebSocket.
+                Use <code className="text-[13px] font-mono text-zinc-300">?alternates=true</code> to include alternate spread and total lines on Pinnacle outcomes (Rookie+ only).
               </p>
             </div>
 
@@ -343,6 +344,7 @@ export default function DocsPage() {
               params={[
                 { name: "books", type: "string", required: false, description: "Comma-separated list of sportsbooks to include" },
                 { name: "game_id", type: "string", required: false, description: "Filter to a specific game" },
+                { name: "alternates", type: "boolean", required: false, description: "Include Pinnacle alternate spread/total lines (Rookie+ only)" },
               ]}
             />
 
@@ -350,7 +352,7 @@ export default function DocsPage() {
             <CodeBlock
               language="bash"
               code={`curl -H "Authorization: Bearer YOUR_API_KEY" \\
-  "https://api.owlsinsight.com/api/v1/nba/odds?books=pinnacle,fanduel"`}
+  "https://api.owlsinsight.com/api/v1/nba/odds?books=pinnacle,fanduel,draftkings&alternates=true"`}
             />
 
             <SubHeading>Response</SubHeading>
@@ -382,15 +384,47 @@ export default function DocsPage() {
               {
                 "key": "spreads",
                 "outcomes": [
-                  { "name": "Los Angeles Lakers", "price": -110, "point": -3.5 },
-                  { "name": "Boston Celtics", "price": -110, "point": 3.5 }
+                  {
+                    "name": "Los Angeles Lakers", "price": -110, "point": -3.5,
+                    "alternateLines": [
+                      { "point": -1.5, "price": -180 },
+                      { "point": -2.5, "price": -140 },
+                      { "point": -4.5, "price": 100 },
+                      { "point": -5.5, "price": 130 }
+                    ]
+                  },
+                  {
+                    "name": "Boston Celtics", "price": -110, "point": 3.5,
+                    "alternateLines": [
+                      { "point": 1.5, "price": 130 },
+                      { "point": 2.5, "price": 110 },
+                      { "point": 4.5, "price": -130 },
+                      { "point": 5.5, "price": -160 }
+                    ]
+                  }
                 ]
               },
               {
                 "key": "totals",
                 "outcomes": [
-                  { "name": "Over", "price": -110, "point": 224.5 },
-                  { "name": "Under", "price": -110, "point": 224.5 }
+                  {
+                    "name": "Over", "price": -110, "point": 224.5,
+                    "alternateLines": [
+                      { "point": 222.5, "price": -145 },
+                      { "point": 223.5, "price": -125 },
+                      { "point": 225.5, "price": 105 },
+                      { "point": 226.5, "price": 125 }
+                    ]
+                  },
+                  {
+                    "name": "Under", "price": -110, "point": 224.5,
+                    "alternateLines": [
+                      { "point": 222.5, "price": 120 },
+                      { "point": 223.5, "price": 105 },
+                      { "point": 225.5, "price": -130 },
+                      { "point": 226.5, "price": -150 }
+                    ]
+                  }
                 ]
               }
             ]
@@ -405,6 +439,7 @@ export default function DocsPage() {
     "sport": "nba",
     "sport_key": "basketball_nba",
     "market": "all",
+    "alternates": true,
     "timestamp": "2026-01-31T18:30:00.000Z",
     "requestedBooks": ["pinnacle", "fanduel", "draftkings"],
     "availableBooks": ["pinnacle", "fanduel", "draftkings", "betmgm", "bet365", "caesars", "kalshi"],
@@ -413,19 +448,25 @@ export default function DocsPage() {
   }
 }`}
             />
+
+            <p className="text-xs text-zinc-600 font-sans mt-3 leading-relaxed">
+              The <code className="text-[11px] font-mono text-zinc-500">alternateLines</code> array on spread/total outcomes is only present when <code className="text-[11px] font-mono text-zinc-500">?alternates=true</code> is passed by a Rookie+ tier user. Currently available for Pinnacle.
+              The <code className="text-[11px] font-mono text-zinc-500">alternates</code> field in <code className="text-[11px] font-mono text-zinc-500">meta</code> is always present in responses — it returns <code className="text-[11px] font-mono text-zinc-500">false</code> when the parameter is omitted or the API key&apos;s tier is below Rookie.
+            </p>
           </section>
 
           {/* ─── Esports API ───────────────────────────────────────── */}
           <section id="esports-api" className="mb-20">
             <SectionHeading>Esports API</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-6 leading-relaxed">
-              Live CS2 (Counter-Strike 2) match odds from 1xBet. Moneylines, map handicaps, and map totals
-              updated every ~3 seconds during live matches. Available via REST and WebSocket.
+              CS2 (Counter-Strike 2) match odds from 1xBet. Live and prematch games with moneylines,
+              map handicaps, map totals, correct score, map winner, round totals, and round handicap markets.
+              Updated every ~3 seconds. Available via REST and WebSocket.
             </p>
 
             <SubHeading>Endpoint</SubHeading>
             <div className="mb-8">
-              <Endpoint method="GET" path="/api/v1/cs2/odds" description="Live CS2 match odds (moneylines, spreads, totals)" />
+              <Endpoint method="GET" path="/api/v1/cs2/odds" description="CS2 match odds — live and prematch (6+ market types)" />
             </div>
 
             <SubHeading>Example request</SubHeading>
@@ -455,7 +496,6 @@ export default function DocsPage() {
           {
             "key": "1xbet",
             "title": "1xBet",
-            "last_update": "2026-02-12T15:30:00.000Z",
             "markets": [
               {
                 "key": "h2h",
@@ -470,10 +510,51 @@ export default function DocsPage() {
                   { "name": "Over", "price": -115, "point": 2.5 },
                   { "name": "Under", "price": -105, "point": 2.5 }
                 ]
+              },
+              {
+                "key": "correct_score",
+                "outcomes": [
+                  { "name": "2-0", "price": 150 },
+                  { "name": "2-1", "price": 200 },
+                  { "name": "0-2", "price": 280 },
+                  { "name": "1-2", "price": 350 }
+                ]
+              },
+              {
+                "key": "map_winner",
+                "outcomes": [
+                  { "name": "Natus Vincere", "price": -130 },
+                  { "name": "G2 Esports", "price": 105 }
+                ]
+              },
+              {
+                "key": "round_totals",
+                "outcomes": [
+                  { "name": "Over", "price": -110, "point": 51.5 },
+                  { "name": "Under", "price": -115, "point": 51.5 }
+                ]
+              },
+              {
+                "key": "round_handicap",
+                "outcomes": [
+                  { "name": "Natus Vincere", "price": -105, "point": -2.5 },
+                  { "name": "G2 Esports", "price": -120, "point": 2.5 }
+                ]
               }
             ]
           }
         ]
+      },
+      {
+        "id": "694454283",
+        "sport_key": "esports_cs2",
+        "sport_title": "CS2",
+        "commence_time": "2026-02-15T14:00:00.000Z",
+        "home_team": "Sangal Esports",
+        "away_team": "AaB Esport",
+        "status": "scheduled",
+        "sport": "cs2",
+        "bookmakers": [ ... ]
       }
     ]
   },
@@ -488,6 +569,35 @@ export default function DocsPage() {
 }`}
             />
 
+            <SubHeading>Markets</SubHeading>
+            <div className="overflow-x-auto mb-8">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-white/[0.08]">
+                    <th className="text-left py-2 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Key</th>
+                    <th className="text-left py-2 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Market</th>
+                    <th className="text-left py-2 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Description</th>
+                  </tr>
+                </thead>
+                <tbody className="text-sm">
+                  {[
+                    { key: "h2h", name: "Match Winner", desc: "Moneyline — which team wins the match" },
+                    { key: "totals", name: "Map Total", desc: "Over/under on total maps played (e.g. 2.5)" },
+                    { key: "correct_score", name: "Correct Score", desc: "Exact final map score (2-0, 2-1, 0-2, 1-2)" },
+                    { key: "map_winner", name: "Current Map Winner", desc: "Which team wins the current map (live only)" },
+                    { key: "round_totals", name: "Round Totals", desc: "Over/under on total rounds played" },
+                    { key: "round_handicap", name: "Round Handicap", desc: "Round-level handicap spread" },
+                  ].map((m) => (
+                    <tr key={m.key} className="border-b border-white/[0.04]">
+                      <td className="py-2.5 pr-6 font-mono text-white">{m.key}</td>
+                      <td className="py-2.5 pr-6 text-zinc-300">{m.name}</td>
+                      <td className="py-2.5 text-zinc-500">{m.desc}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
             <div className="rounded-lg bg-[#111113] border border-purple-500/15 p-5 mt-8">
               <div className="flex items-center gap-2 mb-2">
                 <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
@@ -496,7 +606,7 @@ export default function DocsPage() {
               <p className="text-sm text-zinc-400 font-sans leading-relaxed">
                 For real-time CS2 odds, subscribe to the <code className="text-[13px] font-mono text-zinc-300">esports-update</code> WebSocket event.
                 Opt in by emitting <code className="text-[13px] font-mono text-zinc-300">subscribe</code> with <code className="text-[13px] font-mono text-zinc-300">{`{ esports: true }`}</code>.
-                Updates are pushed every ~3 seconds during live matches.
+                Includes both live and prematch games. Updates are pushed every ~3 seconds.
               </p>
             </div>
           </section>
@@ -1414,7 +1524,7 @@ socket.on("connect", () => {
                 { name: "bet365-props-update", description: "Bet365 player props, streamed on change (requires subscribe-bet365-props)", tier: "Rookie+" },
                 { name: "betmgm-props-update", description: "BetMGM player props (live games only), streamed on change (requires subscribe-betmgm-props)", tier: "Rookie+" },
                 { name: "caesars-props-update", description: "Caesars player props, streamed on change (requires subscribe-caesars-props)", tier: "Rookie+" },
-                { name: "esports-update", description: "CS2 esports odds from 1xBet, streamed on change (requires esports: true)", tier: undefined },
+                { name: "esports-update", description: "CS2 live + prematch odds from 1xBet, streamed on change (requires esports: true)", tier: undefined },
               ].map((event) => (
                 <div key={event.name} className="flex items-start gap-3 py-3 border-b border-white/[0.04]">
                   <code className="text-[13px] font-mono text-white shrink-0">{event.name}</code>
