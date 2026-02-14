@@ -334,7 +334,7 @@ export default function DocsPage() {
               </div>
               <p className="text-sm text-zinc-400 font-sans leading-relaxed">
                 Pinnacle odds are refreshed with sub-second latency for moneylines, spreads, and totals across all sports.
-                All tiers receive fast Pinnacle data via REST and WebSocket.
+                Rookie and MVP tiers receive real-time Pinnacle data via REST and WebSocket. Bench tier receives Pinnacle data on a slower refresh cycle.
                 Use <code className="text-[13px] font-mono text-zinc-300">?alternates=true</code> to include alternate spread and total lines on Pinnacle outcomes (Rookie+ only).
               </p>
             </div>
@@ -343,7 +343,6 @@ export default function DocsPage() {
             <ParamTable
               params={[
                 { name: "books", type: "string", required: false, description: "Comma-separated list of sportsbooks to include" },
-                { name: "game_id", type: "string", required: false, description: "Filter to a specific game" },
                 { name: "alternates", type: "boolean", required: false, description: "Include Pinnacle alternate spread/total lines (Rookie+ only)" },
               ]}
             />
