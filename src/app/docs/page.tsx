@@ -232,7 +232,7 @@ export default function DocsPage() {
               API Reference
             </h1>
             <p className="text-zinc-500 text-sm font-sans leading-relaxed mb-10">
-              REST API and WebSocket streaming for real-time sports and esports betting odds from major sportsbooks, Kalshi prediction markets, and 1xBet.
+              REST API and WebSocket streaming for live sports and esports betting odds from major sportsbooks, Kalshi prediction markets, and 1xBet. Odds update every ~3 seconds.
             </p>
 
             <div className="rounded-lg bg-[#111113] border border-white/[0.06] px-5 py-4 mb-10">
@@ -275,7 +275,7 @@ export default function DocsPage() {
           <section id="odds-api" className="mb-20">
             <SectionHeading>Odds API</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-6">
-              Real-time betting odds from Pinnacle, FanDuel, DraftKings, BetMGM, Bet365, Caesars, and Kalshi.
+              Live betting odds from Pinnacle, FanDuel, DraftKings, BetMGM, Bet365, Caesars, and Kalshi. Updated every ~3 seconds via polling.
             </p>
 
             <SubHeading>Endpoints</SubHeading>
@@ -288,7 +288,7 @@ export default function DocsPage() {
 
             <SubHeading>Sports</SubHeading>
             <div className="flex flex-wrap gap-2 mb-8">
-              {["nba", "ncaab", "nfl", "nhl", "ncaaf", "mlb", "cs2"].map((sport) => (
+              {["nba", "ncaab", "nfl", "nhl", "ncaaf", "mlb", "ncaah", "tennis", "cs2"].map((sport) => (
                 <code key={sport} className="text-[13px] font-mono text-zinc-300 bg-white/[0.04] px-2.5 py-1 rounded">
                   {sport}
                 </code>
@@ -333,8 +333,8 @@ export default function DocsPage() {
                 <TierBadge tier="Rookie+" />
               </div>
               <p className="text-sm text-zinc-400 font-sans leading-relaxed">
-                Pinnacle odds are refreshed with sub-second latency for moneylines, spreads, and totals across all sports.
-                Rookie and MVP tiers receive real-time Pinnacle data via REST and WebSocket. Bench tier receives Pinnacle data on a slower refresh cycle.
+                Pinnacle odds are refreshed every ~3 seconds for moneylines, spreads, and totals across all sports.
+                Rookie and MVP tiers receive live Pinnacle data via REST and WebSocket. Bench tier receives Pinnacle data on a slower refresh cycle.
                 Use <code className="text-[13px] font-mono text-zinc-300">?alternates=true</code> to include alternate spread and total lines on Pinnacle outcomes (Rookie+ only).
               </p>
             </div>
@@ -600,10 +600,10 @@ export default function DocsPage() {
             <div className="rounded-lg bg-[#111113] border border-purple-500/15 p-5 mt-8">
               <div className="flex items-center gap-2 mb-2">
                 <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
-                <p className="font-mono text-sm font-semibold text-white">Real-time via WebSocket</p>
+                <p className="font-mono text-sm font-semibold text-white">Live via WebSocket</p>
               </div>
               <p className="text-sm text-zinc-400 font-sans leading-relaxed">
-                For real-time CS2 odds, subscribe to the <code className="text-[13px] font-mono text-zinc-300">esports-update</code> WebSocket event.
+                For live CS2 odds, subscribe to the <code className="text-[13px] font-mono text-zinc-300">esports-update</code> WebSocket event.
                 Opt in by emitting <code className="text-[13px] font-mono text-zinc-300">subscribe</code> with <code className="text-[13px] font-mono text-zinc-300">{`{ esports: true }`}</code>.
                 Includes both live and prematch games. Updates are pushed every ~3 seconds.
               </p>
@@ -727,7 +727,7 @@ export default function DocsPage() {
           <section id="scores-api" className="mb-20">
             <SectionHeading>Live Scores API</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-6">
-              Real-time game scores and status updates.
+              Live game scores and status updates, refreshed every ~3 seconds.
             </p>
 
             <SubHeading>Endpoints</SubHeading>
@@ -783,7 +783,7 @@ export default function DocsPage() {
           <section id="stats-api" className="mb-20">
             <SectionHeading>Player Stats API</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-2">
-              Live and final box score data from ESPN. Returns per-player statistics including points, rebounds, assists, shooting splits, and more for today&apos;s games.
+              Live and final box score data. Returns per-player statistics including points, rebounds, assists, shooting splits, and more for today&apos;s games.
             </p>
             <p className="text-sm mb-6">
               <TierBadge tier="Rookie+" />
@@ -916,7 +916,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
 
             <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5 mb-10">
               <p className="text-sm text-zinc-400 font-sans leading-relaxed">
-                Stats are sourced from ESPN and update in real-time during live games.
+                Stats update during live games.
                 When a game completes, the final box score is automatically archived to the{" "}
                 <a href="#history-api" className="text-[#00FF88] hover:underline">Historical Data API</a> for long-term access.
               </p>
@@ -924,7 +924,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
 
             <SubHeading>Rolling averages parameters</SubHeading>
             <p className="text-sm text-zinc-500 font-sans mb-4">
-              Compute L5/L10/L20 rolling averages for any active player using full-season game logs from ESPN.
+              Compute L5/L10/L20 rolling averages for any active player using full-season game logs.
               Add the <code className="text-[13px] font-mono text-zinc-300">opponent</code> parameter for head-to-head averages against a specific team.
               Shooting percentages are computed from totals (sum of makes / sum of attempts), not per-game averages.
             </p>
@@ -1057,7 +1057,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
 
             <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5">
               <p className="text-sm text-zinc-400 font-sans leading-relaxed">
-                Rolling averages use full-season game logs from ESPN, covering any active player across all supported sports.
+                Rolling averages use full-season game logs, covering any active player across all supported sports.
                 The response includes up to 100 individual game logs alongside the computed averages.
                 Windows with fewer games than the window size will return all available games
                 (e.g., <code className="text-[13px] font-mono text-zinc-300">last20</code> may show <code className="text-[13px] font-mono text-zinc-300">gamesPlayed: 15</code> if only 15 games have been played).
@@ -1491,7 +1491,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
           <section id="websocket" className="mb-20">
             <SectionHeading>WebSocket API</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-2">
-              Real-time streaming for odds, scores, and player props.
+              Live streaming for odds, scores, and player props. Updates are pushed every ~3 seconds.
             </p>
             <p className="text-sm mb-6">
               <TierBadge tier="Rookie+" />
@@ -1535,7 +1535,7 @@ socket.on("connect", () => {
 
             <SubHeading>Odds and scores (automatic)</SubHeading>
             <p className="text-sm text-zinc-500 font-sans mb-4">
-              Odds and scores are sent automatically after connecting. Use <code className="text-[13px] font-mono text-zinc-300">subscribe</code> to filter by sport or book.
+              Odds and scores are sent automatically every ~3 seconds after connecting. Use <code className="text-[13px] font-mono text-zinc-300">subscribe</code> to filter by sport or book.
             </p>
             <CodeBlock
               language="javascript"
@@ -1556,7 +1556,8 @@ socket.on("scores-update", (data) => {
 // Optional: filter odds to specific sports/books
 socket.emit("subscribe", {
   sports: ["nba", "ncaab"],
-  books: ["pinnacle", "fanduel", "draftkings", "betmgm", "bet365", "caesars"]
+  books: ["pinnacle", "fanduel", "draftkings", "betmgm", "bet365", "caesars"],
+  alternates: true  // Include Pinnacle alternate spread/total lines (Rookie+)
 });`}
             />
 
