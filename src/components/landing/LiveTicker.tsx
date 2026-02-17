@@ -20,6 +20,7 @@ const BOOK_ABBREV: Record<string, string> = {
   bet365: "365",
   caesars: "CZR",
   kalshi: "KAL",
+  "1xbet": "1XB",
 };
 
 // Generate short team name from full name
