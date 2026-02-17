@@ -99,26 +99,46 @@ export function LiveTicker() {
             const book = event.bookmakers[0];
             if (!book) continue;
 
-            const spreadsMarket = book.markets?.find((m: { key: string }) => m.key === "spreads");
-            if (!spreadsMarket?.outcomes?.length) continue;
-
-            const awaySpread = spreadsMarket.outcomes.find(
-              (o: { name: string }) => o.name === event.away_team
-            );
-            if (awaySpread?.point === undefined) continue;
-
-            const point = awaySpread.point;
-            const line = point >= 0 ? `+${point.toFixed(1)}` : point.toFixed(1);
+            let line: string;
+            let trackingValue: number;
             const itemId = `${event.id}-${book.key}`;
+
+            if (sport === "soccer") {
+              // Soccer: show moneyline (h2h) since soccer has no point spreads
+              const h2hMarket = book.markets?.find((m: { key: string }) => m.key === "h2h");
+              if (!h2hMarket?.outcomes?.length) continue;
+
+              const homeOutcome = h2hMarket.outcomes.find(
+                (o: { name: string }) => o.name === event.home_team
+              );
+              if (homeOutcome?.price === undefined) continue;
+
+              const price = Math.round(homeOutcome.price);
+              trackingValue = price;
+              line = `ML ${price >= 0 ? `+${price}` : price}`;
+            } else {
+              // Other sports: show spreads
+              const spreadsMarket = book.markets?.find((m: { key: string }) => m.key === "spreads");
+              if (!spreadsMarket?.outcomes?.length) continue;
+
+              const awaySpread = spreadsMarket.outcomes.find(
+                (o: { name: string }) => o.name === event.away_team
+              );
+              if (awaySpread?.point === undefined) continue;
+
+              const point = awaySpread.point;
+              trackingValue = point;
+              line = point >= 0 ? `+${point.toFixed(1)}` : point.toFixed(1);
+            }
 
             // Check for movement compared to previous fetch
             const prevPoint = previousOdds.current.get(itemId);
             let movement: "up" | "down" | "none" = "none";
             if (prevPoint !== undefined) {
-              if (point > prevPoint) movement = "up";
-              else if (point < prevPoint) movement = "down";
+              if (trackingValue > prevPoint) movement = "up";
+              else if (trackingValue < prevPoint) movement = "down";
             }
-            previousOdds.current.set(itemId, point);
+            previousOdds.current.set(itemId, trackingValue);
 
             items.push({
               id: itemId,
@@ -141,7 +161,7 @@ export function LiveTicker() {
       setError(null);
       try {
         // Fetch from multiple sports in parallel
-        const sports = ["nba", "ncaab", "nhl", "nfl"];
+        const sports = ["nba", "ncaab", "nhl", "nfl", "soccer"];
         const results = await Promise.all(sports.map(fetchSportOdds));
 
         // Combine results

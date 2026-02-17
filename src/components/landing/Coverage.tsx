@@ -18,6 +18,7 @@ const sports = [
   { name: "MLB", logo: "https://www.google.com/s2/favicons?domain=mlb.com&sz=128" },
   { name: "NCAAB", logo: "https://www.google.com/s2/favicons?domain=ncaa.com&sz=128" },
   { name: "NCAAF", logo: "https://www.google.com/s2/favicons?domain=ncaa.com&sz=128" },
+  { name: "Soccer", logo: "https://www.google.com/s2/favicons?domain=premierleague.com&sz=128" },
   { name: "CS2", logo: "https://www.google.com/s2/favicons?domain=counter-strike.net&sz=128" },
 ];
 

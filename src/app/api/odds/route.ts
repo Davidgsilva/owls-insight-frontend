@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 const API_SERVER_URL = process.env.API_SERVER_URL || "http://owls-insight-api-server";
 const API_KEY = process.env.OWLS_INSIGHT_API_KEY || "";
 
-const VALID_SPORTS = ["nba", "ncaab", "nfl", "nhl", "ncaaf", "mlb"];
+const VALID_SPORTS = ["nba", "ncaab", "nfl", "nhl", "ncaaf", "mlb", "soccer"];
 
 // GET /api/odds?sport=nba — proxies odds requests with server-side API key
 export async function GET(request: NextRequest) {

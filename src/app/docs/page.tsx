@@ -288,7 +288,7 @@ export default function DocsPage() {
 
             <SubHeading>Sports</SubHeading>
             <div className="flex flex-wrap gap-2 mb-8">
-              {["nba", "ncaab", "nfl", "nhl", "ncaaf", "mlb", "ncaah", "tennis", "cs2"].map((sport) => (
+              {["nba", "ncaab", "nfl", "nhl", "ncaaf", "mlb", "soccer", "ncaah", "tennis", "cs2"].map((sport) => (
                 <code key={sport} className="text-[13px] font-mono text-zinc-300 bg-white/[0.04] px-2.5 py-1 rounded">
                   {sport}
                 </code>
@@ -1118,7 +1118,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
 
             <SubHeading>Sports</SubHeading>
             <div className="flex flex-wrap gap-2 mb-8">
-              {["nba", "ncaab", "nfl", "nhl", "mlb"].map((sport) => (
+              {["nba", "ncaab", "nfl", "nhl", "mlb", "soccer"].map((sport) => (
                 <code key={sport} className="text-[13px] font-mono text-zinc-300 bg-white/[0.04] px-2.5 py-1 rounded">
                   {sport}
                 </code>
@@ -1146,6 +1146,9 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
                     { ticker: "KXNFLSPREAD", sport: "nfl", desc: "NFL game spreads" },
                     { ticker: "KXNFLTOTAL", sport: "nfl", desc: "NFL game totals" },
                     { ticker: "KXNFLSBMVP", sport: "nfl", desc: "Super Bowl MVP" },
+                    { ticker: "KXEPLGAME", sport: "soccer", desc: "English Premier League game outcomes" },
+                    { ticker: "KXUCLGAME", sport: "soccer", desc: "UEFA Champions League game outcomes" },
+                    { ticker: "KXMLSGAME", sport: "soccer", desc: "MLS game outcomes" },
                   ].map((s) => (
                     <tr key={s.ticker} className="border-b border-white/[0.04]">
                       <td className="py-2.5 pr-6 font-mono text-white">{s.ticker}</td>
@@ -1247,7 +1250,8 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
     { "sport": "nba", "series_ticker": "KXNBAGAME" },
     { "sport": "ncaab", "series_ticker": "KXNCAAMBGAME" },
     { "sport": "nfl", "series_ticker": "KXNFLGAME" },
-    { "sport": "mlb", "series_ticker": "KXMLBGAME" }
+    { "sport": "mlb", "series_ticker": "KXMLBGAME" },
+    { "sport": "soccer", "series_ticker": "KXEPLGAME" }
   ],
   "special_series": [
     { "series_ticker": "KXSB", "description": "Big Game / Championship Winner", "sport": "nfl" },
@@ -1256,7 +1260,8 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
     { "series_ticker": "KXNFLSBMVP", "description": "Big Game MVP", "sport": "nfl" }
   ],
   "all_known_tickers": [
-    "KXNBAGAME", "KXNCAAMBGAME", "KXNFLGAME", "KXNHLGAME", "KXMLBGAME"
+    "KXNBAGAME", "KXNCAAMBGAME", "KXNFLGAME", "KXNHLGAME", "KXMLBGAME",
+    "KXEPLGAME", "KXUCLGAME", "KXMLSGAME"
   ]
 }`}
             />
@@ -1316,7 +1321,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
             <SubHeading>/history/games parameters</SubHeading>
             <ParamTable
               params={[
-                { name: "sport", type: "string", required: false, description: "Filter by sport (nba, ncaab, nfl, nhl, ncaaf, mlb)" },
+                { name: "sport", type: "string", required: false, description: "Filter by sport (nba, ncaab, nfl, nhl, ncaaf, mlb, soccer)" },
                 { name: "startDate", type: "string", required: false, description: "Start date (YYYY-MM-DD)" },
                 { name: "endDate", type: "string", required: false, description: "End date (YYYY-MM-DD)" },
                 { name: "limit", type: "number", required: false, description: "Max results (1-100, default 50)" },
@@ -1429,7 +1434,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
               params={[
                 { name: "eventId", type: "string", required: false, description: "Game identifier from /history/games" },
                 { name: "playerName", type: "string", required: false, description: "Player name (partial match supported)" },
-                { name: "sport", type: "string", required: false, description: "Filter by sport (nba, ncaab, nfl, nhl, ncaaf, mlb)" },
+                { name: "sport", type: "string", required: false, description: "Filter by sport (nba, ncaab, nfl, nhl, ncaaf, mlb, soccer)" },
                 { name: "position", type: "string", required: false, description: "Filter by position (e.g. G, F, C)" },
                 { name: "startDate", type: "string", required: false, description: "Start date (YYYY-MM-DD)" },
                 { name: "endDate", type: "string", required: false, description: "End date (YYYY-MM-DD)" },
@@ -1651,7 +1656,7 @@ socket.on("fanduel-props-subscribed", (sub) => console.log("FanDuel props active
             </p>
             <ParamTable
               params={[
-                { name: "sports", type: "string[]", required: false, description: "Filter by sport: nba, ncaab, nfl, nhl, ncaaf, mlb" },
+                { name: "sports", type: "string[]", required: false, description: "Filter by sport: nba, ncaab, nfl, nhl, ncaaf, mlb, soccer" },
                 { name: "games", type: "string[]", required: false, description: "Filter by specific game IDs" },
                 { name: "categories", type: "string[]", required: false, description: "Filter by prop type: points, rebounds, assists, threes, blocks, steals, turnovers, goals, shots" },
               ]}
@@ -1837,24 +1842,25 @@ X-RateLimit-Reset-Month: 2026-03-01T00:00:00.000Z`}
                     <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">NHL</th>
                     <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">NCAAH</th>
                     <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">MLB</th>
+                    <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Soccer</th>
                     <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Tennis</th>
                     <th className="text-left py-2.5 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">CS2</th>
                   </tr>
                 </thead>
                 <tbody className="text-[13px]">
                   {[
-                    { book: "Pinnacle", nba: "strong", ncaab: "strong", nfl: "strong", ncaaf: "strong", nhl: "strong", ncaah: "strong", mlb: "strong", tennis: "strong", cs2: "none" },
-                    { book: "FanDuel", nba: "strong", ncaab: "strong", nfl: "strong", ncaaf: "strong", nhl: "strong", ncaah: "partial", mlb: "strong", tennis: "none", cs2: "none" },
-                    { book: "DraftKings", nba: "strong", ncaab: "strong", nfl: "strong", ncaaf: "strong", nhl: "strong", ncaah: "partial", mlb: "strong", tennis: "none", cs2: "none" },
-                    { book: "BetMGM", nba: "strong", ncaab: "partial", nfl: "strong", ncaaf: "partial", nhl: "partial", ncaah: "partial", mlb: "soon", tennis: "none", cs2: "none" },
-                    { book: "Bet365", nba: "strong", ncaab: "partial", nfl: "strong", ncaaf: "partial", nhl: "partial", ncaah: "none", mlb: "soon", tennis: "none", cs2: "none" },
-                    { book: "Caesars", nba: "strong", ncaab: "partial", nfl: "strong", ncaaf: "partial", nhl: "partial", ncaah: "none", mlb: "soon", tennis: "none", cs2: "none" },
-                    { book: "Kalshi", nba: "strong", ncaab: "partial", nfl: "strong", ncaaf: "none", nhl: "partial", ncaah: "none", mlb: "partial", tennis: "none", cs2: "none" },
-                    { book: "1xBet", nba: "none", ncaab: "none", nfl: "none", ncaaf: "none", nhl: "none", ncaah: "none", mlb: "none", tennis: "none", cs2: "strong" },
+                    { book: "Pinnacle", nba: "strong", ncaab: "strong", nfl: "strong", ncaaf: "strong", nhl: "strong", ncaah: "strong", mlb: "strong", soccer: "strong", tennis: "strong", cs2: "none" },
+                    { book: "FanDuel", nba: "strong", ncaab: "strong", nfl: "strong", ncaaf: "strong", nhl: "strong", ncaah: "partial", mlb: "strong", soccer: "strong", tennis: "none", cs2: "none" },
+                    { book: "DraftKings", nba: "strong", ncaab: "strong", nfl: "strong", ncaaf: "strong", nhl: "strong", ncaah: "partial", mlb: "strong", soccer: "strong", tennis: "none", cs2: "none" },
+                    { book: "BetMGM", nba: "strong", ncaab: "partial", nfl: "strong", ncaaf: "partial", nhl: "partial", ncaah: "partial", mlb: "soon", soccer: "partial", tennis: "none", cs2: "none" },
+                    { book: "Bet365", nba: "strong", ncaab: "partial", nfl: "strong", ncaaf: "partial", nhl: "partial", ncaah: "none", mlb: "soon", soccer: "partial", tennis: "none", cs2: "none" },
+                    { book: "Caesars", nba: "strong", ncaab: "partial", nfl: "strong", ncaaf: "partial", nhl: "partial", ncaah: "none", mlb: "soon", soccer: "partial", tennis: "none", cs2: "none" },
+                    { book: "Kalshi", nba: "strong", ncaab: "partial", nfl: "strong", ncaaf: "none", nhl: "partial", ncaah: "none", mlb: "partial", soccer: "strong", tennis: "none", cs2: "none" },
+                    { book: "1xBet", nba: "none", ncaab: "none", nfl: "none", ncaaf: "none", nhl: "none", ncaah: "none", mlb: "none", soccer: "partial", tennis: "none", cs2: "strong" },
                   ].map((row) => (
                     <tr key={row.book} className="border-b border-white/[0.04]">
                       <td className="py-2.5 pr-4 font-mono text-white">{row.book}</td>
-                      {[row.nba, row.ncaab, row.nfl, row.ncaaf, row.nhl, row.ncaah, row.mlb, row.tennis, row.cs2].map((status, i) => (
+                      {[row.nba, row.ncaab, row.nfl, row.ncaaf, row.nhl, row.ncaah, row.mlb, row.soccer, row.tennis, row.cs2].map((status, i) => (
                         <td key={i} className="py-2.5 pr-4">
                           {status === "none" ? (
                             <span className="text-[12px] font-mono text-zinc-700">—</span>
