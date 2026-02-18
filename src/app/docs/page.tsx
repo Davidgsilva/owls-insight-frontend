@@ -762,7 +762,7 @@ export default function DocsPage() {
           <section id="scores-api" className="mb-20">
             <SectionHeading>Live Scores API</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-6">
-              Live game scores and status updates, refreshed every ~3 seconds.
+              Live game scores and status updates, refreshed every ~3 seconds. Soccer matches include rich in-match data: team statistics, match incidents (goals, cards, substitutions), and per-player ratings.
             </p>
 
             <SubHeading>Endpoints</SubHeading>
@@ -771,47 +771,211 @@ export default function DocsPage() {
               <Endpoint method="GET" path="/api/v1/{sport}/scores/live" description="Live scores for a specific sport" />
             </div>
 
-            <SubHeading>Response</SubHeading>
+            <SubHeading>Response structure</SubHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-4">
+              Returns an object keyed by sport, each containing an array of live game events.
+            </p>
             <CodeBlock
               language="json"
               code={`{
   "success": true,
-  "sport": "nba",
-  "timestamp": "2026-01-31T20:15:00.000Z",
-  "count": 1,
-  "events": [
-    {
-      "id": "nba:BOS@LAL-20260131",
-      "sport": "nba",
-      "name": "Boston Celtics at Los Angeles Lakers",
-      "startTime": "2026-01-31T20:00:00Z",
-      "status": {
-        "state": "in",
-        "detail": "8:42 - 3rd Quarter",
-        "displayClock": "8:42",
-        "period": 3
-      },
-      "home": {
-        "homeAway": "home",
-        "team": {
-          "displayName": "Los Angeles Lakers",
-          "abbreviation": "LAL"
-        },
-        "score": 78
-      },
-      "away": {
-        "homeAway": "away",
-        "team": {
-          "displayName": "Boston Celtics",
-          "abbreviation": "BOS"
-        },
-        "score": 82
-      },
-      "lastUpdated": "2026-01-31T20:15:00.000Z"
-    }
-  ]
+  "data": {
+    "sports": {
+      "nba": [ ... ],
+      "soccer": [ ... ],
+      "tennis": [ ... ]
+    },
+    "timestamp": "2026-02-18T20:15:00.000Z"
+  }
 }`}
             />
+
+            <SubHeading>NBA example</SubHeading>
+            <CodeBlock
+              language="json"
+              code={`{
+  "id": "nba:BOS@LAL-20260131",
+  "sport": "nba",
+  "name": "Boston Celtics at Los Angeles Lakers",
+  "startTime": "2026-01-31T20:00:00Z",
+  "status": {
+    "state": "in",
+    "detail": "8:42 - 3rd Quarter",
+    "displayClock": "8:42",
+    "period": 3
+  },
+  "home": {
+    "homeAway": "home",
+    "team": { "displayName": "Los Angeles Lakers", "abbreviation": "LAL" },
+    "score": 78
+  },
+  "away": {
+    "homeAway": "away",
+    "team": { "displayName": "Boston Celtics", "abbreviation": "BOS" },
+    "score": 82
+  },
+  "lastUpdated": "2026-01-31T20:15:00.000Z"
+}`}
+            />
+
+            <SubHeading>Soccer example (with enrichment)</SubHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-4">
+              Soccer events include <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">matchStats</code>, <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">incidents</code>, and <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">playerStats</code> when available. Stats populate for top leagues (EPL, Champions League, La Liga, etc.) and update every ~30 seconds.
+            </p>
+            <CodeBlock
+              language="json"
+              code={`{
+  "id": "soccer:Galatasaray@Juventus-20260218",
+  "sport": "soccer",
+  "name": "Galatasaray at Juventus",
+  "startTime": "2026-02-18T20:00:00Z",
+  "status": {
+    "state": "in",
+    "detail": "72'",
+    "displayClock": "72",
+    "period": null
+  },
+  "home": {
+    "homeAway": "home",
+    "team": { "displayName": "Juventus" },
+    "score": 2
+  },
+  "away": {
+    "homeAway": "away",
+    "team": { "displayName": "Galatasaray" },
+    "score": 5
+  },
+  "sourceMatchId": "jJa9kFZ1",
+  "matchStats": {
+    "possession": { "home": 38, "away": 62 },
+    "shots": { "home": 7, "away": 22 },
+    "shotsOnTarget": { "home": 3, "away": 9 },
+    "corners": { "home": 5, "away": 5 },
+    "fouls": { "home": 18, "away": 8 },
+    "yellowCards": { "home": 4, "away": 1 },
+    "redCards": { "home": 1, "away": 0 },
+    "offsides": { "home": 2, "away": 1 },
+    "expectedGoals": { "home": 1.12, "away": 2.92 },
+    "bigChances": { "home": 3, "away": 5 },
+    "shotsOffTarget": { "home": 2, "away": 7 },
+    "blockedShots": { "home": 2, "away": 6 },
+    "shotsInsideBox": { "home": 7, "away": 16 },
+    "shotsOutsideBox": { "home": 0, "away": 6 },
+    "goalkeeperSaves": { "home": 4, "away": 1 },
+    "passes": { "home": 80, "away": 88 },
+    "tackles": { "home": 63, "away": 64 },
+    "freeKicks": { "home": 8, "away": 18 },
+    "throwIns": { "home": 14, "away": 21 }
+  },
+  "incidents": [
+    {
+      "minute": 13,
+      "type": "goal",
+      "playerName": "Icardi M.",
+      "teamSide": "away",
+      "assistPlayerName": "Mertens D."
+    },
+    {
+      "minute": 30,
+      "type": "yellowCard",
+      "playerName": "Locatelli M.",
+      "teamSide": "home"
+    },
+    {
+      "minute": 58,
+      "type": "substitution",
+      "playerName": "Yildiz K.",
+      "teamSide": "home",
+      "playerOut": "Weah T."
+    }
+  ],
+  "playerStats": [
+    { "playerName": "Icardi M.", "teamSide": "away", "rating": 8.6 },
+    { "playerName": "Mertens D.", "teamSide": "away", "rating": 7.9 },
+    { "playerName": "Vlahovic D.", "teamSide": "home", "rating": 6.4 }
+  ],
+  "lastUpdated": "2026-02-18T20:42:00.000Z"
+}`}
+            />
+
+            <SubHeading>Match stats fields</SubHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-4">
+              All stats use the <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">{`{ "home": number, "away": number }`}</code> format. Fields are <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">null</code> when not available for a given match.
+            </p>
+            <div className="overflow-x-auto mb-8">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-white/[0.08]">
+                    <th className="text-left py-2 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Field</th>
+                    <th className="text-left py-2 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Description</th>
+                  </tr>
+                </thead>
+                <tbody className="text-[13px]">
+                  {[
+                    { field: "possession", desc: "Ball possession %" },
+                    { field: "shots", desc: "Total shots" },
+                    { field: "shotsOnTarget", desc: "Shots on target" },
+                    { field: "shotsOffTarget", desc: "Shots off target" },
+                    { field: "blockedShots", desc: "Blocked shots" },
+                    { field: "shotsInsideBox", desc: "Shots inside the box" },
+                    { field: "shotsOutsideBox", desc: "Shots outside the box" },
+                    { field: "corners", desc: "Corner kicks" },
+                    { field: "fouls", desc: "Fouls committed" },
+                    { field: "yellowCards", desc: "Yellow cards" },
+                    { field: "redCards", desc: "Red cards" },
+                    { field: "offsides", desc: "Offsides" },
+                    { field: "expectedGoals", desc: "Expected goals (xG)" },
+                    { field: "bigChances", desc: "Big chances created" },
+                    { field: "goalkeeperSaves", desc: "Goalkeeper saves" },
+                    { field: "passes", desc: "Pass accuracy (percentage)" },
+                    { field: "tackles", desc: "Tackles" },
+                    { field: "freeKicks", desc: "Free kicks" },
+                    { field: "throwIns", desc: "Throw-ins" },
+                  ].map((row) => (
+                    <tr key={row.field} className="border-b border-white/[0.04]">
+                      <td className="py-2.5 pr-6 font-mono text-white whitespace-nowrap">{row.field}</td>
+                      <td className="py-2.5 text-zinc-400">{row.desc}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <SubHeading>Incident types</SubHeading>
+            <div className="overflow-x-auto mb-8">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-white/[0.08]">
+                    <th className="text-left py-2 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Type</th>
+                    <th className="text-left py-2 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Extra fields</th>
+                    <th className="text-left py-2 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Description</th>
+                  </tr>
+                </thead>
+                <tbody className="text-[13px]">
+                  {[
+                    { type: "goal", extra: "assistPlayerName?", desc: "Goal scored (includes assist when available)" },
+                    { type: "penalty", extra: "assistPlayerName?", desc: "Penalty goal" },
+                    { type: "ownGoal", extra: "—", desc: "Own goal" },
+                    { type: "yellowCard", extra: "—", desc: "Yellow card" },
+                    { type: "redCard", extra: "—", desc: "Red card" },
+                    { type: "substitution", extra: "playerOut", desc: "Substitution (playerName = in, playerOut = replaced)" },
+                  ].map((row) => (
+                    <tr key={row.type} className="border-b border-white/[0.04]">
+                      <td className="py-2.5 pr-6 font-mono text-white whitespace-nowrap">{row.type}</td>
+                      <td className="py-2.5 pr-6 font-mono text-zinc-500 whitespace-nowrap">{row.extra}</td>
+                      <td className="py-2.5 text-zinc-400">{row.desc}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5 mb-6">
+              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
+                <strong className="text-zinc-300">Soccer enrichment</strong> — Match stats, incidents, and player ratings are sourced from FlashScore and update every ~30 seconds during live matches. Extended stats (xG, big chances, shot breakdowns) are available for top leagues. When a soccer game completes, all enrichment data is automatically archived to the{" "}
+                <a href="#history-api" className="text-[#00FF88] hover:underline">Historical Data API</a>.
+              </p>
+            </div>
           </section>
 
           {/* ─── Player Stats API ──────────────────────────────────── */}
