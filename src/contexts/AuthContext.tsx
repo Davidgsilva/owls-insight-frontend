@@ -137,23 +137,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [validateSession]);
 
   const logout = useCallback(async () => {
-    // Navigate away from /dashboard BEFORE clearing auth state,
-    // otherwise the dashboard layout's !isAuthenticated guard
-    // fires router.replace("/login") and wins the race.
-    router.push("/");
+    // 1. Clear the httpOnly token cookie FIRST so middleware won't
+    //    redirect /login back to /dashboard on subsequent navigation
     try {
       await fetch("/api/auth/logout", {
         method: "POST",
         credentials: "include",
       });
-    } catch {
-      // Best effort - continue with client-side cleanup
+    } catch (err) {
+      console.warn("Logout API call failed:", err);
     }
+    // 2. Clear client state — if dashboard layout guard fires
+    //    router.replace("/login"), that's fine since cookie is already gone
     setUser(null);
     setSubscription(null);
-    if (typeof window !== "undefined") {
-      localStorage.removeItem(USER_STORAGE_KEY);
-    }
+    localStorage.removeItem(USER_STORAGE_KEY);
+    // 3. Navigate after both cookie and state are cleared
+    router.push("/");
   }, [router]);
 
   const value = useMemo(() => ({
