@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <main className="min-h-screen bg-[#0a0a0a] text-white">
       <div className="max-w-3xl mx-auto px-6 py-24">
         <Link
           href="/"
@@ -31,14 +31,14 @@ export default function PrivacyPage() {
               This Privacy Policy explains what information we collect, how we use and share it, and your
               choices regarding your information. By using the Service, you agree to the collection and use of
               information in accordance with this policy. This policy should be read alongside our{" "}
-              <a href="/terms" className="text-[#00FF88] hover:underline">Terms of Service</a>.
+              <Link href="/terms" className="text-[#00FF88] hover:underline">Terms of Service</Link>.
             </p>
           </section>
 
           <section>
             <h2 className="text-lg font-mono font-semibold text-white mb-3">2. Information We Collect</h2>
 
-            <p className="font-medium text-white">2.1 Information You Provide</p>
+            <h3 className="font-medium text-white text-sm">2.1 Information You Provide</h3>
             <ul className="list-disc list-inside space-y-2 mt-3 text-zinc-400">
               <li>
                 <strong className="text-zinc-300">Account registration:</strong> Email address and password
@@ -61,7 +61,7 @@ export default function PrivacyPage() {
               </li>
             </ul>
 
-            <p className="font-medium text-white mt-5">2.2 Information Collected Automatically</p>
+            <h3 className="font-medium text-white text-sm mt-5">2.2 Information Collected Automatically</h3>
             <ul className="list-disc list-inside space-y-2 mt-3 text-zinc-400">
               <li>
                 <strong className="text-zinc-300">API usage data:</strong> For each API request, we log the API
@@ -79,7 +79,7 @@ export default function PrivacyPage() {
               </li>
             </ul>
 
-            <p className="font-medium text-white mt-5">2.3 Information We Do Not Collect</p>
+            <h3 className="font-medium text-white text-sm mt-5">2.3 Information We Do Not Collect</h3>
             <ul className="list-disc list-inside space-y-2 mt-3 text-zinc-400">
               <li>We do not use analytics trackers (no Google Analytics, Mixpanel, Amplitude, etc.)</li>
               <li>We do not use advertising pixels or retargeting cookies</li>
@@ -450,6 +450,6 @@ export default function PrivacyPage() {
           </section>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

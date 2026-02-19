@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <main className="min-h-screen bg-[#0a0a0a] text-white">
       <div className="max-w-3xl mx-auto px-6 py-24">
         <Link
           href="/"
@@ -32,7 +32,7 @@ export default function TermsPage() {
             <p className="mt-3">
               By creating an account, generating an API key, or otherwise accessing the Service, you acknowledge
               that you have read, understood, and agree to be bound by these Terms and our{" "}
-              <a href="/privacy" className="text-[#00FF88] hover:underline">Privacy Policy</a>, which is
+              <Link href="/privacy" className="text-[#00FF88] hover:underline">Privacy Policy</Link>, which is
               incorporated herein by reference. If you do not agree to these Terms, you must not access or use
               the Service.
             </p>
@@ -115,7 +115,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-lg font-mono font-semibold text-white mb-3">6. Subscription Plans and Billing</h2>
-            <p className="font-medium text-white">6.1 Plans</p>
+            <h3 className="font-medium text-white text-sm">6.1 Plans</h3>
             <p className="mt-2">
               The Service is offered through tiered subscription plans (currently Bench, Rookie, and MVP), each
               with defined rate limits, feature access, and monthly pricing as described on our pricing page.
@@ -123,7 +123,7 @@ export default function TermsPage() {
               communicated to active subscribers at least 30 days before taking effect.
             </p>
 
-            <p className="font-medium text-white mt-4">6.2 Billing</p>
+            <h3 className="font-medium text-white text-sm mt-4">6.2 Billing</h3>
             <p className="mt-2">
               Subscriptions are billed on a recurring monthly basis. Payment is processed through Stripe, PayPal,
               or NOWPayments (cryptocurrency), depending on the payment method you select at checkout. By
@@ -131,7 +131,7 @@ export default function TermsPage() {
               cancel. All prices are in US dollars unless otherwise stated.
             </p>
 
-            <p className="font-medium text-white mt-4">6.3 Free Trials</p>
+            <h3 className="font-medium text-white text-sm mt-4">6.3 Free Trials</h3>
             <p className="mt-2">
               We may offer free trial periods for certain plans. At the end of a trial, your subscription will
               automatically convert to a paid subscription unless you cancel before the trial expires. Trial
@@ -139,7 +139,7 @@ export default function TermsPage() {
               trials is a violation of these Terms.
             </p>
 
-            <p className="font-medium text-white mt-4">6.4 Cancellation</p>
+            <h3 className="font-medium text-white text-sm mt-4">6.4 Cancellation</h3>
             <p className="mt-2">
               You may cancel your subscription at any time through your dashboard billing page. Upon
               cancellation, your access to paid features continues until the end of your current billing period.
@@ -147,14 +147,14 @@ export default function TermsPage() {
               reverts to a free tier with no API access.
             </p>
 
-            <p className="font-medium text-white mt-4">6.5 Refunds</p>
+            <h3 className="font-medium text-white text-sm mt-4">6.5 Refunds</h3>
             <p className="mt-2">
               Refund requests are handled on a case-by-case basis. If you experience a significant service
               outage or billing error, contact us at david@wisesportsai.com within 14 days of the charge. We
               reserve the right to grant or deny refund requests at our sole discretion.
             </p>
 
-            <p className="font-medium text-white mt-4">6.6 Failed Payments</p>
+            <h3 className="font-medium text-white text-sm mt-4">6.6 Failed Payments</h3>
             <p className="mt-2">
               If a recurring payment fails, we will notify you by email and may retry the charge. If payment
               remains unsuccessful, your subscription may be suspended or canceled. You remain responsible for
@@ -186,7 +186,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-lg font-mono font-semibold text-white mb-3">8. Rate Limits and Fair Use</h2>
             <p>
-              Each subscription tier has defined rate limits (requests per minute and requests per month). These
+              Each subscription tier has defined rate limits (requests per minute and requests per day). These
               limits are enforced automatically. Requests exceeding your tier&apos;s limits will receive HTTP 429
               (Too Many Requests) responses.
             </p>
@@ -244,7 +244,7 @@ export default function TermsPage() {
             <p className="mt-3">
               We reserve the right to modify, suspend, or discontinue any part of the Service at any time, with
               or without notice. We will make reasonable efforts to provide advance notice of significant changes
-              or planned downtime. Service status is available at status.owlsinsight.com.
+              or planned downtime.
             </p>
           </section>
 
@@ -341,7 +341,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-lg font-mono font-semibold text-white mb-3">18. General Provisions</h2>
-            <p className="font-medium text-white">18.1 Modifications to Terms</p>
+            <h3 className="font-medium text-white text-sm">18.1 Modifications to Terms</h3>
             <p className="mt-2">
               We reserve the right to modify these Terms at any time. If we make material changes, we will
               notify you by email or through a prominent notice on the Service at least 15 days before the
@@ -350,26 +350,26 @@ export default function TermsPage() {
               stop using the Service and cancel your subscription.
             </p>
 
-            <p className="font-medium text-white mt-4">18.2 Entire Agreement</p>
+            <h3 className="font-medium text-white text-sm mt-4">18.2 Entire Agreement</h3>
             <p className="mt-2">
               These Terms, together with the Privacy Policy, constitute the entire agreement between you and us
               regarding the Service and supersede all prior agreements, representations, and understandings.
             </p>
 
-            <p className="font-medium text-white mt-4">18.3 Severability</p>
+            <h3 className="font-medium text-white text-sm mt-4">18.3 Severability</h3>
             <p className="mt-2">
               If any provision of these Terms is held to be invalid or unenforceable, that provision shall be
               modified to the minimum extent necessary to make it enforceable, and the remaining provisions
               shall continue in full force and effect.
             </p>
 
-            <p className="font-medium text-white mt-4">18.4 Waiver</p>
+            <h3 className="font-medium text-white text-sm mt-4">18.4 Waiver</h3>
             <p className="mt-2">
               Our failure to enforce any right or provision of these Terms shall not constitute a waiver of
               such right or provision.
             </p>
 
-            <p className="font-medium text-white mt-4">18.5 Assignment</p>
+            <h3 className="font-medium text-white text-sm mt-4">18.5 Assignment</h3>
             <p className="mt-2">
               You may not assign or transfer your rights or obligations under these Terms without our prior
               written consent. We may assign our rights and obligations without restriction.
@@ -392,6 +392,6 @@ export default function TermsPage() {
           </section>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

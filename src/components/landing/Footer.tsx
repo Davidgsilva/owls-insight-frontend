@@ -159,9 +159,17 @@ export function Footer() {
 
         {/* Bottom bar */}
         <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-neutral-600">
-            &copy; {new Date().getFullYear()} Owls Insight. All rights reserved.
-          </p>
+          <div className="flex items-center gap-4">
+            <p className="text-sm text-neutral-600">
+              &copy; {new Date().getFullYear()} Owls Insight. All rights reserved.
+            </p>
+            <Link href="/privacy" className="text-sm text-neutral-600 hover:text-neutral-400 transition-colors">
+              Privacy
+            </Link>
+            <Link href="/terms" className="text-sm text-neutral-600 hover:text-neutral-400 transition-colors">
+              Terms
+            </Link>
+          </div>
 
           {/* API Status indicator */}
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#111111] border border-white/5">
