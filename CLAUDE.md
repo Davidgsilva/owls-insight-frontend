@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Git Commit Rules
+
+Do NOT include "Co-Authored-By" lines in commit messages.
+
 ## Project Overview
 
 Owls Insight Frontend — Next.js 16 App Router application serving as both a marketing landing page and authenticated user dashboard for a real-time sports betting odds API. Part of the WiseSportsServices multi-repo architecture (see parent `CLAUDE.md` for cross-repo data flow).
