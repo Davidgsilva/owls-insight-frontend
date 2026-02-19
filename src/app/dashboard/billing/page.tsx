@@ -115,7 +115,7 @@ function BillingContent() {
   const trialDays = getTrialDaysRemaining();
   const isTrialing = subscription?.status === "trialing";
   const trialCanceled = isTrialing && subscription?.cancelAtPeriodEnd;
-  const trialEligible = subscription ? (subscription.trialEligible ?? (subscription.tier === "free")) : false;
+  const trialEligible = subscription?.trialEligible ?? false;
 
   async function handleUpgrade(tier: "bench" | "rookie" | "mvp") {
     setIsLoading(tier);
@@ -246,7 +246,10 @@ function BillingContent() {
         throw new Error(data.error || "Failed to start crypto checkout");
       }
 
-      if (data.paymentUrl) {
+      if (data.trial) {
+        toast.success("Your 7-day free trial has started!");
+        await refreshUser();
+      } else if (data.paymentUrl) {
         window.location.href = data.paymentUrl;
       } else {
         toast.success("Crypto subscription created. Check your email for invoice.");
@@ -516,17 +519,24 @@ function BillingContent() {
               <DialogTitle className="text-white font-mono text-lg">Choose Payment Method</DialogTitle>
               <DialogDescription className="text-zinc-400 text-sm">
                 {paymentDialogTier && (
-                  <>
-                    Subscribe to{" "}
-                    <span className={`font-semibold ${
-                      paymentDialogTier === "mvp" ? "text-purple-400" :
-                      paymentDialogTier === "rookie" ? "text-blue-400" : "text-zinc-300"
-                    }`}>
-                      {tiers[paymentDialogTier].name}
-                    </span>
-                    {" "}&middot;{" "}
-                    <span className="text-white font-medium">{tiers[paymentDialogTier].price}/mo</span>
-                  </>
+                  paymentDialogTier === "mvp" && trialEligible ? (
+                    <>
+                      Start your 7-day free trial of{" "}
+                      <span className="font-semibold text-purple-400">MVP</span>
+                    </>
+                  ) : (
+                    <>
+                      Subscribe to{" "}
+                      <span className={`font-semibold ${
+                        paymentDialogTier === "mvp" ? "text-purple-400" :
+                        paymentDialogTier === "rookie" ? "text-blue-400" : "text-zinc-300"
+                      }`}>
+                        {tiers[paymentDialogTier].name}
+                      </span>
+                      {" "}&middot;{" "}
+                      <span className="text-white font-medium">{tiers[paymentDialogTier].price}/mo</span>
+                    </>
+                  )
                 )}
               </DialogDescription>
             </DialogHeader>
@@ -573,6 +583,11 @@ function BillingContent() {
                 <p className="text-white font-medium text-sm">PayPal</p>
                 <p className="text-zinc-500 text-xs">Pay with your PayPal account</p>
               </div>
+              {paymentDialogTier === "mvp" && trialEligible && (
+                <Badge className="bg-[#00FF88]/15 text-[#00FF88] border-[#00FF88]/20 border text-[10px] font-mono shrink-0">
+                  7-DAY TRIAL
+                </Badge>
+              )}
             </button>
 
             {/* Crypto */}
@@ -590,9 +605,16 @@ function BillingContent() {
                 <p className="text-white font-medium text-sm">Cryptocurrency</p>
                 <p className="text-zinc-500 text-xs flex items-center gap-1">
                   <Envelope size={12} className="text-zinc-500" />
-                  Payment link sent to your email
+                  {paymentDialogTier === "mvp" && trialEligible
+                    ? "No payment required during trial"
+                    : "Payment link sent to your email"}
                 </p>
               </div>
+              {paymentDialogTier === "mvp" && trialEligible && (
+                <Badge className="bg-[#00FF88]/15 text-[#00FF88] border-[#00FF88]/20 border text-[10px] font-mono shrink-0">
+                  7-DAY TRIAL
+                </Badge>
+              )}
             </button>
           </div>
 
