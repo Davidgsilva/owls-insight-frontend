@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Owls Insight Frontend - Next.js 16 landing page for a real-time sports betting odds API service. Part of the WiseSportsServices multi-repo architecture (see parent `CLAUDE.md` for cross-repo data flow).
+Owls Insight Frontend — Next.js 16 App Router application serving as both a marketing landing page and authenticated user dashboard for a real-time sports betting odds API. Part of the WiseSportsServices multi-repo architecture (see parent `CLAUDE.md` for cross-repo data flow).
 
 ## Commands
 
@@ -17,26 +17,117 @@ npm run start    # Start production server
 
 ## Architecture
 
-### Directory Structure
-```
-src/
-├── app/              # Next.js App Router (layout.tsx, page.tsx, globals.css)
-├── components/
-│   ├── ui/           # shadcn/ui components (Radix primitives + Tailwind)
-│   └── landing/      # Landing page sections (Header, Hero, Features, etc.)
-└── lib/
-    └── utils.ts      # cn() utility for Tailwind class merging
-```
+### BFF Proxy Pattern
+
+The central design: **every API route in `src/app/api/` is a pure proxy** to the internal `owls-insight-api-server` (K8s cluster DNS). The frontend never exposes the backend directly.
+
+All proxy route handlers:
+- Add `X-Internal-Auth` header (shared secret from `INTERNAL_AUTH_SECRET` env var) for service-to-service auth
+- Forward the browser's `Cookie` header so the backend identifies users via the httpOnly `token` cookie
+- Return backend responses verbatim (including status codes)
+
+Exception: `/api/odds` uses a Bearer token via `OWLS_INSIGHT_API_KEY` (consumer-facing API auth) for the landing page live ticker.
+
+### Route Organization
+
+**Public pages** (server-rendered): `/`, `/docs`, `/contact`, `/login`, `/register`, `/forgot-password`, `/reset-password`, `/verify-email`
+
+**Dashboard pages** (all `"use client"`, auth-protected): `/dashboard`, `/dashboard/keys`, `/dashboard/usage`, `/dashboard/billing`, `/dashboard/account`
+
+The landing page (`/`) assembles sections from `src/components/landing/` barrel export: `Header → Hero → LiveTicker → Features → Coverage → Pricing → Footer`.
+
+The dashboard uses a shared layout (`src/app/dashboard/layout.tsx`) rendering `<Sidebar>` + `<Header>` + `<EmailVerificationBanner>` + `{children}`.
+
+### Three-Layer Auth System
+
+1. **Middleware** (`src/middleware.ts`): Edge runtime, checks `token` cookie. Redirects unauthenticated users from `/dashboard/*` to `/login?redirect=...`. Redirects authenticated users from `/login` to `/dashboard`. Only matches `/dashboard/:path*` and `/login`. Origin validated against an allowlist to prevent open redirects.
+
+2. **Dashboard layout guard** (`src/app/dashboard/layout.tsx`): Client-side `useEffect` — catches expired sessions where the cookie exists but `AuthContext` validation fails.
+
+3. **AuthContext** (`src/contexts/AuthContext.tsx`): Central auth state. Hydrates from `localStorage` (`owls_user`) for instant UI, then validates against `/api/auth/me`. On 401, clears cookie and localStorage. Logout sequence is carefully ordered: clear cookie first → clear client state → navigate.
+
+Auth methods: email/password and Discord OAuth. Discord flow preserves a `?tier=` param through the OAuth round-trip via an httpOnly cookie, enabling direct-to-checkout flows from pricing CTAs.
+
+### Payment Integrations
+
+Three providers, all proxied through Next.js route handlers:
+
+- **Stripe** (primary): `/api/stripe/checkout`, `/api/stripe/portal`, `/api/stripe/sync`
+- **PayPal**: `/api/paypal/checkout`, `/api/paypal/sync`, `/api/paypal/cancel` — stores `subscriptionId` in `sessionStorage` to survive redirect
+- **NOWPayments (Crypto)**: `/api/nowpayments/checkout`, `/api/nowpayments/sync`, `/api/nowpayments/cancel`
+
+The billing page (`/dashboard/billing`) detects provider via `subscription.paymentProvider` and shows provider-specific management UI.
+
+Subscription tiers: `free`, `bench` ($9.99), `rookie` ($24.99), `mvp` ($49.99). MVP has a 7-day free trial for eligible users.
+
+### State Management
+
+No global state library. Only:
+- **`AuthContext`** for user/subscription/auth methods (wrapped at root layout)
+- **Local `useState`** per dashboard page with `useEffect` + `fetch` + `setInterval` polling (30s overview, 15s usage stats, 10s logs)
+- **`sonner` toast** for user feedback (configured globally in root layout)
 
 ### Key Patterns
 
-**Component Organization**: Landing page sections are barrel-exported from `src/components/landing/index.ts`. UI primitives use shadcn/ui pattern with Radix UI + class-variance-authority.
+**`hasSynced` ref pattern**: Payment sync `useEffect`s use `useRef(false)` to fire exactly once, preventing duplicate API calls when `searchParams` changes reference.
 
-**Styling**: Tailwind CSS 4 with custom theme in `globals.css`. Brand colors use `#00FF88` (primary green) and `#06b6d4` (cyan). Custom animations defined: `animate-ticker`, `animate-fade-in-up`, `animate-float`, `animate-pulse-glow`. Staggered animations via `.stagger-1` through `.stagger-6`.
+**Suspense wrapping**: All pages using `useSearchParams()` wrap content in `<Suspense>` (required by Next.js for static rendering compatibility).
 
-**Fonts**: JetBrains Mono for headings/code, IBM Plex Sans for body text (loaded via @font-face in globals.css).
+**Polling with cleanup**: Dashboard pages use `AbortController` + `clearInterval` + `cancelled` flag to prevent state updates after unmount.
+
+### Styling
+
+Tailwind CSS 4 with custom theme in `globals.css`. Brand colors: `#00FF88` (primary green), `#06b6d4` (cyan). Fonts: JetBrains Mono (headings/code), IBM Plex Sans (body). Custom animations: `animate-ticker`, `animate-fade-in-up`, `animate-float`, `animate-pulse-glow`. Staggered animations via `.stagger-1` through `.stagger-6`.
 
 **Path Alias**: `@/*` maps to `./src/*`
+
+### Environment Variables
+
+| Variable | Purpose |
+|---|---|
+| `API_SERVER_URL` | Internal API server URL (default: `http://owls-insight-api-server`) |
+| `INTERNAL_AUTH_SECRET` | Shared secret for `X-Internal-Auth` header on all backend calls |
+| `OWLS_INSIGHT_API_KEY` | Bearer token for `/api/odds` proxy (landing page live ticker) |
+| `DISCORD_CLIENT_ID` | Discord OAuth app ID |
+| `DISCORD_REDIRECT_URI` | Discord OAuth callback URL |
+
+Note: `NEXT_PUBLIC_API_URL` is referenced in K8s manifests but not in source code — the frontend always hits its own Next.js API routes.
+
+## UI Component Library
+
+Uses shadcn/ui pattern. Components in `src/components/ui/` are Radix UI primitives styled with Tailwind. The `cn()` utility from `@/lib/utils` merges Tailwind classes via `clsx` + `tailwind-merge`.
+
+## Known Issues & Gotchas
+
+### NEVER use `NextResponse.redirect()` in standalone mode
+
+Next.js standalone mode rewrites the `Location` header in `NextResponse.redirect()` to the server's bind address (`0.0.0.0:3000`). This causes production redirects to go to `https://0.0.0.0:3000/...` instead of `https://owlsinsight.com/...`.
+
+**Always use raw `Response` objects for redirects:**
+
+```typescript
+// WRONG - will redirect to 0.0.0.0:3000 in production
+return NextResponse.redirect(new URL("/dashboard", origin));
+
+// CORRECT - preserves the intended URL
+return new Response(null, {
+  status: 302,
+  headers: { Location: new URL("/dashboard", origin).toString() },
+});
+
+// CORRECT with cookies - use NextResponse only for cookie-setting, then copy headers
+const nr = new NextResponse(null);
+nr.cookies.set('token', value, { httpOnly: true, secure: true, ... });
+const headers = new Headers(nr.headers);
+headers.set('Location', targetUrl);
+return new Response(null, { status: 302, headers });
+```
+
+This applies to both middleware (`src/middleware.ts`) and route handlers (`src/app/api/...`).
+
+### `/register` is intentionally unprotected
+
+Excluded from auth redirect routes — a stale token cookie would cause `/register → /dashboard → /login` redirect chain, breaking "Start Free Trial" CTA buttons that link to `/register?tier=mvp`.
 
 ## Deployment
 
@@ -45,7 +136,6 @@ AWS EKS deployment configured:
 - K8s manifests in `k8s/` (deployment, service, ingress)
 - Namespace: `owls-insight-prod`
 - ECR registry: `482566359918.dkr.ecr.us-east-1.amazonaws.com/owls-insight-frontend`
-- Environment variable: `NEXT_PUBLIC_API_URL` points to `https://api.owlsinsight.com`
 
 ### CRITICAL: Deploying the Frontend
 
@@ -97,37 +187,3 @@ curl -s https://owlsinsight.com | grep -o "expected text snippet"
 **Incidents (Feb 2026):**
 1. A Claude Code session built and deployed the frontend from an older commit, overwriting a newer production version with stale code. This rolled back features and bug fixes that were already live. **Fix:** Always verify HEAD contains all expected changes before building.
 2. A Docker build used cached layers (`COPY . .` and `npm run build` both showed CACHED) despite source code having changed. The deployed image contained old code ("7 sportsbooks" instead of "6 sportsbooks"). **Fix:** Always use `docker build --no-cache`.
-
-## Known Issues & Gotchas
-
-### NEVER use `NextResponse.redirect()` in standalone mode
-
-Next.js standalone mode rewrites the `Location` header in `NextResponse.redirect()` to the server's bind address (`0.0.0.0:3000`). This causes production redirects to go to `https://0.0.0.0:3000/...` instead of `https://owlsinsight.com/...`.
-
-**Always use raw `Response` objects for redirects:**
-
-```typescript
-// WRONG - will redirect to 0.0.0.0:3000 in production
-return NextResponse.redirect(new URL("/dashboard", origin));
-
-// CORRECT - preserves the intended URL
-return new Response(null, {
-  status: 302,
-  headers: { Location: new URL("/dashboard", origin).toString() },
-});
-
-// CORRECT with cookies - use NextResponse only for cookie-setting, then copy headers
-const nr = new NextResponse(null);
-nr.cookies.set('token', value, { httpOnly: true, secure: true, ... });
-const headers = new Headers(nr.headers);
-headers.set('Location', targetUrl);
-return new Response(null, { status: 302, headers });
-```
-
-This applies to both middleware (`src/middleware.ts`) and route handlers (`src/app/api/...`).
-
-## UI Component Library
-
-Uses shadcn/ui pattern. Components in `src/components/ui/` are based on Radix UI primitives styled with Tailwind. The `cn()` utility from `@/lib/utils` merges Tailwind classes.
-
-Available components: button, input, card, label, tabs, table, badge, avatar, dropdown-menu, dialog, separator, sheet, sonner (toast), form.
