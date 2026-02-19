@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
@@ -73,11 +73,38 @@ function UsageBar({ used, total, loading }: { used: number; total: number; loadi
 }
 
 function DashboardContent() {
-  const { user, subscription } = useAuth();
+  const { user, subscription, refreshUser } = useAuth();
   const searchParams = useSearchParams();
   const [usage, setUsage] = useState<UsageData | null>(null);
   const [keys, setKeys] = useState<KeysData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const hasSynced = useRef(false);
+
+  // Handle PayPal or Stripe checkout return
+  useEffect(() => {
+    const checkoutSuccess = searchParams.get("checkout") === "success";
+    const paypalSuccess = searchParams.get("paypal") === "success";
+    if ((checkoutSuccess || paypalSuccess) && !hasSynced.current) {
+      hasSynced.current = true;
+      window.history.replaceState({}, "", "/dashboard");
+      if (paypalSuccess) {
+        const subId = sessionStorage.getItem("paypal_sub_id");
+        sessionStorage.removeItem("paypal_sub_id");
+        fetch("/api/paypal/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ subscriptionId: subId }),
+        })
+          .catch(() => {})
+          .finally(() => refreshUser());
+      } else {
+        fetch("/api/stripe/sync", { method: "POST", credentials: "include" })
+          .catch(() => {})
+          .finally(() => refreshUser());
+      }
+    }
+  }, [searchParams, refreshUser]);
 
   // Handle Discord OAuth redirect with checkout intent
   useEffect(() => {
