@@ -46,9 +46,9 @@ export default function TermsPage() {
           <section>
             <h2 className="text-lg font-mono font-semibold text-white mb-3">2. Description of Service</h2>
             <p>
-              Owls Insight is a real-time sports betting odds aggregation platform. The Service collects publicly
-              available odds, spreads, totals, and player prop data from multiple licensed sportsbooks and
-              prediction markets, normalizes the data, and delivers it to subscribers through:
+              Owls Insight is a real-time sports odds data aggregation platform. The Service collects publicly
+              available odds, spreads, totals, and player prop data from multiple sportsbooks and prediction
+              markets, normalizes the data, and delivers it to subscribers through:
             </p>
             <ul className="list-disc list-inside space-y-1 mt-3 text-zinc-400">
               <li>A RESTful JSON API accessible at api.owlsinsight.com</li>
@@ -174,7 +174,7 @@ export default function TermsPage() {
               <li>Reverse engineer, decompile, disassemble, or attempt to derive the source code of any part of the Service</li>
               <li>Introduce viruses, malware, or any harmful code to the Service</li>
               <li>Use the Service in any manner that could disable, overburden, damage, or impair the Service or interfere with any other party&apos;s use of the Service</li>
-              <li>Use the Service for any purpose that is illegal under applicable law, including but not limited to gambling in jurisdictions where it is prohibited</li>
+              <li>Use the Service for any purpose that is illegal under applicable law</li>
               <li>Misrepresent your identity or affiliation when creating an account</li>
             </ul>
             <p className="mt-3">
@@ -218,22 +218,19 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-mono font-semibold text-white mb-3">10. Data Accuracy and No Gambling Advice</h2>
+            <h2 className="text-lg font-mono font-semibold text-white mb-3">10. Data Accuracy and Informational Use</h2>
             <p>
-              The Service provides odds data for informational and analytical purposes only. We aggregate data
-              from third-party sources and, while we strive for accuracy and timeliness, we make no
-              representations or warranties regarding the accuracy, completeness, reliability, or timeliness of
-              any data provided.
+              The Service provides sports odds data strictly for informational, analytical, and research
+              purposes. We aggregate data from publicly available third-party sources and, while we strive for
+              accuracy and timeliness, we make no representations or warranties regarding the accuracy,
+              completeness, reliability, or timeliness of any data provided.
             </p>
             <p className="mt-3 font-medium text-white">
-              The Service does not constitute gambling advice, betting recommendations, or financial advice of
-              any kind. We do not recommend, endorse, or encourage gambling. Any decisions you make based on
-              data obtained through the Service are made at your own risk and sole discretion. You acknowledge
-              that sports betting involves the risk of financial loss.
-            </p>
-            <p className="mt-3">
-              We are not a sportsbook, bookmaker, or gambling operator. We do not accept bets, facilitate
-              wagering, or hold user funds. We are a data aggregation service only.
+              Owls Insight is not a sportsbook, bookmaker, or gambling operator. We do not accept bets,
+              facilitate wagering, hold user funds, or operate any form of gambling service. We are a data
+              aggregation and information service only. The Service does not constitute financial advice,
+              investment advice, or recommendations of any kind. Any decisions you make based on data obtained
+              through the Service are made entirely at your own risk and sole discretion.
             </p>
           </section>
 
@@ -332,12 +329,12 @@ export default function TermsPage() {
             <h2 className="text-lg font-mono font-semibold text-white mb-3">17. Governing Law and Dispute Resolution</h2>
             <p>
               These Terms shall be governed by and construed in accordance with the laws of the State of
-              New Jersey, United States, without regard to its conflict of law provisions.
+              California, United States, without regard to its conflict of law provisions.
             </p>
             <p className="mt-3">
               Any dispute arising out of or relating to these Terms or the Service shall first be resolved
               through good-faith negotiation. If the dispute cannot be resolved informally within 30 days,
-              either party may pursue resolution in the state or federal courts located in New Jersey. You
+              either party may pursue resolution in the state or federal courts located in California. You
               consent to the exclusive jurisdiction and venue of such courts.
             </p>
           </section>
