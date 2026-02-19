@@ -1,7 +1,6 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, useCallback, useMemo, ReactNode } from "react";
-import { useRouter } from "next/navigation";
 
 interface User {
   id: string;
@@ -41,8 +40,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
-
   const validateSession = useCallback(async () => {
     try {
       const res = await fetch("/api/auth/me", {
@@ -148,14 +145,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       console.warn("Logout API call failed:", err);
     }
-    // 2. Clear client state — if dashboard layout guard fires
-    //    router.replace("/login"), that's fine since cookie is already gone
+    // 2. Clear client state
     setUser(null);
     setSubscription(null);
     localStorage.removeItem(USER_STORAGE_KEY);
-    // 3. Navigate after both cookie and state are cleared
-    router.push("/");
-  }, [router]);
+    // 3. Hard navigate to exit the dashboard layout entirely.
+    //    router.push() causes a soft navigation that keeps the dashboard
+    //    layout mounted — it sees !isAuthenticated and shows a loading
+    //    spinner while racing with router.replace("/login"), deadlocking.
+    window.location.href = "/";
+  }, []);
 
   const value = useMemo(() => ({
     user,
