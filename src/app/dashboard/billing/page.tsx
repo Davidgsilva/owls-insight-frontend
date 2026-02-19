@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Check, CreditCard, ArrowSquareOut } from "@phosphor-icons/react";
+import { Check, CreditCard, ArrowSquareOut, CurrencyBtc, PaypalLogo, ShieldCheck, Envelope } from "@phosphor-icons/react";
 
 const tiers = {
   bench: {
@@ -510,15 +510,31 @@ function BillingContent() {
 
       {/* Payment Method Dialog */}
       <Dialog open={!!paymentDialogTier} onOpenChange={(open) => !open && setPaymentDialogTier(null)}>
-        <DialogContent className="bg-[#111113] border-white/10 sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-white font-mono">Choose Payment Method</DialogTitle>
-            <DialogDescription className="text-zinc-400">
-              {`Subscribe to ${paymentDialogTier?.toUpperCase() || ""}`}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col gap-3 mt-2">
-            <Button
+        <DialogContent className="bg-[#111113] border-white/10 sm:max-w-[420px] p-0 gap-0 overflow-hidden">
+          <div className="px-6 pt-6 pb-4">
+            <DialogHeader>
+              <DialogTitle className="text-white font-mono text-lg">Choose Payment Method</DialogTitle>
+              <DialogDescription className="text-zinc-400 text-sm">
+                {paymentDialogTier && (
+                  <>
+                    Subscribe to{" "}
+                    <span className={`font-semibold ${
+                      paymentDialogTier === "mvp" ? "text-purple-400" :
+                      paymentDialogTier === "rookie" ? "text-blue-400" : "text-zinc-300"
+                    }`}>
+                      {tiers[paymentDialogTier].name}
+                    </span>
+                    {" "}&middot;{" "}
+                    <span className="text-white font-medium">{tiers[paymentDialogTier].price}/mo</span>
+                  </>
+                )}
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+
+          <div className="px-6 pb-6 flex flex-col gap-2">
+            {/* Card */}
+            <button
               onClick={() => {
                 if (paymentDialogTier) {
                   setPaymentDialogTier(null);
@@ -526,33 +542,65 @@ function BillingContent() {
                 }
               }}
               disabled={!!isLoading}
-              className="w-full bg-white hover:bg-zinc-200 text-black font-semibold h-12"
+              className="group flex items-center gap-4 w-full rounded-xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.07] hover:border-white/20 transition-all px-4 py-3.5 text-left disabled:opacity-50"
             >
-              <CreditCard size={20} weight="duotone" className="mr-2" />
-              {isLoading
-                ? "Loading..."
-                : paymentDialogTier === "mvp" && trialEligible
-                ? "Pay with Card (7-day free trial)"
-                : "Pay with Card"}
-            </Button>
-            <Button
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/10">
+                <CreditCard size={22} weight="duotone" className="text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-white font-medium text-sm">Credit or Debit Card</p>
+                <p className="text-zinc-500 text-xs">Visa, Mastercard, Amex</p>
+              </div>
+              {paymentDialogTier === "mvp" && trialEligible && (
+                <Badge className="bg-[#00FF88]/15 text-[#00FF88] border-[#00FF88]/20 border text-[10px] font-mono shrink-0">
+                  7-DAY TRIAL
+                </Badge>
+              )}
+            </button>
+
+            {/* PayPal */}
+            <button
               onClick={() => {
                 if (paymentDialogTier) handlePayPalCheckout(paymentDialogTier);
               }}
               disabled={!!isLoading}
-              className="w-full bg-[#0070BA] hover:bg-[#005ea6] text-white font-semibold h-12"
+              className="group flex items-center gap-4 w-full rounded-xl border border-white/10 bg-white/[0.03] hover:bg-[#0070BA]/10 hover:border-[#0070BA]/30 transition-all px-4 py-3.5 text-left disabled:opacity-50"
             >
-              {isLoading ? "Loading..." : "Pay with PayPal"}
-            </Button>
-            <Button
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#0070BA]/15">
+                <PaypalLogo size={22} weight="fill" className="text-[#0070BA]" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-white font-medium text-sm">PayPal</p>
+                <p className="text-zinc-500 text-xs">Pay with your PayPal account</p>
+              </div>
+            </button>
+
+            {/* Crypto */}
+            <button
               onClick={() => {
                 if (paymentDialogTier) handleCryptoCheckout(paymentDialogTier);
               }}
               disabled={!!isLoading}
-              className="w-full bg-[#F7931A] hover:bg-[#d97e16] text-white font-semibold h-12"
+              className="group flex items-center gap-4 w-full rounded-xl border border-white/10 bg-white/[0.03] hover:bg-[#F7931A]/10 hover:border-[#F7931A]/30 transition-all px-4 py-3.5 text-left disabled:opacity-50"
             >
-              {isLoading ? "Loading..." : "Pay with Crypto"}
-            </Button>
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#F7931A]/15">
+                <CurrencyBtc size={22} weight="bold" className="text-[#F7931A]" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-white font-medium text-sm">Cryptocurrency</p>
+                <p className="text-zinc-500 text-xs flex items-center gap-1">
+                  <Envelope size={12} className="text-zinc-500" />
+                  Payment link sent to your email
+                </p>
+              </div>
+            </button>
+          </div>
+
+          <div className="px-6 py-3 border-t border-white/5 bg-white/[0.02]">
+            <p className="text-zinc-600 text-[11px] text-center flex items-center justify-center gap-1.5">
+              <ShieldCheck size={13} weight="fill" className="text-zinc-500" />
+              Payments processed securely. Cancel anytime.
+            </p>
           </div>
         </DialogContent>
       </Dialog>
