@@ -1,26 +1,77 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
-import { Copy, Check } from "@phosphor-icons/react";
+import { Copy, Check, MagnifyingGlass, ArrowUp } from "@phosphor-icons/react";
 
 // Navigation sections
-const sections = [
-  { id: "getting-started", label: "Getting Started" },
-  { id: "authentication", label: "Authentication" },
-  { id: "odds-api", label: "Odds" },
-  { id: "esports-api", label: "Esports" },
-  { id: "props-api", label: "Player Props" },
-  { id: "scores-api", label: "Live Scores" },
-  { id: "stats-api", label: "Player Stats" },
-  { id: "kalshi-api", label: "Kalshi Markets" },
-  { id: "history-api", label: "Historical Data" },
-  { id: "websocket", label: "WebSocket" },
-  { id: "usage-api", label: "Usage" },
-  { id: "rate-limits", label: "Rate Limits" },
-  { id: "coverage", label: "Coverage" },
-  { id: "errors", label: "Errors" },
+type SubItem = { id: string; label: string };
+type Section = { id: string; label: string; subItems?: SubItem[]; keywords?: string[] };
+
+const sections: Section[] = [
+  { id: "getting-started", label: "Getting Started", subItems: [
+    { id: "sub-quick-start", label: "Quick start" },
+    { id: "sub-health-check", label: "Health check" },
+  ], keywords: ["base url", "curl", "api key", "setup"] },
+  { id: "authentication", label: "Authentication", keywords: ["bearer", "header", "api key", "auth"] },
+  { id: "odds-api", label: "Odds", subItems: [
+    { id: "sub-odds-endpoints", label: "Endpoints" },
+    { id: "sub-odds-sports", label: "Sports" },
+    { id: "sub-odds-sportsbooks", label: "Sportsbooks" },
+    { id: "sub-odds-parameters", label: "Parameters" },
+    { id: "sub-tennis-markets", label: "Tennis markets" },
+  ], keywords: ["nba", "nfl", "nhl", "mlb", "ncaab", "ncaaf", "soccer", "tennis", "pinnacle", "fanduel", "draftkings", "moneyline", "spreads", "totals", "alternates"] },
+  { id: "esports-api", label: "Esports", subItems: [
+    { id: "sub-esports-markets", label: "Markets" },
+  ], keywords: ["cs2", "counter-strike", "1xbet", "esports"] },
+  { id: "props-api", label: "Player Props", subItems: [
+    { id: "sub-props-endpoints", label: "Endpoints" },
+    { id: "sub-props-parameters", label: "Parameters" },
+    { id: "sub-prop-categories", label: "Prop categories" },
+  ], keywords: ["props", "player", "points", "rebounds", "assists", "threes", "fanduel", "draftkings", "caesars", "betmgm", "bet365"] },
+  { id: "scores-api", label: "Live Scores", subItems: [
+    { id: "sub-scores-endpoints", label: "Endpoints" },
+    { id: "sub-scores-nba", label: "NBA example" },
+    { id: "sub-scores-soccer", label: "Soccer example" },
+    { id: "sub-match-stats", label: "Match stats" },
+    { id: "sub-incidents", label: "Incidents" },
+  ], keywords: ["scores", "live", "soccer", "nba", "possession", "goals", "cards", "xg", "expected goals", "incidents", "substitution"] },
+  { id: "stats-api", label: "Player Stats", subItems: [
+    { id: "sub-stats-endpoints", label: "Endpoints" },
+    { id: "sub-box-scores", label: "Box scores" },
+    { id: "sub-rolling-averages", label: "Rolling averages" },
+  ], keywords: ["stats", "box score", "averages", "l5", "l10", "l20", "h2h"] },
+  { id: "kalshi-api", label: "Kalshi Markets", subItems: [
+    { id: "sub-series-tickers", label: "Series tickers" },
+  ], keywords: ["kalshi", "prediction", "markets", "series", "cftc"] },
+  { id: "history-api", label: "Historical Data", subItems: [
+    { id: "sub-history-endpoints", label: "Endpoints" },
+  ], keywords: ["history", "historical", "snapshots", "games", "odds history", "props history", "stats history"] },
+  { id: "websocket", label: "WebSocket", subItems: [
+    { id: "sub-ws-connection", label: "Connection" },
+    { id: "sub-ws-events", label: "Events" },
+    { id: "sub-ws-props", label: "Props streaming" },
+  ], keywords: ["websocket", "ws", "socket", "streaming", "live", "subscribe", "events", "real-time"] },
+  { id: "usage-api", label: "Usage", keywords: ["usage", "dashboard", "requests"] },
+  { id: "rate-limits", label: "Rate Limits", subItems: [
+    { id: "sub-tier-features", label: "Tier features" },
+  ], keywords: ["rate limit", "tier", "bench", "rookie", "mvp", "pricing", "price", "connections"] },
+  { id: "coverage", label: "Coverage", subItems: [
+    { id: "sub-game-odds-coverage", label: "Game odds" },
+    { id: "sub-props-coverage", label: "Player props" },
+  ], keywords: ["coverage", "sports", "books", "sportsbooks", "availability"] },
+  { id: "errors", label: "Errors", keywords: ["error", "status code", "401", "403", "429", "500"] },
 ];
+
+// Map sub-item IDs to their parent section IDs for IntersectionObserver
+const subItemToParent: Record<string, string> = {};
+for (const section of sections) {
+  if (section.subItems) {
+    for (const sub of section.subItems) {
+      subItemToParent[sub.id] = section.id;
+    }
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Shared sub-components
@@ -137,9 +188,9 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
   );
 }
 
-function SubHeading({ children }: { children: React.ReactNode }) {
+function SubHeading({ children, id }: { children: React.ReactNode; id?: string }) {
   return (
-    <h3 className="text-sm font-mono font-semibold text-zinc-300 mt-10 mb-3 uppercase tracking-wider">
+    <h3 id={id} className="text-sm font-mono font-semibold text-zinc-300 mt-10 mb-3 uppercase tracking-wider scroll-mt-20">
       {children}
     </h3>
   );
@@ -163,14 +214,51 @@ function TierBadge({ tier, className = "" }: { tier: string; className?: string 
 
 export default function DocsPage() {
   const [activeSection, setActiveSection] = useState("getting-started");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchIndex, setSearchIndex] = useState(0);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Track active section on scroll
+  // Build search results from query
+  const results = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const q = searchQuery.toLowerCase();
+    const matches: { sectionId: string; sectionLabel: string; subId?: string; subLabel?: string }[] = [];
+    for (const section of sections) {
+      const sectionMatch = section.label.toLowerCase().includes(q) ||
+        section.keywords?.some(k => k.includes(q));
+      if (sectionMatch) {
+        matches.push({ sectionId: section.id, sectionLabel: section.label });
+      }
+      if (section.subItems) {
+        for (const sub of section.subItems) {
+          if (sub.label.toLowerCase().includes(q)) {
+            matches.push({ sectionId: section.id, sectionLabel: section.label, subId: sub.id, subLabel: sub.label });
+          }
+        }
+      }
+    }
+    // Deduplicate by target ID
+    const seen = new Set<string>();
+    return matches.filter(r => {
+      const key = r.subId || r.sectionId;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    }).slice(0, 8);
+  }, [searchQuery]);
+
+  // Track active section on scroll (sections + sub-items)
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
+            const id = entry.target.id;
+            // Map sub-item IDs to parent section
+            const parentId = subItemToParent[id];
+            setActiveSection(parentId || id);
           }
         }
       },
@@ -180,9 +268,47 @@ export default function DocsPage() {
     for (const section of sections) {
       const el = document.getElementById(section.id);
       if (el) observer.observe(el);
+      if (section.subItems) {
+        for (const sub of section.subItems) {
+          const subEl = document.getElementById(sub.id);
+          if (subEl) observer.observe(subEl);
+        }
+      }
     }
 
     return () => observer.disconnect();
+  }, []);
+
+  // Cmd/Ctrl+K keyboard shortcut
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setSearchOpen(prev => !prev);
+        setSearchQuery("");
+        setSearchIndex(0);
+      }
+      if (e.key === "Escape") {
+        setSearchOpen(false);
+      }
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, []);
+
+  // Focus search input when modal opens
+  useEffect(() => {
+    if (searchOpen) {
+      const id = setTimeout(() => searchInputRef.current?.focus(), 0);
+      return () => clearTimeout(id);
+    }
+  }, [searchOpen]);
+
+  // Back-to-top visibility
+  useEffect(() => {
+    const handler = () => setShowBackToTop(window.scrollY > 400);
+    window.addEventListener("scroll", handler, { passive: true });
+    return () => window.removeEventListener("scroll", handler);
   }, []);
 
   return (
@@ -197,6 +323,14 @@ export default function DocsPage() {
             <span className="text-zinc-700">/</span>
             <span className="font-mono text-sm text-white">Docs</span>
           </div>
+          <button
+            onClick={() => { setSearchOpen(true); setSearchQuery(""); setSearchIndex(0); }}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/[0.08] bg-white/[0.02] text-zinc-500 hover:text-zinc-300 hover:border-white/[0.12] transition-colors text-sm"
+          >
+            <MagnifyingGlass size={14} />
+            <span className="font-sans">Search</span>
+            <kbd className="hidden sm:inline-block text-[10px] font-mono text-zinc-600 bg-white/[0.06] px-1.5 py-0.5 rounded ml-1">⌘K</kbd>
+          </button>
         </div>
       </header>
 
@@ -206,19 +340,42 @@ export default function DocsPage() {
           <nav className="py-6 px-4">
             <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-600 mb-3 px-2">Reference</p>
             <div className="space-y-0.5">
-              {sections.map((section) => (
-                <a
-                  key={section.id}
-                  href={`#${section.id}`}
-                  className={`block px-2 py-1.5 rounded text-[13px] transition-colors ${
-                    activeSection === section.id
-                      ? "text-white bg-white/[0.04]"
-                      : "text-zinc-500 hover:text-zinc-300"
-                  }`}
-                >
-                  {section.label}
-                </a>
-              ))}
+              {sections.map((section) => {
+                const isActive = activeSection === section.id;
+                const hasSubItems = section.subItems && section.subItems.length > 0;
+                return (
+                  <div key={section.id}>
+                    <a
+                      href={`#${section.id}`}
+                      className={`block px-2 py-1.5 rounded text-[13px] transition-colors ${
+                        isActive
+                          ? "text-white bg-white/[0.04]"
+                          : "text-zinc-500 hover:text-zinc-300"
+                      }`}
+                    >
+                      {section.label}
+                    </a>
+                    {hasSubItems && (
+                      <div
+                        className="overflow-hidden transition-all duration-200 ease-in-out"
+                        style={{ maxHeight: isActive ? `${section.subItems!.length * 32 + 8}px` : "0px", opacity: isActive ? 1 : 0 }}
+                      >
+                        <div className="ml-3 pl-2 border-l border-white/[0.06]">
+                          {section.subItems!.map((sub) => (
+                            <a
+                              key={sub.id}
+                              href={`#${sub.id}`}
+                              className="block px-2 py-1 text-[12px] text-zinc-600 hover:text-zinc-300 transition-colors"
+                            >
+                              {sub.label}
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </nav>
         </aside>
@@ -227,7 +384,7 @@ export default function DocsPage() {
         <main className="flex-1 ml-56 px-12 py-12 max-w-3xl">
 
           {/* ─── Getting Started ────────────────────────────────────── */}
-          <section id="getting-started" className="mb-20">
+          <section id="getting-started" className="mb-20 scroll-mt-20">
             <h1 className="text-3xl font-mono font-bold tracking-tight text-white mb-2">
               API Reference
             </h1>
@@ -240,7 +397,7 @@ export default function DocsPage() {
               <code className="text-sm font-mono text-white">https://api.owlsinsight.com</code>
             </div>
 
-            <SubHeading>Quick start</SubHeading>
+            <SubHeading id="sub-quick-start">Quick start</SubHeading>
             <ol className="text-sm text-zinc-400 font-sans space-y-2 mb-6 list-decimal list-inside">
               <li>Create an account and get your API key from the dashboard.</li>
               <li>Include the key in every request via the <code className="text-[13px] font-mono text-zinc-300">Authorization</code> header.</li>
@@ -251,7 +408,7 @@ export default function DocsPage() {
   https://api.owlsinsight.com/api/v1/nba/odds`}
             />
 
-            <SubHeading>Health check</SubHeading>
+            <SubHeading id="sub-health-check">Health check</SubHeading>
             <p className="text-sm text-zinc-500 font-sans mb-4">
               No authentication required.
             </p>
@@ -262,7 +419,7 @@ export default function DocsPage() {
           </section>
 
           {/* ─── Authentication ─────────────────────────────────────── */}
-          <section id="authentication" className="mb-20">
+          <section id="authentication" className="mb-20 scroll-mt-20">
             <SectionHeading>Authentication</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-6">
               All endpoints require an API key in the Authorization header.
@@ -272,13 +429,13 @@ export default function DocsPage() {
           </section>
 
           {/* ─── Odds API ──────────────────────────────────────────── */}
-          <section id="odds-api" className="mb-20">
+          <section id="odds-api" className="mb-20 scroll-mt-20">
             <SectionHeading>Odds API</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-6">
-              Live betting odds from Pinnacle, FanDuel, DraftKings, BetMGM, Bet365, Caesars, and Kalshi. Updated every ~3 seconds via polling.
+              Live betting odds from Pinnacle, FanDuel, DraftKings, BetMGM, Bet365, Caesars, Kalshi, and 1xBet. Updated every ~3 seconds via polling.
             </p>
 
-            <SubHeading>Endpoints</SubHeading>
+            <SubHeading id="sub-odds-endpoints">Endpoints</SubHeading>
             <div className="mb-8">
               <Endpoint method="GET" path="/api/v1/{sport}/odds" description="All odds for a sport (spreads, moneylines, totals)" />
               <Endpoint method="GET" path="/api/v1/{sport}/moneyline" description="Moneyline odds only" />
@@ -286,7 +443,7 @@ export default function DocsPage() {
               <Endpoint method="GET" path="/api/v1/{sport}/totals" description="Over/under totals only" />
             </div>
 
-            <SubHeading>Sports</SubHeading>
+            <SubHeading id="sub-odds-sports">Sports</SubHeading>
             <div className="flex flex-wrap gap-2 mb-8">
               {["nba", "ncaab", "nfl", "nhl", "ncaaf", "mlb", "soccer", "ncaah", "tennis", "cs2"].map((sport) => (
                 <code key={sport} className="text-[13px] font-mono text-zinc-300 bg-white/[0.04] px-2.5 py-1 rounded">
@@ -295,7 +452,7 @@ export default function DocsPage() {
               ))}
             </div>
 
-            <SubHeading>Sportsbooks</SubHeading>
+            <SubHeading id="sub-odds-sportsbooks">Sportsbooks</SubHeading>
             <div className="overflow-x-auto mb-8">
               <table className="w-full text-sm">
                 <thead>
@@ -339,7 +496,7 @@ export default function DocsPage() {
               </p>
             </div>
 
-            <SubHeading>Parameters</SubHeading>
+            <SubHeading id="sub-odds-parameters">Parameters</SubHeading>
             <ParamTable
               params={[
                 { name: "books", type: "string", required: false, description: "Comma-separated list of sportsbooks to include" },
@@ -453,7 +610,7 @@ export default function DocsPage() {
               The <code className="text-[11px] font-mono text-zinc-500">alternates</code> field in <code className="text-[11px] font-mono text-zinc-500">meta</code> is always present in responses — it returns <code className="text-[11px] font-mono text-zinc-500">false</code> when the parameter is omitted or the API key&apos;s tier is below Rookie.
             </p>
 
-            <SubHeading>Tennis markets</SubHeading>
+            <SubHeading id="sub-tennis-markets">Tennis markets</SubHeading>
             <p className="text-sm text-zinc-500 font-sans mb-4">
               Tennis odds from Pinnacle include additional match and set-level markets beyond the standard h2h, spreads, and totals.
               All 8 market types are included in the <code className="text-[13px] font-mono text-zinc-300">/api/v1/tennis/odds</code> response.
@@ -490,7 +647,7 @@ export default function DocsPage() {
           </section>
 
           {/* ─── Esports API ───────────────────────────────────────── */}
-          <section id="esports-api" className="mb-20">
+          <section id="esports-api" className="mb-20 scroll-mt-20">
             <SectionHeading>Esports API</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-6 leading-relaxed">
               CS2 (Counter-Strike 2) match odds from 1xBet. Live and prematch games with moneylines,
@@ -603,7 +760,7 @@ export default function DocsPage() {
 }`}
             />
 
-            <SubHeading>Markets</SubHeading>
+            <SubHeading id="sub-esports-markets">Markets</SubHeading>
             <div className="overflow-x-auto mb-8">
               <table className="w-full text-sm">
                 <thead>
@@ -646,7 +803,7 @@ export default function DocsPage() {
           </section>
 
           {/* ─── Props API ─────────────────────────────────────────── */}
-          <section id="props-api" className="mb-20">
+          <section id="props-api" className="mb-20 scroll-mt-20">
             <SectionHeading>Player Props API</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-2">
               Player prop betting lines from multiple sportsbooks with alternate lines support.
@@ -655,7 +812,7 @@ export default function DocsPage() {
               <TierBadge tier="Rookie+" />
             </p>
 
-            <SubHeading>Endpoints</SubHeading>
+            <SubHeading id="sub-props-endpoints">Endpoints</SubHeading>
             <div className="mb-8">
               <Endpoint method="GET" path="/api/v1/{sport}/props" description="Aggregated player props from all books" tier="Rookie+" />
               <Endpoint method="GET" path="/api/v1/{sport}/props/fanduel" description="FanDuel player props only" tier="Rookie+" />
@@ -668,7 +825,7 @@ export default function DocsPage() {
               <Endpoint method="GET" path="/api/v1/props/stats" description="Aggregated props cache statistics" tier="Rookie+" />
             </div>
 
-            <SubHeading>Parameters</SubHeading>
+            <SubHeading id="sub-props-parameters">Parameters</SubHeading>
             <ParamTable
               params={[
                 { name: "game_id", type: "string", required: false, description: "Filter to a specific game" },
@@ -678,7 +835,7 @@ export default function DocsPage() {
               ]}
             />
 
-            <SubHeading>Prop categories</SubHeading>
+            <SubHeading id="sub-prop-categories">Prop categories</SubHeading>
             <div className="flex flex-wrap gap-1.5 mb-8">
               {[
                 "points", "rebounds", "assists", "steals", "blocks", "threes_made",
@@ -759,13 +916,13 @@ export default function DocsPage() {
           </section>
 
           {/* ─── Scores API ────────────────────────────────────────── */}
-          <section id="scores-api" className="mb-20">
+          <section id="scores-api" className="mb-20 scroll-mt-20">
             <SectionHeading>Live Scores API</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-6">
               Live game scores and status updates, refreshed every ~3 seconds. Soccer matches include rich in-match data: team statistics, match incidents (goals, cards, substitutions), and per-player ratings.
             </p>
 
-            <SubHeading>Endpoints</SubHeading>
+            <SubHeading id="sub-scores-endpoints">Endpoints</SubHeading>
             <div className="mb-8">
               <Endpoint method="GET" path="/api/v1/scores/live" description="Live scores across all sports" />
               <Endpoint method="GET" path="/api/v1/{sport}/scores/live" description="Live scores for a specific sport" />
@@ -790,7 +947,7 @@ export default function DocsPage() {
 }`}
             />
 
-            <SubHeading>NBA example</SubHeading>
+            <SubHeading id="sub-scores-nba">NBA example</SubHeading>
             <CodeBlock
               language="json"
               code={`{
@@ -818,7 +975,7 @@ export default function DocsPage() {
 }`}
             />
 
-            <SubHeading>Soccer example (with enrichment)</SubHeading>
+            <SubHeading id="sub-scores-soccer">Soccer example</SubHeading>
             <p className="text-sm text-zinc-500 font-sans mb-4">
               Soccer events include <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">matchStats</code>, <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">incidents</code>, and <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">playerStats</code> when available. Stats populate for top leagues (EPL, Champions League, La Liga, etc.) and update every ~30 seconds.
             </p>
@@ -898,7 +1055,7 @@ export default function DocsPage() {
 }`}
             />
 
-            <SubHeading>Match stats fields</SubHeading>
+            <SubHeading id="sub-match-stats">Match stats fields</SubHeading>
             <p className="text-sm text-zinc-500 font-sans mb-4">
               All stats use the <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">{`{ "home": number, "away": number }`}</code> format. Fields are <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">null</code> when not available for a given match.
             </p>
@@ -941,7 +1098,7 @@ export default function DocsPage() {
               </table>
             </div>
 
-            <SubHeading>Incident types</SubHeading>
+            <SubHeading id="sub-incidents">Incident types</SubHeading>
             <div className="overflow-x-auto mb-8">
               <table className="w-full text-sm">
                 <thead>
@@ -972,14 +1129,14 @@ export default function DocsPage() {
 
             <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5 mb-6">
               <p className="text-sm text-zinc-400 font-sans leading-relaxed">
-                <strong className="text-zinc-300">Soccer enrichment</strong> — Match stats, incidents, and player ratings are sourced from FlashScore and update every ~30 seconds during live matches. Extended stats (xG, big chances, shot breakdowns) are available for top leagues. When a soccer game completes, all enrichment data is automatically archived to the{" "}
+                <strong className="text-zinc-300">Soccer data</strong> — Match stats, incidents, and player ratings are sourced from FlashScore and update every ~30 seconds during live matches. Extended stats (xG, big chances, shot breakdowns) are available for top leagues. When a soccer game completes, all data is automatically archived to the{" "}
                 <a href="#history-api" className="text-[#00FF88] hover:underline">Historical Data API</a>.
               </p>
             </div>
           </section>
 
           {/* ─── Player Stats API ──────────────────────────────────── */}
-          <section id="stats-api" className="mb-20">
+          <section id="stats-api" className="mb-20 scroll-mt-20">
             <SectionHeading>Player Stats API</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-2">
               Live and final box score data. Returns per-player statistics including points, rebounds, assists, shooting splits, and more for today&apos;s games.
@@ -988,13 +1145,13 @@ export default function DocsPage() {
               <TierBadge tier="Rookie+" />
             </p>
 
-            <SubHeading>Endpoints</SubHeading>
+            <SubHeading id="sub-stats-endpoints">Endpoints</SubHeading>
             <div className="mb-8">
               <Endpoint method="GET" path="/api/v1/nba/stats" description="Box scores for today's NBA games (live and completed)" tier="Rookie+" />
               <Endpoint method="GET" path="/api/v1/{sport}/stats/averages" description="Rolling averages (L5/L10/L20) with optional H2H filtering" tier="Rookie+" />
             </div>
 
-            <SubHeading>Box scores parameters</SubHeading>
+            <SubHeading id="sub-box-scores">Box scores parameters</SubHeading>
             <ParamTable
               params={[
                 { name: "date", type: "string", required: false, description: "Date in YYYY-MM-DD or YYYYMMDD format (defaults to today ET)" },
@@ -1121,7 +1278,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
               </p>
             </div>
 
-            <SubHeading>Rolling averages parameters</SubHeading>
+            <SubHeading id="sub-rolling-averages">Rolling averages parameters</SubHeading>
             <p className="text-sm text-zinc-500 font-sans mb-4">
               Compute L5/L10/L20 rolling averages for any active player using full-season game logs.
               Add the <code className="text-[13px] font-mono text-zinc-300">opponent</code> parameter for head-to-head averages against a specific team.
@@ -1265,7 +1422,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
           </section>
 
           {/* ─── Kalshi Markets API ──────────────────────────────────── */}
-          <section id="kalshi-api" className="mb-20">
+          <section id="kalshi-api" className="mb-20 scroll-mt-20">
             <SectionHeading>Kalshi Markets API</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-6">
               Raw prediction market data from Kalshi, a CFTC-regulated event contract exchange.
@@ -1273,14 +1430,14 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
               order book depth, settlement rules, and price history.
             </p>
 
-            <SubHeading>Endpoints</SubHeading>
+            <SubHeading id="sub-kalshi-endpoints">Endpoints</SubHeading>
             <div className="mb-8">
               <Endpoint method="GET" path="/api/v1/kalshi/{sport}/markets" description="Prediction markets for a sport (game outcomes, spreads, totals)" />
               <Endpoint method="GET" path="/api/v1/kalshi/series/{seriesTicker}/markets" description="Markets for any Kalshi series ticker (Super Bowl, MVP, specials)" />
               <Endpoint method="GET" path="/api/v1/kalshi/series" description="List all known series tickers and sport mappings" />
             </div>
 
-            <SubHeading>Sports</SubHeading>
+            <SubHeading id="sub-kalshi-sports">Sports</SubHeading>
             <div className="flex flex-wrap gap-2 mb-8">
               {["nba", "ncaab", "nfl", "nhl", "mlb", "soccer"].map((sport) => (
                 <code key={sport} className="text-[13px] font-mono text-zinc-300 bg-white/[0.04] px-2.5 py-1 rounded">
@@ -1289,7 +1446,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
               ))}
             </div>
 
-            <SubHeading>Series tickers</SubHeading>
+            <SubHeading id="sub-series-tickers">Series tickers</SubHeading>
             <div className="overflow-x-auto mb-8">
               <table className="w-full text-sm">
                 <thead>
@@ -1464,7 +1621,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
           </section>
 
           {/* ─── Historical Data API ───────────────────────────────── */}
-          <section id="history-api" className="mb-20">
+          <section id="history-api" className="mb-20 scroll-mt-20">
             <SectionHeading>Historical Data API</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-2">
               Archived odds, props, and player stats for completed games. Data is archived automatically when games finish.
@@ -1473,7 +1630,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
               <TierBadge tier="MVP" />
             </p>
 
-            <SubHeading>Endpoints</SubHeading>
+            <SubHeading id="sub-history-endpoints">Endpoints</SubHeading>
             <div className="mb-8">
               <Endpoint method="GET" path="/api/v1/history/games" description="List archived games with filtering and pagination" tier="MVP" />
               <Endpoint method="GET" path="/api/v1/history/odds" description="Historical odds snapshots for an archived game" tier="MVP" />
@@ -1692,7 +1849,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
           </section>
 
           {/* ─── WebSocket API ─────────────────────────────────────── */}
-          <section id="websocket" className="mb-20">
+          <section id="websocket" className="mb-20 scroll-mt-20">
             <SectionHeading>WebSocket API</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-2">
               Live streaming for odds, scores, and player props. Updates are pushed every ~3 seconds.
@@ -1701,7 +1858,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
               <TierBadge tier="Rookie+" />
             </p>
 
-            <SubHeading>Connection</SubHeading>
+            <SubHeading id="sub-ws-connection">Connection</SubHeading>
             <CodeBlock
               language="javascript"
               code={`import { io } from "socket.io-client";
@@ -1716,7 +1873,7 @@ socket.on("connect", () => {
 });`}
             />
 
-            <SubHeading>Events</SubHeading>
+            <SubHeading id="sub-ws-events">Events</SubHeading>
             <div className="space-y-0 mb-8">
               {[
                 { name: "odds-update", description: "Latest odds data, emitted every ~3 seconds (automatic)", tier: undefined },
@@ -1765,7 +1922,7 @@ socket.emit("subscribe", {
 });`}
             />
 
-            <SubHeading>Player props (subscription required)</SubHeading>
+            <SubHeading id="sub-ws-props">Player props (subscription required)</SubHeading>
             <div className="rounded-lg bg-[#111113] border border-amber-500/20 p-5 mb-6">
               <p className="text-sm text-zinc-400 font-sans leading-relaxed">
                 Props are <strong className="text-zinc-200">not sent automatically</strong>. You must emit a subscribe event for each book
@@ -1839,7 +1996,7 @@ socket.on("esports-update", (data) => {
           </section>
 
           {/* ─── Usage API ─────────────────────────────────────────── */}
-          <section id="usage-api" className="mb-20">
+          <section id="usage-api" className="mb-20 scroll-mt-20">
             <SectionHeading>Usage API</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-6">
               Monitor API usage and rate limit status. Available via the dashboard (requires login session, not API key).
@@ -1901,7 +2058,7 @@ socket.on("esports-update", (data) => {
           </section>
 
           {/* ─── Rate Limits ───────────────────────────────────────── */}
-          <section id="rate-limits" className="mb-20">
+          <section id="rate-limits" className="mb-20 scroll-mt-20">
             <SectionHeading>Rate Limits</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-6">
               Rate limits are applied per API key. Limits vary by subscription tier.
@@ -1944,7 +2101,7 @@ socket.on("esports-update", (data) => {
               </table>
             </div>
 
-            <SubHeading>Tier features</SubHeading>
+            <SubHeading id="sub-tier-features">Tier features</SubHeading>
             <div className="space-y-4 mb-10">
               <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5">
                 <p className="font-mono text-sm font-semibold text-white mb-2">Bench</p>
@@ -1983,14 +2140,14 @@ X-RateLimit-Reset-Month: 2026-03-01T00:00:00.000Z`}
           </section>
 
           {/* ─── Coverage ──────────────────────────────────────────── */}
-          <section id="coverage" className="mb-20">
+          <section id="coverage" className="mb-20 scroll-mt-20">
             <SectionHeading>Coverage</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-6 leading-relaxed">
               We aggregate odds from multiple sportsbooks across multiple sports. Coverage varies by sport, book, and market type.
               We&apos;re continuously expanding coverage and improving data quality.
             </p>
 
-            <SubHeading>Game odds</SubHeading>
+            <SubHeading id="sub-game-odds-coverage">Game odds</SubHeading>
             <p className="text-sm text-zinc-500 font-sans mb-4">
               Pre-match and live odds including moneylines, spreads, and totals.
             </p>
@@ -2054,7 +2211,7 @@ X-RateLimit-Reset-Month: 2026-03-01T00:00:00.000Z`}
               </table>
             </div>
 
-            <SubHeading>Player props</SubHeading>
+            <SubHeading id="sub-props-coverage">Player props</SubHeading>
             <p className="text-sm text-zinc-500 font-sans mb-4">
               Player prop lines vary by sport and sportsbook. NBA has the deepest prop coverage.
               We&apos;re actively working to expand prop coverage across all sports and books.
@@ -2139,7 +2296,7 @@ X-RateLimit-Reset-Month: 2026-03-01T00:00:00.000Z`}
           </section>
 
           {/* ─── Errors ────────────────────────────────────────────── */}
-          <section id="errors" className="mb-20">
+          <section id="errors" className="mb-20 scroll-mt-20">
             <SectionHeading>Error Codes</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-6">
               All errors return JSON with an error message.
@@ -2200,6 +2357,93 @@ X-RateLimit-Reset-Month: 2026-03-01T00:00:00.000Z`}
           </div>
         </main>
       </div>
+
+      {/* Search modal */}
+      {searchOpen && (
+        <div
+          className="fixed inset-0 z-[100] flex items-start justify-center pt-[20vh]"
+          onClick={() => setSearchOpen(false)}
+        >
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Search documentation"
+            className="relative w-full max-w-lg bg-[#111113] border border-white/[0.08] rounded-xl shadow-2xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3 px-4 border-b border-white/[0.06]">
+              <MagnifyingGlass size={16} className="text-zinc-500 shrink-0" />
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => { setSearchQuery(e.target.value); setSearchIndex(0); }}
+                onKeyDown={(e) => {
+                  if (e.key === "ArrowDown" && results.length > 0) {
+                    e.preventDefault();
+                    setSearchIndex(i => Math.min(i + 1, results.length - 1));
+                  } else if (e.key === "ArrowUp" && results.length > 0) {
+                    e.preventDefault();
+                    setSearchIndex(i => Math.max(i - 1, 0));
+                  } else if (e.key === "Enter" && results[searchIndex]) {
+                    const r = results[searchIndex];
+                    const target = r.subId || r.sectionId;
+                    document.getElementById(target)?.scrollIntoView({ behavior: "smooth" });
+                    setSearchOpen(false);
+                  }
+                }}
+                placeholder="Search docs..."
+                className="flex-1 bg-transparent py-3.5 text-sm text-white placeholder-zinc-600 outline-none font-sans"
+              />
+              <kbd className="text-[10px] font-mono text-zinc-600 bg-white/[0.06] px-1.5 py-0.5 rounded">ESC</kbd>
+            </div>
+            {searchQuery.trim() && (
+              <div className="max-h-72 overflow-y-auto py-2">
+                {results.length === 0 ? (
+                  <p className="px-4 py-6 text-sm text-zinc-600 text-center font-sans">No results found</p>
+                ) : (
+                  results.map((r, i) => (
+                    <button
+                      key={r.subId || r.sectionId}
+                      className={`w-full text-left px-4 py-2.5 flex items-center gap-2 text-sm transition-colors ${
+                        i === searchIndex ? "bg-white/[0.06] text-white" : "text-zinc-400 hover:bg-white/[0.03]"
+                      }`}
+                      onClick={() => {
+                        const target = r.subId || r.sectionId;
+                        document.getElementById(target)?.scrollIntoView({ behavior: "smooth" });
+                        setSearchOpen(false);
+                      }}
+                      onMouseEnter={() => setSearchIndex(i)}
+                    >
+                      {r.subLabel ? (
+                        <>
+                          <span className="text-[11px] font-mono text-zinc-600 shrink-0">{r.sectionLabel}</span>
+                          <span className="text-zinc-700">&rsaquo;</span>
+                          <span className="font-sans">{r.subLabel}</span>
+                        </>
+                      ) : (
+                        <span className="font-sans">{r.sectionLabel}</span>
+                      )}
+                    </button>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Back to top button */}
+      <button
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        className={`fixed bottom-6 right-6 z-50 p-3 rounded-full bg-white/[0.06] border border-white/[0.08] text-zinc-400 hover:text-white hover:bg-white/[0.1] transition-all duration-200 ${
+          showBackToTop ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
+        }`}
+        aria-label="Back to top"
+      >
+        <ArrowUp size={18} />
+      </button>
     </div>
   );
 }
