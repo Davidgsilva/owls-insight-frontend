@@ -471,7 +471,7 @@ export default function DocsPage() {
                     { key: "bet365", name: "Bet365", notes: "Global market leader" },
                     { key: "caesars", name: "Caesars", notes: "Casino heritage" },
                     { key: "kalshi", name: "Kalshi", notes: "CFTC-regulated prediction exchange" },
-                    { key: "1xbet", name: "1xBet", notes: "CS2 esports, live + prematch odds" },
+                    { key: "1xbet", name: "1xBet", notes: "CS2 esports + MLB, live + prematch odds" },
                   ].map((book) => (
                     <tr key={book.key} className="border-b border-white/[0.04]">
                       <td className="py-2.5 pr-6 font-mono text-white">{book.key}</td>
@@ -2177,7 +2177,7 @@ X-RateLimit-Reset-Month: 2026-03-01T00:00:00.000Z`}
                     { book: "Bet365", nba: "strong", ncaab: "partial", nfl: "strong", ncaaf: "partial", nhl: "partial", ncaah: "none", mlb: "soon", soccer: "partial", tennis: "none", cs2: "none" },
                     { book: "Caesars", nba: "strong", ncaab: "partial", nfl: "strong", ncaaf: "partial", nhl: "partial", ncaah: "none", mlb: "soon", soccer: "partial", tennis: "none", cs2: "none" },
                     { book: "Kalshi", nba: "strong", ncaab: "partial", nfl: "strong", ncaaf: "none", nhl: "partial", ncaah: "none", mlb: "partial", soccer: "strong", tennis: "none", cs2: "none" },
-                    { book: "1xBet", nba: "none", ncaab: "none", nfl: "none", ncaaf: "none", nhl: "none", ncaah: "none", mlb: "none", soccer: "partial", tennis: "none", cs2: "strong" },
+                    { book: "1xBet", nba: "none", ncaab: "none", nfl: "none", ncaaf: "none", nhl: "none", ncaah: "none", mlb: "partial", soccer: "partial", tennis: "none", cs2: "strong" },
                   ].map((row) => (
                     <tr key={row.book} className="border-b border-white/[0.04]">
                       <td className="py-2.5 pr-4 font-mono text-white">{row.book}</td>
