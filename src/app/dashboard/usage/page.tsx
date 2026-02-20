@@ -1,11 +1,18 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import { format } from "date-fns";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -102,6 +109,13 @@ function formatTime(ts: string): string {
 function shortEndpoint(endpoint: string): string {
   return endpoint.replace(/^\/api\/v1/, "");
 }
+
+// Filter label maps (hoisted to module level)
+type StatusFilter = "all" | "success" | "error" | "rate-limited";
+type SortOption = "newest" | "oldest" | "slowest" | "status";
+const statusFilterLabels: Record<StatusFilter, string> = { all: "All", success: "2xx", error: "4xx/5xx", "rate-limited": "429" };
+const sortLabels: Record<SortOption, string> = { newest: "Newest first", oldest: "Oldest first", slowest: "Slowest first", status: "By status" };
+const sortShortLabels: Record<SortOption, string> = { newest: "Newest", oldest: "Oldest", slowest: "Slowest", status: "Status" };
 
 // WS event name → readable label
 const wsEventLabels: Record<string, string> = {
@@ -217,6 +231,12 @@ export default function UsagePage() {
   const [isLogsLoading, setIsLogsLoading] = useState(true);
   const logsRef = useRef<LogEntry[]>([]);
   const lastFetchRef = useRef<string>("");
+  const hasLoadedOnce = useRef(false);
+
+  // Filter state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [sortBy, setSortBy] = useState<SortOption>("newest");
 
   const selectedDate = format(selectedDay, "yyyy-MM-dd");
   const isToday = selectedDate === format(new Date(), "yyyy-MM-dd");
@@ -277,19 +297,26 @@ export default function UsagePage() {
   // ─── Effects ────────────────────────────────────────────────────────────
 
   useEffect(() => {
-    setIsLoading(true);
-    fetchUsage();
+    // Only show loading skeleton on very first load — subsequent refreshes
+    // (date changes, 15s polling) silently update values in place to avoid
+    // a jarring "disappear and comeback" flash.
+    if (!hasLoadedOnce.current) setIsLoading(true);
+    fetchUsage().then(() => { hasLoadedOnce.current = true; });
 
     const interval = setInterval(fetchUsage, 15_000);
     return () => clearInterval(interval);
   }, [fetchUsage]);
 
   useEffect(() => {
-    // Reset logs when date changes
+    // Reset logs and filters when date changes — logs must clear immediately
+    // because stale timestamps from a different date would be confusing.
     if (lastFetchRef.current !== selectedDate) {
       logsRef.current = [];
       setLogs([]);
       setIsLogsLoading(true);
+      setSearchQuery("");
+      setStatusFilter("all");
+      setSortBy("newest");
       lastFetchRef.current = selectedDate;
     }
 
@@ -318,6 +345,36 @@ export default function UsagePage() {
   const wsEventTypes = usageData?.wsTotals?.eventTypes || wsStats?.eventTypes || {};
 
   const wsHourlyData = wsStats?.hourlyBreakdown || {};
+
+  // ─── Filtered & sorted logs ─────────────────────────────────────────────
+
+  const hasActiveFilters = searchQuery !== "" || statusFilter !== "all";
+  const hasCustomSort = sortBy !== "newest";
+
+  const filteredLogs = useMemo(() => {
+    let result = logs;
+
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter((l) => l.endpoint.toLowerCase().includes(q));
+    }
+
+    if (statusFilter === "success") result = result.filter((l) => l.statusCode >= 200 && l.statusCode < 300);
+    else if (statusFilter === "error") result = result.filter((l) => l.statusCode >= 400 && l.statusCode !== 429);
+    else if (statusFilter === "rate-limited") result = result.filter((l) => l.statusCode === 429);
+
+    if (sortBy === "oldest") result = [...result].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+    else if (sortBy === "slowest") result = [...result].sort((a, b) => b.responseTime - a.responseTime);
+    else if (sortBy === "status") result = [...result].sort((a, b) => a.statusCode - b.statusCode);
+
+    return result;
+  }, [logs, searchQuery, statusFilter, sortBy]);
+
+  const clearFilters = () => {
+    setSearchQuery("");
+    setStatusFilter("all");
+    setSortBy("newest");
+  };
 
   // ─── Render ────────────────────────────────────────────────────────────
 
@@ -415,16 +472,91 @@ export default function UsagePage() {
             <div>
               <h2 className="text-[13px] font-mono font-medium text-white">Request Log</h2>
               <span className="text-[11px] text-zinc-600 font-sans">
-                {logs.length > 0 ? `${logs.length} recent calls` : "No requests yet"}
+                {logs.length > 0
+                  ? hasActiveFilters
+                    ? `${filteredLogs.length} of ${logs.length} requests`
+                    : `${logs.length} recent calls`
+                  : "No requests yet"}
               </span>
             </div>
-            {isToday && logs.length > 0 && (
-              <span className="flex items-center gap-1.5 text-[10px] text-zinc-600 font-mono">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#00FF88] animate-pulse" />
-                streaming
-              </span>
-            )}
+            <div className="flex items-center gap-2">
+              {(hasActiveFilters || hasCustomSort) && (
+                <button
+                  onClick={clearFilters}
+                  className="text-[10px] font-mono text-zinc-500 hover:text-[#00FF88] transition-colors"
+                >
+                  Clear filters
+                </button>
+              )}
+              {isToday && logs.length > 0 && (
+                <span className="flex items-center gap-1.5 text-[10px] text-zinc-600 font-mono">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#00FF88] animate-pulse" />
+                  streaming
+                </span>
+              )}
+            </div>
           </div>
+
+          {/* Filter Bar */}
+          {logs.length > 0 && !isLogsLoading && (
+            <div className="px-5 py-2.5 border-b border-white/[0.04] flex flex-wrap items-center gap-2">
+              {/* Search */}
+              <Input
+                placeholder="Filter endpoint..."
+                aria-label="Filter by endpoint"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-7 w-40 bg-transparent border-white/[0.06] text-[11px] font-mono text-zinc-300 placeholder:text-zinc-600 focus-visible:ring-[#00FF88]/20 focus-visible:border-[#00FF88]/30 rounded-md px-2"
+              />
+
+              {/* Divider */}
+              <div className="w-px h-4 bg-white/[0.06]" />
+
+              {/* Status pills */}
+              {(["all", "success", "error", "rate-limited"] as const).map((s) => {
+                const isActive = statusFilter === s;
+                return (
+                  <button
+                    key={s}
+                    onClick={() => setStatusFilter(s)}
+                    aria-pressed={isActive}
+                    className={`h-6 px-2 rounded text-[10px] font-mono transition-colors ${
+                      isActive
+                        ? "bg-[#00FF88]/10 text-[#00FF88] border border-[#00FF88]/20"
+                        : "text-zinc-500 hover:text-zinc-300 border border-transparent"
+                    }`}
+                  >
+                    {statusFilterLabels[s]}
+                  </button>
+                );
+              })}
+
+              {/* Spacer */}
+              <div className="flex-1" />
+
+              {/* Sort dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="h-6 px-2 rounded text-[10px] font-mono text-zinc-500 hover:text-zinc-300 border border-white/[0.06] transition-colors flex items-center gap-1">
+                    {sortShortLabels[sortBy]}
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-[#111113] border-white/10 min-w-[120px]">
+                  {(["newest", "oldest", "slowest", "status"] as const).map((s) => (
+                      <DropdownMenuItem
+                        key={s}
+                        onClick={() => setSortBy(s)}
+                        className={`text-[11px] font-mono cursor-pointer ${sortBy === s ? "text-[#00FF88]" : "text-zinc-400"}`}
+                      >
+                        {sortLabels[s]}
+                      </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          )}
+
           <CardContent className="p-0">
             {isLogsLoading ? (
               <div className="flex items-center justify-center py-16">
@@ -434,9 +566,16 @@ export default function UsagePage() {
               <div className="py-16 text-center">
                 <p className="text-zinc-600 text-sm font-sans">No API calls recorded for this date</p>
               </div>
+            ) : filteredLogs.length === 0 ? (
+              <div className="py-12 text-center">
+                <p className="text-zinc-600 text-sm font-sans">No requests match your filters</p>
+                <button onClick={clearFilters} className="text-[12px] font-mono text-[#00FF88]/70 hover:text-[#00FF88] mt-1 transition-colors">
+                  Clear filters
+                </button>
+              </div>
             ) : (
               <div className="divide-y divide-white/[0.03] max-h-[520px] overflow-y-auto">
-                {logs.map((log, i) => (
+                {filteredLogs.map((log, i) => (
                   <div
                     key={`${log.timestamp}-${i}`}
                     className="group px-5 py-2.5 flex items-center gap-4 hover:bg-white/[0.02] transition-colors"
