@@ -53,6 +53,11 @@ const sections: Section[] = [
     { id: "sub-ws-events", label: "Events" },
     { id: "sub-ws-props", label: "Props streaming" },
   ], keywords: ["websocket", "ws", "socket", "streaming", "live", "subscribe", "events", "real-time"] },
+  { id: "realtime-api", label: "Real-Time Odds", subItems: [
+    { id: "sub-realtime-endpoints", label: "Endpoints" },
+    { id: "sub-realtime-parameters", label: "Parameters" },
+    { id: "sub-realtime-ws", label: "WebSocket event" },
+  ], keywords: ["realtime", "real-time", "pinnacle", "live odds", "fast", "low latency"] },
   { id: "usage-api", label: "Usage", keywords: ["usage", "dashboard", "requests"] },
   { id: "rate-limits", label: "Rate Limits", subItems: [
     { id: "sub-tier-features", label: "Tier features" },
@@ -2041,6 +2046,157 @@ socket.on("esports-update", (data) => {
             />
           </section>
 
+          {/* ─── Real-Time Odds API ──────────────────────────────────── */}
+          <section id="realtime-api" className="mb-20 scroll-mt-20">
+            <SectionHeading>Real-Time Odds</SectionHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-6">
+              Sub-second Pinnacle odds delivered via a dedicated low-latency feed. Available to MVP tier subscribers only.
+              This is separate from the aggregated <code className="text-[13px] font-mono text-zinc-300">/odds</code> endpoint — it provides the fastest possible Pinnacle data with freshness metadata.
+            </p>
+
+            <div className="rounded-lg bg-[#111113] border border-purple-500/15 p-5 mb-8">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
+                <p className="font-mono text-sm font-semibold text-white">Beta</p>
+                <TierBadge tier="MVP" />
+              </div>
+              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
+                This feature is currently in beta. Data refreshes in under 10 seconds with moneylines, spreads, and totals across all 9 sports.
+                The <code className="text-[13px] font-mono text-zinc-300">meta.freshness</code> object in each response tells you exactly how old the data is.
+              </p>
+            </div>
+
+            <SubHeading id="sub-realtime-endpoints">Endpoints</SubHeading>
+            <div className="overflow-x-auto mb-8">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-white/[0.08]">
+                    <th className="text-left py-2.5 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Method</th>
+                    <th className="text-left py-2.5 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Endpoint</th>
+                    <th className="text-left py-2.5 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Description</th>
+                  </tr>
+                </thead>
+                <tbody className="text-[13px]">
+                  <tr className="border-b border-white/[0.04]">
+                    <td className="py-2.5 pr-6 font-mono text-[#00FF88]">GET</td>
+                    <td className="py-2.5 pr-6 font-mono text-white">/api/v1/&#123;sport&#125;/realtime</td>
+                    <td className="py-2.5 text-zinc-400">Real-time Pinnacle odds for a sport</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p className="text-sm text-zinc-500 font-sans mb-6">
+              Supported sports: <code className="text-[13px] font-mono text-zinc-300">nba</code>, <code className="text-[13px] font-mono text-zinc-300">ncaab</code>, <code className="text-[13px] font-mono text-zinc-300">nfl</code>, <code className="text-[13px] font-mono text-zinc-300">nhl</code>, <code className="text-[13px] font-mono text-zinc-300">ncaaf</code>, <code className="text-[13px] font-mono text-zinc-300">mlb</code>, <code className="text-[13px] font-mono text-zinc-300">ncaah</code>, <code className="text-[13px] font-mono text-zinc-300">tennis</code>, <code className="text-[13px] font-mono text-zinc-300">soccer</code>
+            </p>
+
+            <SubHeading id="sub-realtime-parameters">Parameters</SubHeading>
+            <ParamTable
+              params={[
+                { name: "league", type: "string", required: false, description: "Filter by league name — substring match, case-insensitive (useful for soccer and tennis)" },
+              ]}
+            />
+
+            <SubHeading>Example request</SubHeading>
+            <CodeBlock
+              language="bash"
+              code={`curl -H "Authorization: Bearer YOUR_API_KEY" \\
+  "https://api.owlsinsight.com/api/v1/nba/realtime"`}
+            />
+
+            <SubHeading>Response</SubHeading>
+            <CodeBlock
+              language="json"
+              code={`{
+  "success": true,
+  "data": [
+    {
+      "id": "1624025571",
+      "sport_key": "basketball_nba",
+      "commence_time": "2026-02-22T20:00:00Z",
+      "home_team": "Atlanta Hawks",
+      "away_team": "Brooklyn Nets",
+      "bookmakers": [
+        {
+          "key": "pinnacle",
+          "title": "Pinnacle",
+          "markets": [
+            {
+              "key": "h2h",
+              "outcomes": [
+                { "name": "Atlanta Hawks", "price": -366 },
+                { "name": "Brooklyn Nets", "price": 295 }
+              ]
+            },
+            {
+              "key": "spreads",
+              "outcomes": [
+                { "name": "Atlanta Hawks", "price": 102, "point": -8.5 },
+                { "name": "Brooklyn Nets", "price": -130, "point": 8.5 }
+              ]
+            },
+            {
+              "key": "totals",
+              "outcomes": [
+                { "name": "Over", "price": -122, "point": 226.5 },
+                { "name": "Under", "price": -106, "point": 226.5 }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "sport": "nba",
+    "source": "pinnacle_mqtt",
+    "available": true,
+    "events": 10,
+    "timestamp": "2026-02-22T20:59:09.308Z",
+    "freshness": {
+      "ageSeconds": 3,
+      "stale": false,
+      "threshold": 30
+    }
+  }
+}`}
+            />
+
+            <SubHeading>Freshness metadata</SubHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-4">
+              The <code className="text-[13px] font-mono text-zinc-300">meta.freshness</code> object indicates how recent the data is.
+            </p>
+            <ParamTable
+              params={[
+                { name: "ageSeconds", type: "number", required: true, description: "How many seconds ago the data was last updated" },
+                { name: "stale", type: "boolean", required: true, description: "True if data is older than the threshold (feed may be reconnecting)" },
+                { name: "threshold", type: "number", required: true, description: "Staleness threshold in seconds (currently 30)" },
+              ]}
+            />
+
+            <SubHeading id="sub-realtime-ws">WebSocket event</SubHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-4">
+              MVP tier WebSocket connections automatically receive a <code className="text-[13px] font-mono text-zinc-300">pinnacle-realtime</code> event
+              with the full real-time payload whenever new data is available. No subscription required — it is pushed automatically.
+            </p>
+            <CodeBlock
+              language="javascript"
+              code={`socket.on("pinnacle-realtime", (data) => {
+  // data contains all sports: nba, ncaab, nfl, nhl, ncaaf, mlb, ncaah, tennis, soccer
+  console.log("NBA real-time events:", data.nba?.length || 0);
+  console.log("Soccer real-time events:", data.soccer?.length || 0);
+  console.log("Timestamp:", data.timestamp);
+});`}
+            />
+
+            <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5 mt-8">
+              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
+                <strong className="text-white">Non-MVP tiers:</strong> Bench and Rookie subscribers receive Pinnacle data through the standard
+                aggregated <code className="text-[13px] font-mono text-zinc-300">/odds</code> endpoint and <code className="text-[13px] font-mono text-zinc-300">odds-update</code> WebSocket event.
+                Requests to <code className="text-[13px] font-mono text-zinc-300">/realtime</code> will return a <code className="text-[13px] font-mono text-zinc-300">403</code> with an upgrade prompt.
+              </p>
+            </div>
+          </section>
+
           {/* ─── Usage API ─────────────────────────────────────────── */}
           <section id="usage-api" className="mb-20 scroll-mt-20">
             <SectionHeading>Usage API</SectionHeading>
@@ -2171,7 +2327,7 @@ socket.on("esports-update", (data) => {
                   <span className="text-[10px] font-mono text-purple-400">Most Popular</span>
                 </div>
                 <ul className="text-[13px] text-zinc-500 space-y-1">
-                  <li>REST + WebSocket (5 connections), 15 concurrent requests, full props + WebSocket streaming, full historical odds/props/stats (90 days)</li>
+                  <li>REST + WebSocket (5 connections), 15 concurrent requests, full props + WebSocket streaming, full historical odds/props/stats (90 days), real-time Pinnacle odds (beta)</li>
                 </ul>
               </div>
             </div>
