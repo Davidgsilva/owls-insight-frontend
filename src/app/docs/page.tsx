@@ -20,7 +20,8 @@ const sections: Section[] = [
     { id: "sub-odds-sportsbooks", label: "Sportsbooks" },
     { id: "sub-odds-parameters", label: "Parameters" },
     { id: "sub-tennis-markets", label: "Tennis markets" },
-  ], keywords: ["nba", "nfl", "nhl", "mlb", "ncaab", "ncaaf", "soccer", "tennis", "pinnacle", "fanduel", "draftkings", "moneyline", "spreads", "totals", "alternates"] },
+    { id: "sub-soccer-markets", label: "Soccer markets" },
+  ], keywords: ["nba", "nfl", "nhl", "mlb", "ncaab", "ncaaf", "soccer", "tennis", "pinnacle", "fanduel", "draftkings", "moneyline", "spreads", "totals", "alternates", "double chance", "btts", "asian handicap", "corners", "cards"] },
   { id: "esports-api", label: "Esports", subItems: [
     { id: "sub-esports-markets", label: "Markets" },
   ], keywords: ["cs2", "counter-strike", "1xbet", "esports"] },
@@ -56,6 +57,7 @@ const sections: Section[] = [
   { id: "rate-limits", label: "Rate Limits", subItems: [
     { id: "sub-tier-features", label: "Tier features" },
   ], keywords: ["rate limit", "tier", "bench", "rookie", "mvp", "pricing", "price", "connections"] },
+  { id: "sportsbooks", label: "Sportsbooks", keywords: ["sportsbook", "pinnacle", "fanduel", "draftkings", "betmgm", "bet365", "caesars", "kalshi", "1xbet", "sharp", "retail", "exchange"] },
   { id: "coverage", label: "Coverage", subItems: [
     { id: "sub-game-odds-coverage", label: "Game odds" },
     { id: "sub-props-coverage", label: "Player props" },
@@ -471,7 +473,7 @@ export default function DocsPage() {
                     { key: "bet365", name: "Bet365", notes: "Global market leader" },
                     { key: "caesars", name: "Caesars", notes: "Casino heritage" },
                     { key: "kalshi", name: "Kalshi", notes: "CFTC-regulated prediction exchange" },
-                    { key: "1xbet", name: "1xBet", notes: "CS2 esports + MLB/NCAA baseball, live + prematch odds" },
+                    { key: "1xbet", name: "1xBet", notes: "CS2 esports + Soccer + MLB, live + prematch odds" },
                   ].map((book) => (
                     <tr key={book.key} className="border-b border-white/[0.04]">
                       <td className="py-2.5 pr-6 font-mono text-white">{book.key}</td>
@@ -501,6 +503,7 @@ export default function DocsPage() {
               params={[
                 { name: "books", type: "string", required: false, description: "Comma-separated list of sportsbooks to include" },
                 { name: "alternates", type: "boolean", required: false, description: "Include Pinnacle alternate spread/total lines (Rookie+ only)" },
+                { name: "league", type: "string", required: false, description: "Filter by league name — substring match, case-insensitive (soccer and tennis)" },
               ]}
             />
 
@@ -634,6 +637,44 @@ export default function DocsPage() {
                     { key: "1st_set_spreads", name: "1st Set Handicap", desc: "Game handicap for the first set" },
                     { key: "1st_set_totals", name: "1st Set Total", desc: "Over/under on games in the first set" },
                     { key: "team_totals", name: "Player Total Games", desc: "Over/under on each player\u2019s total games won" },
+                  ].map((m) => (
+                    <tr key={m.key} className="border-b border-white/[0.04]">
+                      <td className="py-2.5 pr-6 font-mono text-white">{m.key}</td>
+                      <td className="py-2.5 pr-6 text-zinc-300">{m.name}</td>
+                      <td className="py-2.5 text-zinc-500">{m.desc}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <SubHeading id="sub-soccer-markets">Soccer markets</SubHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-4">
+              Soccer odds include additional market types beyond the standard h2h, spreads, and totals.
+              These markets are available from sportsbooks that cover soccer (Pinnacle, FanDuel, DraftKings, and others).
+            </p>
+            <div className="overflow-x-auto mb-8">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-white/[0.08]">
+                    <th className="text-left py-2 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Key</th>
+                    <th className="text-left py-2 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Market</th>
+                    <th className="text-left py-2 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Description</th>
+                  </tr>
+                </thead>
+                <tbody className="text-sm">
+                  {[
+                    { key: "h2h", name: "Match Result", desc: "3-way moneyline — Home, Draw, Away" },
+                    { key: "spreads", name: "Handicap", desc: "Goal handicap spread (e.g. -1.5)" },
+                    { key: "totals", name: "Total Goals", desc: "Over/under on total goals scored" },
+                    { key: "double_chance", name: "Double Chance", desc: "Home/Draw, Away/Draw, or Home/Away — two outcomes covered" },
+                    { key: "btts", name: "Both Teams To Score", desc: "Yes or No — whether both teams score at least one goal" },
+                    { key: "asian_handicap", name: "Asian Handicap", desc: "Quarter-line handicap spreads (e.g. -0.25, -0.75)" },
+                    { key: "first_half_h2h", name: "1st Half Result", desc: "3-way moneyline for the first half only" },
+                    { key: "first_half_spreads", name: "1st Half Handicap", desc: "Goal handicap for the first half" },
+                    { key: "first_half_totals", name: "1st Half Total", desc: "Over/under on first half goals" },
+                    { key: "corners", name: "Corners", desc: "Over/under on total corner kicks" },
+                    { key: "cards", name: "Cards", desc: "Over/under on total yellow/red cards" },
                   ].map((m) => (
                     <tr key={m.key} className="border-b border-white/[0.04]">
                       <td className="py-2.5 pr-6 font-mono text-white">{m.key}</td>
@@ -840,9 +881,14 @@ export default function DocsPage() {
               {[
                 "points", "rebounds", "assists", "steals", "blocks", "threes_made",
                 "pts_rebs_asts", "pts_rebs", "pts_asts", "rebs_asts",
-                "passing_yards", "passing_tds", "rushing_yards", "rushing_tds",
-                "receiving_yards", "receptions", "touchdowns",
+                "double_double", "triple_double", "turnovers", "minutes",
+                "passing_yards", "passing_tds", "interceptions", "pass_completions", "pass_attempts",
+                "rushing_yards", "rushing_tds", "rush_attempts",
+                "receiving_yards", "receiving_tds", "receptions", "longest_reception", "longest_rush", "touchdowns",
                 "goals", "hockey_assists", "hockey_points", "shots_on_goal",
+                "saves", "goals_against", "power_play_points",
+                "hits", "runs", "rbis", "home_runs", "stolen_bases", "total_bases",
+                "strikeouts_pitcher", "strikeouts_batter", "walks", "earned_runs", "outs_recorded", "hits_allowed",
               ].map((cat) => (
                 <code key={cat} className="text-[12px] font-mono text-zinc-500 bg-white/[0.03] px-2 py-0.5 rounded">
                   {cat}
@@ -2072,6 +2118,7 @@ socket.on("esports-update", (data) => {
                     <th className="text-left py-2.5 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Price</th>
                     <th className="text-left py-2.5 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Req/Month</th>
                     <th className="text-left py-2.5 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Req/Minute</th>
+                    <th className="text-left py-2.5 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Concurrent</th>
                     <th className="text-left py-2.5 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">WebSocket</th>
                   </tr>
                 </thead>
@@ -2081,6 +2128,7 @@ socket.on("esports-update", (data) => {
                     <td className="py-2.5 pr-6 text-zinc-400">$9.99/mo</td>
                     <td className="py-2.5 pr-6 text-zinc-400">10,000</td>
                     <td className="py-2.5 pr-6 text-zinc-400">20</td>
+                    <td className="py-2.5 pr-6 text-zinc-400">1</td>
                     <td className="py-2.5 text-zinc-600">REST only</td>
                   </tr>
                   <tr className="border-b border-white/[0.04]">
@@ -2088,6 +2136,7 @@ socket.on("esports-update", (data) => {
                     <td className="py-2.5 pr-6 text-zinc-400">$24.99/mo</td>
                     <td className="py-2.5 pr-6 text-zinc-400">75,000</td>
                     <td className="py-2.5 pr-6 text-zinc-400">120</td>
+                    <td className="py-2.5 pr-6 text-zinc-400">5</td>
                     <td className="py-2.5 text-zinc-400">2 connections</td>
                   </tr>
                   <tr className="border-b border-white/[0.04]">
@@ -2095,6 +2144,7 @@ socket.on("esports-update", (data) => {
                     <td className="py-2.5 pr-6 text-zinc-400">$49.99/mo</td>
                     <td className="py-2.5 pr-6 text-zinc-400">300,000</td>
                     <td className="py-2.5 pr-6 text-zinc-400">400</td>
+                    <td className="py-2.5 pr-6 text-zinc-400">15</td>
                     <td className="py-2.5 text-zinc-400">5 connections</td>
                   </tr>
                 </tbody>
@@ -2112,7 +2162,7 @@ socket.on("esports-update", (data) => {
               <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5">
                 <p className="font-mono text-sm font-semibold text-white mb-2">Rookie</p>
                 <ul className="text-[13px] text-zinc-500 space-y-1">
-                  <li>REST + WebSocket (2 connections), player props, player stats, prop line history, rolling averages</li>
+                  <li>REST + WebSocket (2 connections), player props, player stats, prop line history, rolling averages, historical data (14 days)</li>
                 </ul>
               </div>
               <div className="rounded-lg bg-[#111113] border border-purple-500/15 p-5">
@@ -2121,7 +2171,7 @@ socket.on("esports-update", (data) => {
                   <span className="text-[10px] font-mono text-purple-400">Most Popular</span>
                 </div>
                 <ul className="text-[13px] text-zinc-500 space-y-1">
-                  <li>REST + WebSocket (5 connections), 15 concurrent requests, full props + WebSocket streaming, full historical odds/props/stats</li>
+                  <li>REST + WebSocket (5 connections), 15 concurrent requests, full props + WebSocket streaming, full historical odds/props/stats (90 days)</li>
                 </ul>
               </div>
             </div>
@@ -2137,6 +2187,55 @@ X-RateLimit-Remaining-Month: 62340
 X-RateLimit-Reset-Minute: 1738348260
 X-RateLimit-Reset-Month: 2026-03-01T00:00:00.000Z`}
             />
+          </section>
+
+          {/* ─── Sportsbooks ────────────────────────────────────────── */}
+          <section id="sportsbooks" className="mb-20 scroll-mt-20">
+            <SectionHeading>Supported Sportsbooks</SectionHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-6 leading-relaxed">
+              We aggregate real-time odds from 8 sportsbooks spanning sharp books, US retail leaders, a regulated prediction exchange, and international markets.
+            </p>
+
+            <div className="overflow-x-auto mb-6">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-white/[0.08]">
+                    <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Book</th>
+                    <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Type</th>
+                    <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Sports</th>
+                    <th className="text-left py-2.5 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Description</th>
+                  </tr>
+                </thead>
+                <tbody className="text-[13px]">
+                  {[
+                    { book: "Pinnacle", type: "Sharp", sports: "NBA, NCAAB, NFL, NHL, NCAAF, MLB, Soccer, Tennis", desc: "Industry benchmark for sharp lines. Lowest margins, highest limits." },
+                    { book: "FanDuel", type: "US Retail", sports: "NBA, NCAAB, NFL, NHL, NCAAF, MLB, Soccer", desc: "Largest US sportsbook by market share. Full player props." },
+                    { book: "DraftKings", type: "US Retail", sports: "NBA, NCAAB, NFL, NHL, NCAAF, MLB, Soccer", desc: "Full market coverage across all major US sports." },
+                    { book: "BetMGM", type: "US Retail", sports: "NBA, NCAAB, NFL, NHL, NCAAF, Soccer", desc: "Vegas-backed lines from the MGM Resorts network." },
+                    { book: "Bet365", type: "International", sports: "NBA, NCAAB, NFL, NHL, NCAAF, Soccer", desc: "World\u2019s largest online sportsbook by volume." },
+                    { book: "Caesars", type: "US Retail", sports: "NBA, NCAAB, NFL, NHL, NCAAF, Soccer", desc: "Casino heritage with competitive NBA and NFL lines." },
+                    { book: "Kalshi", type: "Exchange", sports: "NBA, NCAAB, NFL, NHL, MLB, Soccer", desc: "CFTC-regulated prediction exchange. Event contracts, not traditional odds." },
+                    { book: "1xBet", type: "International", sports: "CS2, Soccer, MLB", desc: "International book with deep esports and soccer coverage." },
+                  ].map((row) => (
+                    <tr key={row.book} className="border-b border-white/[0.04]">
+                      <td className="py-2.5 pr-4 font-mono text-white">{row.book}</td>
+                      <td className="py-2.5 pr-4">
+                        <span className={`inline-flex items-center text-[12px] font-mono ${
+                          row.type === "Sharp" ? "text-[#00FF88]" :
+                          row.type === "Exchange" ? "text-purple-400" :
+                          row.type === "International" ? "text-sky-400" :
+                          "text-amber-400"
+                        }`}>
+                          {row.type}
+                        </span>
+                      </td>
+                      <td className="py-2.5 pr-4 text-zinc-400 text-[12px]">{row.sports}</td>
+                      <td className="py-2.5 text-zinc-500">{row.desc}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </section>
 
           {/* ─── Coverage ──────────────────────────────────────────── */}
@@ -2177,7 +2276,7 @@ X-RateLimit-Reset-Month: 2026-03-01T00:00:00.000Z`}
                     { book: "Bet365", nba: "strong", ncaab: "partial", nfl: "strong", ncaaf: "partial", nhl: "partial", ncaah: "none", mlb: "soon", soccer: "partial", tennis: "none", cs2: "none" },
                     { book: "Caesars", nba: "strong", ncaab: "partial", nfl: "strong", ncaaf: "partial", nhl: "partial", ncaah: "none", mlb: "soon", soccer: "partial", tennis: "none", cs2: "none" },
                     { book: "Kalshi", nba: "strong", ncaab: "partial", nfl: "strong", ncaaf: "none", nhl: "partial", ncaah: "none", mlb: "partial", soccer: "strong", tennis: "none", cs2: "none" },
-                    { book: "1xBet", nba: "none", ncaab: "none", nfl: "none", ncaaf: "none", nhl: "none", ncaah: "none", mlb: "partial", soccer: "partial", tennis: "none", cs2: "strong" },
+                    { book: "1xBet", nba: "none", ncaab: "none", nfl: "none", ncaaf: "none", nhl: "none", ncaah: "none", mlb: "partial", soccer: "strong", tennis: "none", cs2: "strong" },
                   ].map((row) => (
                     <tr key={row.book} className="border-b border-white/[0.04]">
                       <td className="py-2.5 pr-4 font-mono text-white">{row.book}</td>
