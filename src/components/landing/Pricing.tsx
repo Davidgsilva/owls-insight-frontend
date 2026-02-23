@@ -47,6 +47,7 @@ const tiers = [
       "400 requests/minute",
       "REST API + WebSocket (5 connections)",
       "15 concurrent requests",
+      "Real-time sharp odds",
       "Player props & live odds via WebSocket",
       "Full historical odds & props",
     ],
