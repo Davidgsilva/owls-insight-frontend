@@ -471,7 +471,7 @@ export default function DocsPage() {
                 </thead>
                 <tbody className="text-[13px]">
                   {[
-                    { key: "pinnacle", name: "Pinnacle", notes: "Sharp book, fast refresh" },
+                    { key: "pinnacle", name: "Pinnacle", notes: "Sharp book, real-time sharp odds (MVP)" },
                     { key: "fanduel", name: "FanDuel", notes: "US retail leader, full props" },
                     { key: "draftkings", name: "DraftKings", notes: "Full market coverage" },
                     { key: "betmgm", name: "BetMGM", notes: "Vegas-backed lines" },
@@ -543,7 +543,8 @@ export default function DocsPage() {
                 "outcomes": [
                   { "name": "Los Angeles Lakers", "price": -150 },
                   { "name": "Boston Celtics", "price": 130 }
-                ]
+                ],
+                "limits": [{ "type": "maxRiskStake", "amount": 1500 }]
               },
               {
                 "key": "spreads",
@@ -566,7 +567,8 @@ export default function DocsPage() {
                       { "point": 5.5, "price": -160 }
                     ]
                   }
-                ]
+                ],
+                "limits": [{ "type": "maxRiskStake", "amount": 1500 }]
               },
               {
                 "key": "totals",
@@ -589,7 +591,8 @@ export default function DocsPage() {
                       { "point": 226.5, "price": -150 }
                     ]
                   }
-                ]
+                ],
+                "limits": [{ "type": "maxRiskStake", "amount": 1500 }]
               }
             ]
           }
@@ -616,6 +619,9 @@ export default function DocsPage() {
             <p className="text-xs text-zinc-600 font-sans mt-3 leading-relaxed">
               The <code className="text-[11px] font-mono text-zinc-500">alternateLines</code> array on spread/total outcomes is only present when <code className="text-[11px] font-mono text-zinc-500">?alternates=true</code> is passed by a Rookie+ tier user. Currently available for Pinnacle.
               The <code className="text-[11px] font-mono text-zinc-500">alternates</code> field in <code className="text-[11px] font-mono text-zinc-500">meta</code> is always present in responses — it returns <code className="text-[11px] font-mono text-zinc-500">false</code> when the parameter is omitted or the API key&apos;s tier is below Rookie.
+              The <code className="text-[11px] font-mono text-zinc-500">limits</code> array is currently provided for Pinnacle markets only, reflecting their published maximum stake limits.
+              A market may include <code className="text-[11px] font-mono text-zinc-500">suspended: true</code> when the market is temporarily closed (e.g., during a goal review in soccer). This field is omitted when the market is open.
+              Soccer events include a <code className="text-[11px] font-mono text-zinc-500">league</code> field (e.g., &quot;England - Premier League&quot;) and <code className="text-[11px] font-mono text-zinc-500">country_code</code> (ISO 3166-1 alpha-2, e.g., &quot;GB&quot;) for league identification and flag display.
             </p>
 
             <SubHeading id="sub-tennis-markets">Tennis markets</SubHeading>
@@ -894,6 +900,8 @@ export default function DocsPage() {
                 "saves", "goals_against", "power_play_points",
                 "hits", "runs", "rbis", "home_runs", "stolen_bases", "total_bases",
                 "strikeouts_pitcher", "strikeouts_batter", "walks", "earned_runs", "outs_recorded", "hits_allowed",
+                "shots_on_target", "tackles", "passes",
+                "anytime_goalscorer", "first_goalscorer", "last_goalscorer",
               ].map((cat) => (
                 <code key={cat} className="text-[12px] font-mono text-zinc-500 bg-white/[0.03] px-2 py-0.5 rounded">
                   {cat}
@@ -1954,6 +1962,7 @@ socket.on("connect", () => {
               code={`// Odds and scores arrive automatically after connecting
 socket.on("odds-update", (data) => {
   console.log("NBA games:", data.sports.nba?.length || 0);
+  console.log("Available leagues:", data.leagues.nba); // ["NBA"]
   data.sports.nba?.forEach(game => {
     console.log(\`\${game.away_team} @ \${game.home_team}\`);
   });
@@ -1971,6 +1980,28 @@ socket.emit("subscribe", {
   books: ["pinnacle", "fanduel", "draftkings", "betmgm", "bet365", "caesars"],
   alternates: true  // Include Pinnacle alternate spread/total lines (Rookie+)
 });`}
+            />
+
+            <SubHeading>Payload structure</SubHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-4">
+              Each WebSocket event includes a <code className="text-[13px] font-mono text-zinc-300">leagues</code> field listing available leagues per sport, and a <code className="text-[13px] font-mono text-zinc-300">last_odds_change</code> timestamp indicating when any odds value last changed (distinct from <code className="text-[13px] font-mono text-zinc-300">timestamp</code> which updates on every heartbeat):
+            </p>
+            <CodeBlock
+              language="json"
+              code={`{
+  "sports": {
+    "soccer": [ ... ],
+    "tennis": [ ... ],
+    "nba": [ ... ]
+  },
+  "leagues": {
+    "soccer": ["England - Premier League", "Spain - La Liga", "Germany - Bundesliga"],
+    "tennis": ["ATP Dubai - R1", "WTA Austin - R1", "ATP Melbourne - QF"],
+    "nba": ["NBA"]
+  },
+  "timestamp": "2026-01-31T12:34:56.789Z",
+  "last_odds_change": "2026-01-31T12:34:52.100Z"
+}`}
             />
 
             <SubHeading id="sub-ws-props">Player props (subscription required)</SubHeading>
@@ -2050,7 +2081,7 @@ socket.on("esports-update", (data) => {
           <section id="realtime-api" className="mb-20 scroll-mt-20">
             <SectionHeading>Real-Time Odds</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-6">
-              Sub-second Pinnacle odds delivered via a dedicated low-latency feed. Available to MVP tier subscribers only.
+              Real-time sharp Pinnacle odds delivered via a dedicated low-latency feed. Available to MVP tier subscribers only.
               This is separate from the aggregated <code className="text-[13px] font-mono text-zinc-300">/odds</code> endpoint — it provides the fastest possible Pinnacle data with freshness metadata.
             </p>
 
@@ -2061,7 +2092,7 @@ socket.on("esports-update", (data) => {
                 <TierBadge tier="MVP" />
               </div>
               <p className="text-sm text-zinc-400 font-sans leading-relaxed">
-                This feature is currently in beta. Data refreshes in under 10 seconds with moneylines, spreads, and totals across all 9 sports.
+                This feature is currently in beta. Data refreshes in 1-3 seconds with moneylines, spreads, and totals across all 9 sports.
                 The <code className="text-[13px] font-mono text-zinc-300">meta.freshness</code> object in each response tells you exactly how old the data is.
               </p>
             </div>
@@ -2080,7 +2111,7 @@ socket.on("esports-update", (data) => {
                   <tr className="border-b border-white/[0.04]">
                     <td className="py-2.5 pr-6 font-mono text-[#00FF88]">GET</td>
                     <td className="py-2.5 pr-6 font-mono text-white">/api/v1/&#123;sport&#125;/realtime</td>
-                    <td className="py-2.5 text-zinc-400">Real-time Pinnacle odds for a sport</td>
+                    <td className="py-2.5 text-zinc-400">Real-time sharp Pinnacle odds for a sport</td>
                   </tr>
                 </tbody>
               </table>
@@ -2312,13 +2343,13 @@ socket.on("esports-update", (data) => {
               <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5">
                 <p className="font-mono text-sm font-semibold text-white mb-2">Bench</p>
                 <ul className="text-[13px] text-zinc-500 space-y-1">
-                  <li>REST API only, odds/spreads/totals, live scores, Kalshi prediction markets</li>
+                  <li>REST API only, polled odds/spreads/totals, live scores, Kalshi prediction markets</li>
                 </ul>
               </div>
               <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5">
                 <p className="font-mono text-sm font-semibold text-white mb-2">Rookie</p>
                 <ul className="text-[13px] text-zinc-500 space-y-1">
-                  <li>REST + WebSocket (2 connections), player props, player stats, prop line history, rolling averages, historical data (14 days)</li>
+                  <li>REST + WebSocket (2 connections), polled odds, player props, player stats, prop line history, rolling averages, historical data (14 days)</li>
                 </ul>
               </div>
               <div className="rounded-lg bg-[#111113] border border-purple-500/15 p-5">
@@ -2327,7 +2358,7 @@ socket.on("esports-update", (data) => {
                   <span className="text-[10px] font-mono text-purple-400">Most Popular</span>
                 </div>
                 <ul className="text-[13px] text-zinc-500 space-y-1">
-                  <li>REST + WebSocket (5 connections), 15 concurrent requests, full props + WebSocket streaming, full historical odds/props/stats (90 days), real-time Pinnacle odds (beta)</li>
+                  <li>REST + WebSocket (5 connections), 15 concurrent requests, full props + WebSocket streaming, full historical odds/props/stats (90 days), real-time sharp Pinnacle odds (beta)</li>
                 </ul>
               </div>
             </div>
@@ -2349,7 +2380,7 @@ X-RateLimit-Reset-Month: 2026-03-01T00:00:00.000Z`}
           <section id="sportsbooks" className="mb-20 scroll-mt-20">
             <SectionHeading>Supported Sportsbooks</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-6 leading-relaxed">
-              We aggregate real-time odds from 8 sportsbooks spanning sharp books, US retail leaders, a regulated prediction exchange, and international markets.
+              We aggregate real-time odds from 8 sportsbooks — sharp lines from Pinnacle, US retail leaders, a regulated prediction exchange, and international markets.
             </p>
 
             <div className="overflow-x-auto mb-6">
@@ -2364,7 +2395,7 @@ X-RateLimit-Reset-Month: 2026-03-01T00:00:00.000Z`}
                 </thead>
                 <tbody className="text-[13px]">
                   {[
-                    { book: "Pinnacle", type: "Sharp", sports: "NBA, NCAAB, NFL, NHL, NCAAF, MLB, Soccer, Tennis", desc: "Industry benchmark for sharp lines. Lowest margins, highest limits." },
+                    { book: "Pinnacle", type: "Sharp", sports: "NBA, NCAAB, NFL, NHL, NCAAF, NCAAH, MLB, Soccer, Tennis", desc: "Industry benchmark for sharp lines. Lowest margins, highest limits. Real-time sharp odds via dedicated feed (MVP)." },
                     { book: "FanDuel", type: "US Retail", sports: "NBA, NCAAB, NFL, NHL, NCAAF, MLB, Soccer", desc: "Largest US sportsbook by market share. Full player props." },
                     { book: "DraftKings", type: "US Retail", sports: "NBA, NCAAB, NFL, NHL, NCAAF, MLB, Soccer", desc: "Full market coverage across all major US sports." },
                     { book: "BetMGM", type: "US Retail", sports: "NBA, NCAAB, NFL, NHL, NCAAF, Soccer", desc: "Vegas-backed lines from the MGM Resorts network." },
@@ -2391,6 +2422,12 @@ X-RateLimit-Reset-Month: 2026-03-01T00:00:00.000Z`}
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5 mt-6">
+              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
+                <strong className="text-white">Kalshi event tickers:</strong> Kalshi bookmaker objects in the odds response include an <code className="text-[13px] font-mono text-zinc-300">event_ticker</code> field. This is the native Kalshi event identifier (e.g., <code className="text-[13px] font-mono text-zinc-300">KXNBAGAME-26FEB08BOSLAL</code>) that can be used for direct order placement on the Kalshi platform.
+              </p>
             </div>
           </section>
 
@@ -2482,21 +2519,22 @@ X-RateLimit-Reset-Month: 2026-03-01T00:00:00.000Z`}
                     <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">NCAAF</th>
                     <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">NHL</th>
                     <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">NCAAH</th>
-                    <th className="text-left py-2.5 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">MLB</th>
+                    <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">MLB</th>
+                    <th className="text-left py-2.5 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Soccer</th>
                   </tr>
                 </thead>
                 <tbody className="text-[13px]">
                   {[
-                    { book: "FanDuel", nba: "strong", ncaab: "partial", nfl: "partial", ncaaf: "partial", nhl: "partial", ncaah: "soon", mlb: "soon" },
-                    { book: "DraftKings", nba: "strong", ncaab: "soon", nfl: "partial", ncaaf: "soon", nhl: "soon", ncaah: "soon", mlb: "soon" },
-                    { book: "Caesars", nba: "strong", ncaab: "soon", nfl: "partial", ncaaf: "soon", nhl: "soon", ncaah: "none", mlb: "soon" },
-                    { book: "Pinnacle", nba: "partial", ncaab: "soon", nfl: "partial", ncaaf: "partial", nhl: "soon", ncaah: "partial", mlb: "soon" },
-                    { book: "Bet365", nba: "partial", ncaab: "soon", nfl: "partial", ncaaf: "soon", nhl: "soon", ncaah: "soon", mlb: "soon" },
-                    { book: "BetMGM", nba: "partial", ncaab: "soon", nfl: "soon", ncaaf: "soon", nhl: "soon", ncaah: "soon", mlb: "soon" },
+                    { book: "FanDuel", nba: "strong", ncaab: "partial", nfl: "partial", ncaaf: "partial", nhl: "partial", ncaah: "soon", mlb: "soon", soccer: "none" },
+                    { book: "DraftKings", nba: "strong", ncaab: "soon", nfl: "partial", ncaaf: "soon", nhl: "soon", ncaah: "soon", mlb: "soon", soccer: "none" },
+                    { book: "Caesars", nba: "strong", ncaab: "soon", nfl: "partial", ncaaf: "soon", nhl: "soon", ncaah: "none", mlb: "soon", soccer: "none" },
+                    { book: "Pinnacle", nba: "partial", ncaab: "soon", nfl: "partial", ncaaf: "partial", nhl: "soon", ncaah: "partial", mlb: "soon", soccer: "partial" },
+                    { book: "Bet365", nba: "partial", ncaab: "soon", nfl: "partial", ncaaf: "soon", nhl: "soon", ncaah: "soon", mlb: "soon", soccer: "none" },
+                    { book: "BetMGM", nba: "partial", ncaab: "soon", nfl: "soon", ncaaf: "soon", nhl: "soon", ncaah: "soon", mlb: "soon", soccer: "none" },
                   ].map((row) => (
                     <tr key={row.book} className="border-b border-white/[0.04]">
                       <td className="py-2.5 pr-4 font-mono text-white">{row.book}</td>
-                      {[row.nba, row.ncaab, row.nfl, row.ncaaf, row.nhl, row.ncaah, row.mlb].map((status, i) => (
+                      {[row.nba, row.ncaab, row.nfl, row.ncaaf, row.nhl, row.ncaah, row.mlb, row.soccer].map((status, i) => (
                         <td key={i} className="py-2.5 pr-4">
                           <span className={`inline-flex items-center gap-1.5 text-[12px] font-mono ${
                             status === "strong"
