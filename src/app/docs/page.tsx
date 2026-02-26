@@ -2581,7 +2581,7 @@ X-RateLimit-Reset-Month: 2026-03-01T00:00:00.000Z`}
                     { book: "Caesars", type: "US Retail", sports: "NBA, NCAAB, NFL, NHL, NCAAF, Soccer", desc: "Casino heritage with competitive NBA and NFL lines." },
                     { book: "Kalshi", type: "Exchange", sports: "NBA, NCAAB, NFL, NHL, MLB, Soccer", desc: "CFTC-regulated prediction exchange. Event contracts, not traditional odds." },
                     { book: "1xBet", type: "International", sports: "CS2, Soccer, MLB", desc: "International book with deep esports and soccer coverage." },
-                    { book: "Polymarket", type: "Exchange", sports: "NBA, NCAAB, NFL, NHL, NCAAF, NCAAH, MLB, Soccer, Tennis", desc: "Largest decentralized prediction market. Real-time CLOB WebSocket feed (MVP)." },
+                    { book: "Polymarket", type: "Exchange", sports: "NBA, NCAAB, NFL, NHL, NCAAF, NCAAH, MLB, Soccer, Tennis, CS2", desc: "Largest decentralized prediction market. Real-time CLOB WebSocket feed (MVP)." },
                   ].map((row) => (
                     <tr key={row.book} className="border-b border-white/[0.04]">
                       <td className="py-2.5 pr-4 font-mono text-white">{row.book}</td>
