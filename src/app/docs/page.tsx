@@ -2649,6 +2649,7 @@ X-RateLimit-Reset-Month: 2026-03-01T00:00:00.000Z`}
                     { book: "Caesars", nba: "strong", ncaab: "partial", nfl: "strong", ncaaf: "partial", nhl: "partial", ncaah: "none", mlb: "soon", soccer: "partial", tennis: "none", cs2: "none" },
                     { book: "Kalshi", nba: "strong", ncaab: "partial", nfl: "strong", ncaaf: "none", nhl: "partial", ncaah: "none", mlb: "partial", soccer: "strong", tennis: "none", cs2: "none" },
                     { book: "1xBet", nba: "none", ncaab: "none", nfl: "none", ncaaf: "none", nhl: "none", ncaah: "none", mlb: "partial", soccer: "strong", tennis: "none", cs2: "strong" },
+                    { book: "Polymarket", nba: "strong", ncaab: "strong", nfl: "strong", ncaaf: "strong", nhl: "strong", ncaah: "strong", mlb: "strong", soccer: "strong", tennis: "strong", cs2: "strong" },
                   ].map((row) => (
                     <tr key={row.book} className="border-b border-white/[0.04]">
                       <td className="py-2.5 pr-4 font-mono text-white">{row.book}</td>
