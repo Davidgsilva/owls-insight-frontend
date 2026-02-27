@@ -78,6 +78,16 @@ const jsonLd = {
           description:
             "Full access with real-time WebSocket, player props, and historical data",
         },
+        {
+          "@type": "Offer",
+          name: "Hall of Fame",
+          price: "200",
+          priceCurrency: "USD",
+          url: "https://owlsinsight.com/register?tier=hall_of_fame",
+          availability: "https://schema.org/InStock",
+          description:
+            "Enterprise-grade unlimited requests, 20 WebSocket connections, historical data",
+        },
       ],
       featureList: [
         "Live odds from 9 sources",

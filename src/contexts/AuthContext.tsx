@@ -13,7 +13,7 @@ interface User {
 }
 
 interface Subscription {
-  tier: "free" | "bench" | "rookie" | "mvp";
+  tier: "free" | "bench" | "rookie" | "mvp" | "hall_of_fame";
   status: "active" | "past_due" | "canceled" | "trialing" | "paused" | "inactive";
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean;

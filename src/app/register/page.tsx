@@ -90,7 +90,7 @@ function RegisterForm() {
   const searchParams = useSearchParams();
   const { register: registerUser } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const VALID_TIERS = ["bench", "rookie", "mvp"] as const;
+  const VALID_TIERS = ["bench", "rookie", "mvp", "hall_of_fame"] as const;
   type ValidTier = typeof VALID_TIERS[number];
   const tierParam = searchParams.get("tier");
   const selectedTier: ValidTier | null = tierParam && VALID_TIERS.includes(tierParam as ValidTier) ? (tierParam as ValidTier) : null;

@@ -2512,6 +2512,14 @@ socket.on("esports-update", (data) => {
                     <td className="py-2.5 pr-6 text-zinc-400">15</td>
                     <td className="py-2.5 text-zinc-400">5 connections</td>
                   </tr>
+                  <tr className="border-b border-white/[0.04]">
+                    <td className="py-2.5 pr-6 font-mono text-amber-400">Hall of Fame</td>
+                    <td className="py-2.5 pr-6 text-zinc-400">$200/mo</td>
+                    <td className="py-2.5 pr-6 text-zinc-400">Unlimited</td>
+                    <td className="py-2.5 pr-6 text-zinc-400">1,000</td>
+                    <td className="py-2.5 pr-6 text-zinc-400">20</td>
+                    <td className="py-2.5 text-zinc-400">20 connections</td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -2536,7 +2544,16 @@ socket.on("esports-update", (data) => {
                   <span className="text-[10px] font-mono text-purple-400">Most Popular</span>
                 </div>
                 <ul className="text-[13px] text-zinc-500 space-y-1">
-                  <li>REST + WebSocket (5 connections), 15 concurrent requests, full props + WebSocket streaming, full historical odds/props/stats (90 days), real-time sharp Pinnacle odds (beta)</li>
+                  <li>REST + WebSocket (5 connections), 15 concurrent requests, full props + WebSocket streaming, full historical odds/props/stats, real-time sharp Pinnacle odds (beta)</li>
+                </ul>
+              </div>
+              <div className="rounded-lg bg-[#111113] border border-amber-500/15 p-5">
+                <div className="flex items-center gap-2 mb-2">
+                  <p className="font-mono text-sm font-semibold text-white">Hall of Fame</p>
+                  <span className="text-[10px] font-mono text-amber-400">Enterprise</span>
+                </div>
+                <ul className="text-[13px] text-zinc-500 space-y-1">
+                  <li>Everything in MVP + unlimited monthly requests, 1,000 req/min burst, 20 WebSocket connections, 20 concurrent requests, historical data</li>
                 </ul>
               </div>
             </div>

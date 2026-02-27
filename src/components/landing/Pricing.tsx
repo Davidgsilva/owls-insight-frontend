@@ -55,6 +55,23 @@ const tiers = [
     ctaVariant: "default" as const,
     popular: true,
   },
+  {
+    name: "Hall of Fame",
+    price: "$200",
+    period: "/month",
+    description: "Enterprise-grade, unlimited volume",
+    features: [
+      "Unlimited monthly requests",
+      "1,000 requests/minute burst",
+      "REST API + WebSocket (20 connections)",
+      "20 concurrent requests",
+      "Everything in MVP",
+      "Historical data",
+    ],
+    cta: "Get Started",
+    ctaVariant: "outline" as const,
+    popular: false,
+  },
 ];
 
 export function Pricing() {
@@ -77,7 +94,7 @@ export function Pricing() {
         </div>
 
         {/* Pricing Grid */}
-        <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
           {tiers.map((tier) => (
             <div
               key={tier.name}
@@ -122,7 +139,7 @@ export function Pricing() {
               </ul>
 
               {/* CTA Button */}
-              <Link href={`/register?tier=${tier.name.toLowerCase()}`} className="block">
+              <Link href={`/register?tier=${tier.name.toLowerCase().replace(/ /g, '_')}`} className="block">
                 <Button
                   variant={tier.ctaVariant}
                   className={`w-full font-mono ${

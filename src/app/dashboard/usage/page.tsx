@@ -69,6 +69,7 @@ const tierLimits = {
   bench: { month: 10_000, minute: 20, wsPerMin: 0 },
   rookie: { month: 75_000, minute: 120, wsPerMin: 120 },
   mvp: { month: 300_000, minute: 400, wsPerMin: 400 },
+  hall_of_fame: { month: 0, minute: 1_000, wsPerMin: 1_000 },
 } as const;
 
 function statusColor(code: number): string {
@@ -144,9 +145,9 @@ function Gauge({
   sublabel: string;
   resetAt?: string | null;
 }) {
-  const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0;
-  const color = pct > 90 ? "#ef4444" : pct > 70 ? "#eab308" : "#00FF88";
-  const remaining = max - value;
+  const isUnlimited = max === 0;
+  const pct = isUnlimited ? 0 : Math.min((value / max) * 100, 100);
+  const color = isUnlimited ? "#00FF88" : pct > 90 ? "#ef4444" : pct > 70 ? "#eab308" : "#00FF88";
 
   const resetLabel = resetAt && value > 0
     ? `Resets ${new Date(resetAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
@@ -162,16 +163,16 @@ function Gauge({
         <span className="text-[28px] font-mono font-bold text-white leading-none tabular-nums">
           {value.toLocaleString()}
         </span>
-        <span className="text-sm text-zinc-600 font-mono">/ {max.toLocaleString()}</span>
+        <span className="text-sm text-zinc-600 font-mono">/ {isUnlimited ? "Unlimited" : max.toLocaleString()}</span>
       </div>
       <div className="h-1 bg-zinc-800/80 rounded-full overflow-hidden">
         <div
           className="h-full rounded-full transition-all duration-700 ease-out"
-          style={{ width: `${pct}%`, backgroundColor: color }}
+          style={{ width: `${isUnlimited ? 0 : pct}%`, backgroundColor: color }}
         />
       </div>
       <div className="flex items-baseline justify-between">
-        <span className="text-[11px] text-zinc-600 font-mono">{remaining.toLocaleString()} remaining</span>
+        <span className="text-[11px] text-zinc-600 font-mono">{isUnlimited ? "Unlimited" : `${(max - value).toLocaleString()} remaining`}</span>
         {resetLabel && <span className="text-[11px] text-zinc-500 font-mono">{resetLabel}</span>}
       </div>
     </div>
@@ -250,7 +251,7 @@ export default function UsagePage() {
   const selectedDate = format(selectedDay, "yyyy-MM-dd");
   const isToday = selectedDate === format(new Date(), "yyyy-MM-dd");
 
-  const validTiers = ["free", "bench", "rookie", "mvp"] as const;
+  const validTiers = ["free", "bench", "rookie", "mvp", "hall_of_fame"] as const;
   const rawTier = subscription?.tier;
   const tier = rawTier && validTiers.includes(rawTier) ? rawTier : "free";
   const limits = tierLimits[tier];
@@ -623,7 +624,7 @@ export default function UsagePage() {
             </div>
 
             {/* WebSocket Events — compact, only for Rookie/MVP */}
-            {(tier === "rookie" || tier === "mvp") && (
+            {(tier === "rookie" || tier === "mvp" || tier === "hall_of_fame") && (
               <div className="p-4 space-y-3">
                 <div className="flex items-baseline justify-between">
                   <span className="text-[13px] text-zinc-500 font-sans">WebSocket Events</span>

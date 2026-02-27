@@ -52,6 +52,20 @@ const tiers = {
     ],
     color: "purple",
   },
+  hall_of_fame: {
+    name: "Hall of Fame",
+    price: "$200",
+    description: "Enterprise-grade, unlimited volume",
+    features: [
+      "Unlimited monthly requests",
+      "1,000 requests/minute burst",
+      "REST + WebSocket (20 connections)",
+      "20 concurrent requests",
+      "Everything in MVP",
+      "Historical data",
+    ],
+    color: "amber",
+  },
 };
 
 export default function BillingPage() {
@@ -65,7 +79,7 @@ export default function BillingPage() {
 function BillingContent() {
   const { subscription, refreshUser } = useAuth();
   const [isLoading, setIsLoading] = useState<string | null>(null);
-  const [paymentDialogTier, setPaymentDialogTier] = useState<"bench" | "rookie" | "mvp" | null>(null);
+  const [paymentDialogTier, setPaymentDialogTier] = useState<"bench" | "rookie" | "mvp" | "hall_of_fame" | null>(null);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const searchParams = useSearchParams();
   const hasSynced = useRef(false);
@@ -101,7 +115,7 @@ function BillingContent() {
   }, [searchParams, refreshUser]);
 
   // Validate tier from API to prevent runtime errors
-  const validTiers = ["free", "bench", "rookie", "mvp"] as const;
+  const validTiers = ["free", "bench", "rookie", "mvp", "hall_of_fame"] as const;
   const rawTier = subscription?.tier;
   const currentTier = rawTier && validTiers.includes(rawTier) ? rawTier : "free";
 
@@ -117,7 +131,7 @@ function BillingContent() {
   const trialCanceled = isTrialing && subscription?.cancelAtPeriodEnd;
   const trialEligible = subscription?.trialEligible ?? false;
 
-  async function handleUpgrade(tier: "bench" | "rookie" | "mvp") {
+  async function handleUpgrade(tier: "bench" | "rookie" | "mvp" | "hall_of_fame") {
     setIsLoading(tier);
     try {
       const res = await fetch("/api/stripe/checkout", {
@@ -175,7 +189,7 @@ function BillingContent() {
     }
   }
 
-  async function handlePayPalCheckout(tier: "bench" | "rookie" | "mvp") {
+  async function handlePayPalCheckout(tier: "bench" | "rookie" | "mvp" | "hall_of_fame") {
     setPaymentDialogTier(null);
     setIsLoading(tier);
     try {
@@ -229,7 +243,7 @@ function BillingContent() {
     }
   }
 
-  async function handleCryptoCheckout(tier: "bench" | "rookie" | "mvp") {
+  async function handleCryptoCheckout(tier: "bench" | "rookie" | "mvp" | "hall_of_fame") {
     setPaymentDialogTier(null);
     setIsLoading(tier);
     try {
@@ -313,7 +327,9 @@ function BillingContent() {
             <div className="flex items-center gap-4">
               <Badge
                 className={`font-mono text-lg px-4 py-2 ${
-                  currentTier === "mvp"
+                  currentTier === "hall_of_fame"
+                    ? "bg-amber-500/20 text-amber-400 border-amber-500/30"
+                    : currentTier === "mvp"
                     ? "bg-purple-500/20 text-purple-400 border-purple-500/30"
                     : currentTier === "rookie"
                     ? "bg-blue-500/20 text-blue-400 border-blue-500/30"
@@ -322,7 +338,7 @@ function BillingContent() {
                     : "bg-zinc-800/50 text-zinc-500 border-zinc-700/30"
                 } border`}
               >
-                {currentTier.toUpperCase()}
+                {currentTier === "hall_of_fame" ? "HALL OF FAME" : currentTier.toUpperCase()}
               </Badge>
               <div>
                 <p className="text-white font-semibold">
@@ -417,14 +433,12 @@ function BillingContent() {
         <h2 className="text-lg font-mono font-semibold text-white mb-4">
           Available Plans
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {(Object.entries(tiers) as [keyof typeof tiers, typeof tiers[keyof typeof tiers]][]).map(
             ([tier, config]) => {
               const isCurrent = tier === currentTier;
-              const isUpgrade =
-                currentTier === "free" ||
-                (tier === "rookie" && currentTier === "bench") ||
-                (tier === "mvp" && (currentTier === "bench" || currentTier === "rookie"));
+              const tierOrder: Record<string, number> = { free: 0, bench: 1, rookie: 2, mvp: 3, hall_of_fame: 4 };
+              const isUpgrade = (tierOrder[tier] || 0) > (tierOrder[currentTier] || 0);
 
               return (
                 <Card
@@ -568,8 +582,8 @@ function BillingContent() {
               )}
             </button>
 
-            {/* PayPal */}
-            <button
+            {/* PayPal — not available for Hall of Fame */}
+            {paymentDialogTier !== "hall_of_fame" && <button
               onClick={() => {
                 if (paymentDialogTier) handlePayPalCheckout(paymentDialogTier);
               }}
@@ -588,10 +602,10 @@ function BillingContent() {
                   7-DAY TRIAL
                 </Badge>
               )}
-            </button>
+            </button>}
 
-            {/* Crypto */}
-            <button
+            {/* Crypto — not available for Hall of Fame */}
+            {paymentDialogTier !== "hall_of_fame" && <button
               onClick={() => {
                 if (paymentDialogTier) handleCryptoCheckout(paymentDialogTier);
               }}
@@ -615,7 +629,7 @@ function BillingContent() {
                   7-DAY TRIAL
                 </Badge>
               )}
-            </button>
+            </button>}
           </div>
 
           <div className="px-6 py-3 border-t border-white/5 bg-white/[0.02]">

@@ -109,7 +109,7 @@ function DashboardContent() {
   // Handle Discord OAuth redirect with checkout intent
   useEffect(() => {
     const checkoutTier = searchParams.get("start_checkout") || searchParams.get("start_trial");
-    const validCheckoutTiers = ["bench", "rookie", "mvp"];
+    const validCheckoutTiers = ["bench", "rookie", "mvp", "hall_of_fame"];
     if (checkoutTier && validCheckoutTiers.includes(checkoutTier)) {
       // Remove param from URL to prevent re-triggering
       window.history.replaceState({}, "", "/dashboard");
@@ -190,7 +190,7 @@ function DashboardContent() {
     };
   }, []);
 
-  const validTiers = ["free", "bench", "rookie", "mvp"] as const;
+  const validTiers = ["free", "bench", "rookie", "mvp", "hall_of_fame"] as const;
   const rawTier = subscription?.tier;
   const tier = rawTier && validTiers.includes(rawTier) ? rawTier : "free";
   const tierLimits = {
@@ -198,11 +198,13 @@ function DashboardContent() {
     bench: { month: 10000, minute: 20 },
     rookie: { month: 75000, minute: 120 },
     mvp: { month: 300000, minute: 400 },
+    hall_of_fame: { month: 0, minute: 1000 },
   };
   const limits = tierLimits[tier];
 
   const monthUsed = usage?.rateLimits?.month?.count || 0;
-  const monthPct = limits.month > 0 ? ((monthUsed / limits.month) * 100).toFixed(1) : "0.0";
+  const isUnlimited = limits.month === 0 && tier !== "free";
+  const monthPct = isUnlimited ? "0.0" : limits.month > 0 ? ((monthUsed / limits.month) * 100).toFixed(1) : "0.0";
 
   return (
     <div className="w-full space-y-8">
@@ -238,7 +240,7 @@ function DashboardContent() {
               )}
             </p>
             <p className="text-xs text-zinc-500 mt-2 font-sans">
-              {monthUsed.toLocaleString()} / {limits.month.toLocaleString()}
+              {isUnlimited ? `${monthUsed.toLocaleString()} / Unlimited` : `${monthUsed.toLocaleString()} / ${limits.month.toLocaleString()}`}
             </p>
             <UsageBar used={monthUsed} total={limits.month} loading={isLoading} />
           </div>
@@ -257,7 +259,9 @@ function DashboardContent() {
             <Badge
               className={cn(
                 "font-mono text-xs border mt-1",
-                tier === "mvp"
+                tier === "hall_of_fame"
+                  ? "bg-amber-500/15 text-amber-400 border-amber-500/25"
+                  : tier === "mvp"
                   ? "bg-purple-500/15 text-purple-400 border-purple-500/25"
                   : tier === "rookie"
                   ? "bg-[#06b6d4]/15 text-[#06b6d4] border-[#06b6d4]/25"
@@ -266,10 +270,12 @@ function DashboardContent() {
                   : "bg-zinc-800/50 text-zinc-500 border-zinc-700/25"
               )}
             >
-              {tier.toUpperCase()}
+              {tier === "hall_of_fame" ? "HALL OF FAME" : tier.toUpperCase()}
             </Badge>
             <p className="text-xs text-zinc-500 mt-3 font-sans">
-              {tier === "mvp"
+              {tier === "hall_of_fame"
+                ? "Unlimited access"
+                : tier === "mvp"
                 ? "Full access"
                 : tier === "rookie"
                 ? "Standard access"
@@ -331,7 +337,7 @@ function DashboardContent() {
       </section>
 
       {/* Upgrade Banner */}
-      {tier !== "mvp" && (
+      {tier !== "mvp" && tier !== "hall_of_fame" && (
         <section aria-label="Upgrade plan">
           <Link
             href="/dashboard/billing"
@@ -341,7 +347,7 @@ function DashboardContent() {
             <div className="relative flex items-center justify-between p-6">
               <div>
                 <h2 className="text-sm font-mono font-semibold text-white">
-                  {tier === "free" ? "Subscribe to get started" : `Upgrade to ${tier === "bench" ? "Rookie or MVP" : "MVP"}`}
+                  {tier === "free" ? "Subscribe to get started" : `Upgrade to ${tier === "bench" ? "Rookie or MVP" : tier === "rookie" ? "MVP or Hall of Fame" : "Hall of Fame"}`}
                 </h2>
                 <p className="text-sm text-zinc-500 mt-1 font-sans">
                   {tier === "free" ? "Choose a plan to get API access" : "More requests, WebSocket access, and historical data"}
