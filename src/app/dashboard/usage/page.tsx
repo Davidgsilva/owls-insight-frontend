@@ -56,7 +56,7 @@ interface UsageData {
     };
     currentRateLimits: {
       minute: { count: number; limit: number };
-      month: { count: number; limit: number };
+      month: { count: number; limit: number; resetAt?: string | null };
     };
     websocket?: WsStats;
   }>;
@@ -136,15 +136,21 @@ function Gauge({
   max,
   label,
   sublabel,
+  resetAt,
 }: {
   value: number;
   max: number;
   label: string;
   sublabel: string;
+  resetAt?: string | null;
 }) {
   const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0;
   const color = pct > 90 ? "#ef4444" : pct > 70 ? "#eab308" : "#00FF88";
   const remaining = max - value;
+
+  const resetLabel = resetAt && value > 0
+    ? `Resets ${new Date(resetAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
+    : null;
 
   return (
     <div className="space-y-3">
@@ -164,7 +170,10 @@ function Gauge({
           style={{ width: `${pct}%`, backgroundColor: color }}
         />
       </div>
-      <span className="text-[11px] text-zinc-600 font-mono">{remaining.toLocaleString()} remaining</span>
+      <div className="flex items-baseline justify-between">
+        <span className="text-[11px] text-zinc-600 font-mono">{remaining.toLocaleString()} remaining</span>
+        {resetLabel && <span className="text-[11px] text-zinc-500 font-mono">{resetLabel}</span>}
+      </div>
     </div>
   );
 }
@@ -334,7 +343,7 @@ export default function UsagePage() {
   const currentUsage = usageData?.usage?.[0];
   const rateLimits = currentUsage?.currentRateLimits || {
     minute: { count: 0, limit: limits.minute },
-    month: { count: 0, limit: limits.month },
+    month: { count: 0, limit: limits.month, resetAt: null },
   };
 
   const totalRequests = usageData?.totals?.totalRequests || 0;
@@ -609,7 +618,7 @@ export default function UsagePage() {
 
             {/* Quotas section */}
             <div className="p-4 space-y-4">
-              <Gauge value={rateLimits.month.count} max={limits.month} label="Monthly Quota" sublabel={tier.toUpperCase()} />
+              <Gauge value={rateLimits.month.count} max={limits.month} label="Monthly Quota" sublabel={tier.toUpperCase()} resetAt={rateLimits.month.resetAt} />
               <Gauge value={rateLimits.minute.count} max={limits.minute} label="Rate Limit" sublabel="per minute" />
             </div>
 

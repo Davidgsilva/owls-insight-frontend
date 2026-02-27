@@ -9,6 +9,7 @@ const sportsbooks = [
   { name: "Caesars", logo: "https://www.google.com/s2/favicons?domain=caesars.com&sz=128" },
   { name: "Kalshi", logo: "https://www.google.com/s2/favicons?domain=kalshi.com&sz=128" },
   { name: "1xBet", logo: "https://www.google.com/s2/favicons?domain=1xbet.com&sz=128" },
+  { name: "Polymarket", logo: "https://www.google.com/s2/favicons?domain=polymarket.com&sz=128" },
 ];
 
 const sports = [
