@@ -20,7 +20,13 @@ spec:
           image: 482566359918.dkr.ecr.us-east-1.amazonaws.com/owls-insight-frontend:v1.0.5
           ports:
             - containerPort: 3000
+          # NOTE: NEXT_PUBLIC_GA_ID=G-8EFB3XE6WB is baked into the Docker image
+          # at build time via --build-arg (not a runtime env var). See Dockerfile.
+          # Build command:
+          #   docker build --build-arg NEXT_PUBLIC_GA_ID=G-8EFB3XE6WB ...
           env:
+            - name: NEXT_PUBLIC_API_URL
+              value: "https://api.owlsinsight.com"
             - name: API_SERVER_URL
               value: "http://owls-insight-api-server"
             - name: INTERNAL_AUTH_SECRET

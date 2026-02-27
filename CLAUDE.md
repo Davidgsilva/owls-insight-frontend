@@ -94,8 +94,20 @@ Tailwind CSS 4 with custom theme in `globals.css`. Brand colors: `#00FF88` (prim
 | `OWLS_INSIGHT_API_KEY` | Bearer token for `/api/odds` proxy (landing page live ticker) |
 | `DISCORD_CLIENT_ID` | Discord OAuth app ID |
 | `DISCORD_REDIRECT_URI` | Discord OAuth callback URL |
+| `NEXT_PUBLIC_API_URL` | Public API URL (referenced in K8s manifests, not in source — frontend always proxies through its own API routes) |
 
-Note: `NEXT_PUBLIC_API_URL` is referenced in K8s manifests but not in source code — the frontend always hits its own Next.js API routes.
+#### Build-Time Variables (Docker `--build-arg`)
+
+These are **inlined by Next.js during `next build`** and baked into the JS bundle. They are NOT runtime env vars — they must be passed as Docker build args.
+
+| Variable | Value | Purpose |
+|---|---|---|
+| `NEXT_PUBLIC_GA_ID` | `G-8EFB3XE6WB` | Google Analytics measurement ID (added Feb 2026) |
+
+**CRITICAL:** If you add new `NEXT_PUBLIC_*` vars, you MUST:
+1. Add `ARG` + `ENV` lines to the Dockerfile
+2. Pass `--build-arg NEXT_PUBLIC_X=value` during `docker build`
+3. Setting them via `kubectl set env` does NOT work — Next.js has already inlined the value (or empty string) at build time
 
 ## UI Component Library
 
@@ -166,7 +178,7 @@ kubectl get deployment owls-insight-frontend -n owls-insight-prod -o jsonpath='{
 
 # 5. Build, push, deploy
 aws ecr get-login-password --region us-east-1 --profile wisesports | docker login --username AWS --password-stdin 482566359918.dkr.ecr.us-east-1.amazonaws.com
-docker build --no-cache -t 482566359918.dkr.ecr.us-east-1.amazonaws.com/owls-insight-frontend:v1.X.X .
+docker build --no-cache --build-arg NEXT_PUBLIC_GA_ID=G-8EFB3XE6WB -t 482566359918.dkr.ecr.us-east-1.amazonaws.com/owls-insight-frontend:v1.X.X .
 docker push 482566359918.dkr.ecr.us-east-1.amazonaws.com/owls-insight-frontend:v1.X.X
 kubectl set image deployment/owls-insight-frontend -n owls-insight-prod frontend=482566359918.dkr.ecr.us-east-1.amazonaws.com/owls-insight-frontend:v1.X.X
 kubectl rollout status deployment/owls-insight-frontend -n owls-insight-prod --timeout=90s
