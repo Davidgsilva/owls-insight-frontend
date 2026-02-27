@@ -7,9 +7,13 @@ import { AuthProvider } from "@/contexts/AuthContext";
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
 export const metadata: Metadata = {
-  title: "Owls Insight — Sports Betting Odds API",
+  metadataBase: new URL("https://owlsinsight.com"),
+  title: {
+    default: "Owls Insight — Sports Betting Odds API",
+    template: "%s | Owls Insight",
+  },
   description:
-    "Aggregated sports betting odds and player props API. Compare lines across major sportsbooks and prediction markets.",
+    "Real-time sports betting odds API. Compare sharp lines, FanDuel, DraftKings, BetMGM, Bet365, Caesars, Kalshi, 1xBet, and Polymarket via REST and WebSocket.",
   keywords: [
     "sports betting API",
     "odds API",
@@ -18,15 +22,24 @@ export const metadata: Metadata = {
     "NBA odds",
     "NFL odds",
     "NHL odds",
+    "MLB odds",
+    "NCAAB odds",
+    "soccer odds",
     "sportsbook API",
+    "odds comparison",
     "line movement",
     "player props API",
+    "sharp lines API",
+    "sports data API",
+    "betting odds aggregator",
+    "real-time odds",
+    "WebSocket odds",
   ],
   authors: [{ name: "Owls Insight" }],
   openGraph: {
-    title: "Owls Insight — Sports Betting Odds API",
+    title: "Owls Insight — Real-Time Sports Betting Odds API",
     description:
-      "Aggregated sports betting odds and player props API. Compare lines across major sportsbooks and prediction markets.",
+      "Compare live odds from 9 sources via REST API and WebSocket. NBA, NFL, NHL, MLB, NCAAB, soccer, tennis, and esports.",
     url: "https://owlsinsight.com",
     siteName: "Owls Insight",
     type: "website",
@@ -34,9 +47,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Owls Insight — Sports Betting Odds API",
+    title: "Owls Insight — Real-Time Sports Betting Odds API",
     description:
-      "Aggregated sports betting odds and player props API. Compare lines across major sportsbooks and prediction markets.",
+      "Compare live odds from 9 sources via REST API and WebSocket. NBA, NFL, NHL, MLB, NCAAB, soccer, tennis, and esports.",
   },
   robots: {
     index: true,
