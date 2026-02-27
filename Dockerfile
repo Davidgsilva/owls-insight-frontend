@@ -3,6 +3,9 @@ FROM node:20-slim AS builder
 WORKDIR /app
 
 # API key injected at runtime via K8s env vars (server-side only, not baked into bundle)
+# NEXT_PUBLIC_* vars must be available at build time (inlined by Next.js during `next build`)
+ARG NEXT_PUBLIC_GA_ID
+ENV NEXT_PUBLIC_GA_ID=$NEXT_PUBLIC_GA_ID
 
 # Copy package files
 COPY package*.json ./
