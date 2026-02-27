@@ -157,13 +157,13 @@ function RegisterForm() {
         <Card className="bg-[#111113] border-white/10">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-mono text-white">
-              {isMvpTrial ? "Start your free trial" : selectedTier ? `Sign up for ${selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1)}` : "Create an account"}
+              {isMvpTrial ? "Start your free trial" : selectedTier ? `Sign up for ${selectedTier === "hall_of_fame" ? "Hall of Fame" : selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1)}` : "Create an account"}
             </CardTitle>
             <CardDescription className="text-zinc-400">
               {isMvpTrial
                 ? "Create an account to start your 7-day free MVP trial"
                 : selectedTier
-                ? `Create an account to subscribe to the ${selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1)} plan`
+                ? `Create an account to subscribe to the ${selectedTier === "hall_of_fame" ? "Hall of Fame" : selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1)} plan`
                 : "Get started with your API access today"}
             </CardDescription>
           </CardHeader>

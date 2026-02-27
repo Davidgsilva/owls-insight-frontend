@@ -26,7 +26,7 @@ const tiers = [
     name: "Rookie",
     price: "$24.99",
     period: "/month",
-    description: "Active bettors, real-time data needs",
+    description: "Active bettors, enhanced API access",
     features: [
       "75,000 requests/month",
       "120 requests/minute",
