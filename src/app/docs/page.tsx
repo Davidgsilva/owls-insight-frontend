@@ -503,7 +503,7 @@ export default function DocsPage() {
               </div>
               <p className="text-sm text-zinc-400 font-sans leading-relaxed">
                 Pinnacle odds are refreshed every ~3 seconds for moneylines, spreads, and totals across all sports.
-                Rookie and MVP tiers receive live Pinnacle data via REST and WebSocket. Bench tier receives Pinnacle data on a slower refresh cycle.
+                Rookie and MVP tiers receive Pinnacle data via REST polling (~3s). MVP and Hall of Fame tiers also receive real-time Pinnacle odds via WebSocket. Bench tier receives Pinnacle data on a slower refresh cycle.
                 Use <code className="text-[13px] font-mono text-zinc-300">?alternates=true</code> to include alternate spread and total lines on Pinnacle outcomes (Rookie+ only).
               </p>
             </div>
@@ -2535,7 +2535,7 @@ socket.on("esports-update", (data) => {
               <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5">
                 <p className="font-mono text-sm font-semibold text-white mb-2">Rookie</p>
                 <ul className="text-[13px] text-zinc-500 space-y-1">
-                  <li>REST + WebSocket (2 connections), polled odds, player props, player stats, prop line history, rolling averages, historical data (14 days)</li>
+                  <li>REST + WebSocket (2 connections), polled odds, player props, player stats, prop line history, rolling averages</li>
                 </ul>
               </div>
               <div className="rounded-lg bg-[#111113] border border-purple-500/15 p-5">

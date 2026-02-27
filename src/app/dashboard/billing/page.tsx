@@ -34,7 +34,6 @@ const tiers = {
       "REST + WebSocket (2 connections)",
       "Player props access",
       "Historical odds & props",
-      "Real-time updates",
     ],
     color: "blue",
   },
@@ -46,9 +45,9 @@ const tiers = {
       "300,000 requests/month",
       "400 requests/minute",
       "REST + WebSocket (5 connections)",
+      "Real-time sharp Pinnacle odds",
       "Full props + alternates",
-      "Full historical odds & props",
-      "Priority support",
+      "Historical odds & props",
     ],
     color: "purple",
   },
@@ -62,7 +61,6 @@ const tiers = {
       "REST + WebSocket (20 connections)",
       "20 concurrent requests",
       "Everything in MVP",
-      "Historical data",
     ],
     color: "amber",
   },
@@ -542,6 +540,7 @@ function BillingContent() {
                     <>
                       Subscribe to{" "}
                       <span className={`font-semibold ${
+                        paymentDialogTier === "hall_of_fame" ? "text-amber-400" :
                         paymentDialogTier === "mvp" ? "text-purple-400" :
                         paymentDialogTier === "rookie" ? "text-blue-400" : "text-zinc-300"
                       }`}>
