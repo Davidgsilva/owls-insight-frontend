@@ -62,7 +62,7 @@ Three providers, all proxied through Next.js route handlers:
 
 The billing page (`/dashboard/billing`) detects provider via `subscription.paymentProvider` and shows provider-specific management UI.
 
-Subscription tiers: `free`, `bench` ($9.99), `rookie` ($24.99), `mvp` ($49.99). MVP has a 7-day free trial for eligible users.
+Subscription tiers: `free`, `bench` ($9.99), `rookie` ($24.99), `mvp` ($49.99). MVP has a 3-day free trial for eligible users.
 
 ### State Management
 

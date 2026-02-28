@@ -259,7 +259,7 @@ function BillingContent() {
       }
 
       if (data.trial) {
-        toast.success("Your 7-day free trial has started!");
+        toast.success("Your 3-day free trial has started!");
         await refreshUser();
       } else if (data.paymentUrl) {
         window.location.href = data.paymentUrl;
@@ -407,7 +407,7 @@ function BillingContent() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-white font-mono font-semibold text-lg">
-                  Try MVP free for 7 days
+                  Try MVP free for 3 days
                 </p>
                 <p className="text-zinc-400 text-sm mt-1">
                   Get full API access with 300K requests/month, WebSocket streaming, player props, and historical data.
@@ -419,7 +419,7 @@ function BillingContent() {
                 disabled={isLoading === "mvp"}
                 className="bg-[#00FF88] hover:bg-[#00d474] text-[#0a0a0a] font-semibold shrink-0 ml-4"
               >
-                {isLoading === "mvp" ? "Loading..." : "Start 7-Day Free Trial"}
+                {isLoading === "mvp" ? "Loading..." : "Start 3-Day Free Trial"}
               </Button>
             </div>
           </CardContent>
@@ -464,7 +464,7 @@ function BillingContent() {
                       </span>
                       <span className="text-zinc-500">/month</span>
                       {tier === "mvp" && trialEligible && (
-                        <p className="text-xs text-[#00FF88] font-mono mt-1">7-day free trial</p>
+                        <p className="text-xs text-[#00FF88] font-mono mt-1">3-day free trial</p>
                       )}
                     </div>
                     <CardDescription className="text-zinc-500">
@@ -498,7 +498,7 @@ function BillingContent() {
                           {isLoading === tier
                             ? "Loading..."
                             : tier === "mvp" && trialEligible
-                            ? "Start 7-Day Free Trial"
+                            ? "Start 3-Day Free Trial"
                             : "Upgrade"}
                         </Button>
                       ) : isPayPal || isCrypto ? (
@@ -533,7 +533,7 @@ function BillingContent() {
                 {paymentDialogTier && (
                   paymentDialogTier === "mvp" && trialEligible ? (
                     <>
-                      Start your 7-day free trial of{" "}
+                      Start your 3-day free trial of{" "}
                       <span className="font-semibold text-purple-400">MVP</span>
                     </>
                   ) : (
@@ -576,7 +576,7 @@ function BillingContent() {
               </div>
               {paymentDialogTier === "mvp" && trialEligible && (
                 <Badge className="bg-[#00FF88]/15 text-[#00FF88] border-[#00FF88]/20 border text-[10px] font-mono shrink-0">
-                  7-DAY TRIAL
+                  3-DAY TRIAL
                 </Badge>
               )}
             </button>
@@ -598,7 +598,7 @@ function BillingContent() {
               </div>
               {paymentDialogTier === "mvp" && trialEligible && (
                 <Badge className="bg-[#00FF88]/15 text-[#00FF88] border-[#00FF88]/20 border text-[10px] font-mono shrink-0">
-                  7-DAY TRIAL
+                  3-DAY TRIAL
                 </Badge>
               )}
             </button>}
@@ -625,7 +625,7 @@ function BillingContent() {
               </div>
               {paymentDialogTier === "mvp" && trialEligible && (
                 <Badge className="bg-[#00FF88]/15 text-[#00FF88] border-[#00FF88]/20 border text-[10px] font-mono shrink-0">
-                  7-DAY TRIAL
+                  3-DAY TRIAL
                 </Badge>
               )}
             </button>}

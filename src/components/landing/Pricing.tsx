@@ -126,7 +126,7 @@ export function Pricing() {
                 </div>
                 <p className="text-sm text-zinc-500 mt-2">{tier.description}</p>
                 {tier.popular && (
-                  <p className="text-xs text-[#00FF88] font-mono mt-1">7-day free trial</p>
+                  <p className="text-xs text-[#00FF88] font-mono mt-1">3-day free trial</p>
                 )}
               </div>
 

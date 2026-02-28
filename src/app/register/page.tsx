@@ -161,7 +161,7 @@ function RegisterForm() {
             </CardTitle>
             <CardDescription className="text-zinc-400">
               {isMvpTrial
-                ? "Create an account to start your 7-day free MVP trial"
+                ? "Create an account to start your 3-day free MVP trial"
                 : selectedTier
                 ? `Create an account to subscribe to the ${selectedTier === "hall_of_fame" ? "Hall of Fame" : selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1)} plan`
                 : "Get started with your API access today"}
@@ -191,9 +191,9 @@ function RegisterForm() {
 
             {isMvpTrial && (
               <div className="mb-4 p-3 rounded-lg bg-[#00FF88]/5 border border-[#00FF88]/20">
-                <p className="text-sm text-[#00FF88] font-mono font-medium">7-Day Free Trial</p>
+                <p className="text-sm text-[#00FF88] font-mono font-medium">3-Day Free Trial</p>
                 <p className="text-xs text-zinc-400 mt-1">
-                  Credit card required. Cancel anytime during the trial — you won&apos;t be charged. After 7 days, $49.99/mo.
+                  Credit card required. Cancel anytime during the trial — you won&apos;t be charged. After 3 days, $49.99/mo.
                 </p>
               </div>
             )}
@@ -289,7 +289,7 @@ function RegisterForm() {
                 >
                   {isLoading
                     ? (selectedTier ? "Setting up..." : "Creating account...")
-                    : (isMvpTrial ? "Start 7-Day Free Trial" : selectedTier ? "Create account & Subscribe" : "Create account")}
+                    : (isMvpTrial ? "Start 3-Day Free Trial" : selectedTier ? "Create account & Subscribe" : "Create account")}
                 </Button>
               </form>
             </Form>
