@@ -612,7 +612,7 @@ export default function DocsPage() {
     "alternates": true,
     "timestamp": "2026-01-31T18:30:00.000Z",
     "requestedBooks": ["pinnacle", "fanduel", "draftkings"],
-    "availableBooks": ["pinnacle", "fanduel", "draftkings", "betmgm", "bet365", "caesars", "kalshi"],
+    "availableBooks": ["pinnacle", "fanduel", "draftkings", "betmgm", "bet365", "caesars", "kalshi", "polymarket", "1xbet"],
     "booksReturned": ["pinnacle", "fanduel", "draftkings"],
     "freshness": { "ageSeconds": 2, "stale": false, "threshold": 90 }
   }
@@ -895,16 +895,14 @@ export default function DocsPage() {
               {[
                 "points", "rebounds", "assists", "steals", "blocks", "threes_made",
                 "pts_rebs_asts", "pts_rebs", "pts_asts", "rebs_asts",
-                "double_double", "triple_double", "turnovers", "minutes",
-                "passing_yards", "passing_tds", "interceptions", "pass_completions", "pass_attempts",
-                "rushing_yards", "rushing_tds", "rush_attempts",
-                "receiving_yards", "receiving_tds", "receptions", "longest_reception", "longest_rush", "touchdowns",
+                "double_double", "triple_double",
+                "passing_yards", "passing_tds",
+                "rushing_yards", "rushing_tds",
+                "receiving_yards", "receptions", "touchdowns",
                 "goals", "hockey_assists", "hockey_points", "shots_on_goal",
-                "saves", "goals_against", "power_play_points",
                 "hits", "runs", "rbis", "home_runs", "stolen_bases", "total_bases",
                 "strikeouts_pitcher", "strikeouts_batter", "walks", "earned_runs", "outs_recorded", "hits_allowed",
-                "shots_on_target", "tackles", "passes",
-                "anytime_goalscorer", "first_goalscorer", "last_goalscorer",
+                "shots_on_target", "tackles", "passes", "fouls_committed", "corners_taken",
               ].map((cat) => (
                 <code key={cat} className="text-[12px] font-mono text-zinc-500 bg-white/[0.03] px-2 py-0.5 rounded">
                   {cat}
@@ -1488,8 +1486,8 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
             <SectionHeading>Prediction Markets</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-6 leading-relaxed">
               Odds from prediction market exchanges — Kalshi (CFTC-regulated) and Polymarket (decentralized).
-              Both are included as bookmakers in the standard <code className="text-[13px] font-mono text-zinc-300">/api/v1/&#123;sport&#125;/odds</code> response,
-              and also have dedicated endpoints for raw market data.
+              Both are included as bookmakers in the standard <code className="text-[13px] font-mono text-zinc-300">/api/v1/&#123;sport&#125;/odds</code> response.
+              Kalshi also has dedicated endpoints for raw market data (order book depth, liquidity, settlement rules).
             </p>
 
             <h3 className="text-lg font-mono font-semibold text-white mb-4 mt-10">Kalshi</h3>
@@ -1539,6 +1537,11 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
                     { ticker: "KXEPLGAME", sport: "soccer", desc: "English Premier League game outcomes" },
                     { ticker: "KXUCLGAME", sport: "soccer", desc: "UEFA Champions League game outcomes" },
                     { ticker: "KXMLSGAME", sport: "soccer", desc: "MLS game outcomes" },
+                    { ticker: "KXLALIGAGAME", sport: "soccer", desc: "La Liga game outcomes" },
+                    { ticker: "KXSERIEAGAME", sport: "soccer", desc: "Serie A game outcomes" },
+                    { ticker: "KXBUNDESLIGAGAME", sport: "soccer", desc: "Bundesliga game outcomes" },
+                    { ticker: "KXLIGUE1GAME", sport: "soccer", desc: "Ligue 1 game outcomes" },
+                    { ticker: "KXNWSLGAME", sport: "soccer", desc: "NWSL game outcomes" },
                   ].map((s) => (
                     <tr key={s.ticker} className="border-b border-white/[0.04]">
                       <td className="py-2.5 pr-6 font-mono text-white">{s.ticker}</td>
@@ -1640,6 +1643,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
     { "sport": "nba", "series_ticker": "KXNBAGAME" },
     { "sport": "ncaab", "series_ticker": "KXNCAAMBGAME" },
     { "sport": "nfl", "series_ticker": "KXNFLGAME" },
+    { "sport": "nhl", "series_ticker": "KXNHLGAME" },
     { "sport": "mlb", "series_ticker": "KXMLBGAME" },
     { "sport": "soccer", "series_ticker": "KXEPLGAME" }
   ],
@@ -1651,7 +1655,8 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
   ],
   "all_known_tickers": [
     "KXNBAGAME", "KXNCAAMBGAME", "KXNFLGAME", "KXNHLGAME", "KXMLBGAME",
-    "KXEPLGAME", "KXUCLGAME", "KXMLSGAME"
+    "KXEPLGAME", "KXUCLGAME", "KXMLSGAME", "KXLALIGAGAME", "KXSERIEAGAME",
+    "KXBUNDESLIGAGAME", "KXLIGUE1GAME", "KXNWSLGAME"
   ]
 }`}
             />
@@ -2023,6 +2028,7 @@ socket.on("connect", () => {
                 { name: "betmgm-props-update", description: "BetMGM player props (live games only), streamed on change (requires subscribe-betmgm-props)", tier: "Rookie+" },
                 { name: "caesars-props-update", description: "Caesars player props, streamed on change (requires subscribe-caesars-props)", tier: "Rookie+" },
                 { name: "esports-update", description: "CS2 live + prematch odds from 1xBet, streamed on change (requires esports: true)", tier: undefined },
+                { name: "pinnacle-realtime", description: "Real-time Pinnacle sharp odds, pushed automatically every ~2 seconds", tier: "MVP" },
               ].map((event) => (
                 <div key={event.name} className="flex items-start gap-3 py-3 border-b border-white/[0.04]">
                   <code className="text-[13px] font-mono text-white shrink-0">{event.name}</code>
@@ -2524,7 +2530,7 @@ X-RateLimit-Reset-Month: 2026-03-01T00:00:00.000Z`}
 
             <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5 mt-6">
               <p className="text-sm text-zinc-400 font-sans leading-relaxed">
-                <strong className="text-white">Prediction exchanges:</strong> Both Kalshi and Polymarket appear as bookmakers in the standard odds response. Kalshi bookmaker objects include an <code className="text-[13px] font-mono text-zinc-300">event_ticker</code> field for direct order placement. See the <a href="#prediction-markets" className="text-[#00FF88] hover:underline">Prediction Markets section</a> for dedicated endpoints and raw market data.
+                <strong className="text-white">Prediction exchanges:</strong> Both Kalshi and Polymarket appear as bookmakers in the standard odds response. Kalshi bookmaker objects include an <code className="text-[13px] font-mono text-zinc-300">event_ticker</code> field for direct order placement. See the <a href="#prediction-markets" className="text-[#00FF88] hover:underline">Prediction Markets section</a> for Kalshi&apos;s dedicated endpoints and details on Polymarket integration.
               </p>
             </div>
           </section>
@@ -2568,7 +2574,7 @@ X-RateLimit-Reset-Month: 2026-03-01T00:00:00.000Z`}
                     { book: "Caesars", nba: "strong", ncaab: "partial", nfl: "strong", ncaaf: "partial", nhl: "partial", ncaah: "none", mlb: "soon", soccer: "partial", tennis: "none", cs2: "none" },
                     { book: "Kalshi", nba: "strong", ncaab: "partial", nfl: "strong", ncaaf: "none", nhl: "partial", ncaah: "none", mlb: "partial", soccer: "strong", tennis: "none", cs2: "none" },
                     { book: "1xBet", nba: "none", ncaab: "none", nfl: "none", ncaaf: "none", nhl: "none", ncaah: "none", mlb: "partial", soccer: "strong", tennis: "none", cs2: "strong" },
-                    { book: "Polymarket", nba: "strong", ncaab: "strong", nfl: "strong", ncaaf: "strong", nhl: "strong", ncaah: "strong", mlb: "strong", soccer: "strong", tennis: "strong", cs2: "strong" },
+                    { book: "Polymarket", nba: "strong", ncaab: "partial", nfl: "strong", ncaaf: "partial", nhl: "strong", ncaah: "partial", mlb: "partial", soccer: "partial", tennis: "partial", cs2: "none" },
                   ].map((row) => (
                     <tr key={row.book} className="border-b border-white/[0.04]">
                       <td className="py-2.5 pr-4 font-mono text-white">{row.book}</td>
