@@ -227,7 +227,9 @@ export default function DocsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchIndex, setSearchIndex] = useState(0);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [pageCopied, setPageCopied] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   // Build search results from query
   const results = useMemo(() => {
@@ -332,14 +334,28 @@ export default function DocsPage() {
             <span className="text-zinc-700">/</span>
             <span className="font-mono text-sm text-white">Docs</span>
           </div>
-          <button
-            onClick={() => { setSearchOpen(true); setSearchQuery(""); setSearchIndex(0); }}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/[0.08] bg-white/[0.02] text-zinc-500 hover:text-zinc-300 hover:border-white/[0.12] transition-colors text-sm"
-          >
-            <MagnifyingGlass size={14} />
-            <span className="font-sans">Search</span>
-            <kbd className="hidden sm:inline-block text-[10px] font-mono text-zinc-600 bg-white/[0.06] px-1.5 py-0.5 rounded ml-1">⌘K</kbd>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                if (!contentRef.current) return;
+                navigator.clipboard.writeText(contentRef.current.innerText);
+                setPageCopied(true);
+                setTimeout(() => setPageCopied(false), 2000);
+              }}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/[0.08] bg-white/[0.02] text-zinc-500 hover:text-zinc-300 hover:border-white/[0.12] transition-colors text-sm"
+            >
+              {pageCopied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+              <span className="font-sans">{pageCopied ? "Copied!" : "Copy Page"}</span>
+            </button>
+            <button
+              onClick={() => { setSearchOpen(true); setSearchQuery(""); setSearchIndex(0); }}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/[0.08] bg-white/[0.02] text-zinc-500 hover:text-zinc-300 hover:border-white/[0.12] transition-colors text-sm"
+            >
+              <MagnifyingGlass size={14} />
+              <span className="font-sans">Search</span>
+              <kbd className="hidden sm:inline-block text-[10px] font-mono text-zinc-600 bg-white/[0.06] px-1.5 py-0.5 rounded ml-1">⌘K</kbd>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -390,7 +406,7 @@ export default function DocsPage() {
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 ml-56 px-12 py-12 max-w-3xl">
+        <main ref={contentRef} className="flex-1 ml-56 px-12 py-12 max-w-3xl">
 
           {/* ─── Getting Started ────────────────────────────────────── */}
           <section id="getting-started" className="mb-20 scroll-mt-20">
@@ -869,15 +885,23 @@ export default function DocsPage() {
 
             <SubHeading id="sub-props-endpoints">Endpoints</SubHeading>
             <div className="mb-8">
-              <Endpoint method="GET" path="/api/v1/{sport}/props" description="Aggregated player props from all books" tier="Rookie+" />
+              <Endpoint method="GET" path="/api/v1/{sport}/props" description="Aggregated player props from all books (use ?books=pinnacle to filter)" tier="Rookie+" />
               <Endpoint method="GET" path="/api/v1/{sport}/props/fanduel" description="FanDuel player props only" tier="Rookie+" />
               <Endpoint method="GET" path="/api/v1/{sport}/props/draftkings" description="DraftKings player props only" tier="Rookie+" />
               <Endpoint method="GET" path="/api/v1/{sport}/props/caesars" description="Caesars player props only" tier="Rookie+" />
               <Endpoint method="GET" path="/api/v1/{sport}/props/betmgm" description="BetMGM player props only (live games)" tier="Rookie+" />
               <Endpoint method="GET" path="/api/v1/{sport}/props/bet365" description="Bet365 player props only" tier="Rookie+" />
               <Endpoint method="GET" path="/api/v1/{sport}/props/history" description="Historical prop line movements" tier="Rookie+" />
-              <Endpoint method="GET" path="/api/v1/props/{book}/stats" description="Per-book props cache statistics" tier="Rookie+" />
+              <Endpoint method="GET" path="/api/v1/props/{book}/stats" description="Per-book props cache statistics (bet365, fanduel, draftkings, caesars, betmgm)" tier="Rookie+" />
               <Endpoint method="GET" path="/api/v1/props/stats" description="Aggregated props cache statistics" tier="Rookie+" />
+            </div>
+
+            <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5 mb-8">
+              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
+                <strong className="text-zinc-300">Sport availability by book:</strong> The aggregated <code className="text-[13px] font-mono text-zinc-300">/props</code> endpoint includes Pinnacle data for all sports.
+                FanDuel, DraftKings, Caesars, and BetMGM per-book endpoints support nba, ncaab, nfl, nhl, and ncaaf.
+                Bet365 supports all of the above plus mlb. If a book has no props for the requested sport, the response will be empty.
+              </p>
             </div>
 
             <SubHeading id="sub-props-parameters">Parameters</SubHeading>
@@ -1199,7 +1223,7 @@ export default function DocsPage() {
           <section id="stats-api" className="mb-20 scroll-mt-20">
             <SectionHeading>Player Stats API</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-2">
-              Live and final box score data. Returns per-player statistics including points, rebounds, assists, shooting splits, and more for today&apos;s games.
+              NBA box score data. Returns per-player statistics including points, rebounds, assists, shooting splits, and more for today&apos;s games. Box scores are currently NBA-only; rolling averages are available for all sports.
             </p>
             <p className="text-sm mb-6">
               <TierBadge tier="Rookie+" />
@@ -1754,12 +1778,20 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
 }`}
             />
 
-            <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5 mt-8">
+            <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5 mt-8 mb-8">
               <p className="text-sm text-zinc-400 font-sans leading-relaxed">
                 <strong className="text-white">How it works:</strong> A dedicated worker polls Polymarket&apos;s Gamma REST API every 10 seconds.
                 Bid/ask probabilities from the CLOB order book are converted to American odds format
                 using the midpoint price. Data is merged into the standard odds response with moneylines, spreads, and totals.
               </p>
+            </div>
+
+            <SubHeading>Raw market data</SubHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-4 leading-relaxed">
+              For raw Polymarket market data including condition IDs, token addresses, and order book info, use the dedicated endpoint:
+            </p>
+            <div className="mb-8">
+              <Endpoint method="GET" path="/api/v1/polymarket/{sport}/markets" description="Raw Polymarket market data (condition IDs, token addresses, order book info)" tier="Rookie+" />
             </div>
           </section>
 

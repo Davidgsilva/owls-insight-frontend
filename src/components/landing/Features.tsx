@@ -1,52 +1,37 @@
 "use client";
 
-import {
-  Lightning,
-  Broadcast,
-  ClockCounterClockwise,
-  ShieldCheck,
-  ChartBar,
-  UsersThree,
-} from "@phosphor-icons/react";
-
 const features = [
   {
-    icon: Lightning,
     title: "Multi-Book Aggregation",
     description:
       "Sportsbooks and prediction markets — all normalized into a single, consistent API schema.",
     highlight: "Aggregated",
   },
   {
-    icon: Broadcast,
     title: "WebSocket Streaming",
     description:
       "Real-time push updates the moment lines move. No polling required. Subscribe to specific events or entire markets.",
     highlight: "Real-time",
   },
   {
-    icon: ClockCounterClockwise,
     title: "Line History & Analytics",
     description:
       "Track opening lines, line movements, and historical data. Identify CLV opportunities and steam moves.",
     highlight: "Full History",
   },
   {
-    icon: ShieldCheck,
     title: "99.9% Uptime SLA",
     description:
       "Enterprise-grade infrastructure with automatic failover. Rate limiting per API key with generous quotas.",
     highlight: "Enterprise",
   },
   {
-    icon: ChartBar,
     title: "Player Props",
     description:
       "Complete player prop markets including points, rebounds, assists, and more. Available on Pro and Enterprise tiers.",
     highlight: "Full Props",
   },
   {
-    icon: UsersThree,
     title: "Multi-Sport Coverage",
     description:
       "NBA, NFL, NHL, MLB, NCAAB, NCAAF, Soccer, and CS2 esports. All major sports with consistent data schemas across markets.",
@@ -85,11 +70,6 @@ export function Features() {
                 <span className="text-xs font-mono text-[#00FF88]/60">
                   {feature.highlight}
                 </span>
-              </div>
-
-              {/* Icon */}
-              <div className="w-12 h-12 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center mb-4">
-                <feature.icon size={24} weight="duotone" className="text-neutral-400" />
               </div>
 
               {/* Content */}

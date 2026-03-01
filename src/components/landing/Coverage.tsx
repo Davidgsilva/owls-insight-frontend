@@ -85,7 +85,7 @@ export function Coverage() {
             <span className="w-8 h-px bg-purple-700" />
             PREDICTION MARKETS
           </h3>
-          <div className="flex gap-4 justify-center">
+          <div className="flex gap-4">
             {predictionMarkets.map((market) => (
               <div
                 key={market.name}
