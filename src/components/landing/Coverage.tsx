@@ -7,8 +7,11 @@ const sportsbooks = [
   { name: "BetMGM", logo: "https://www.google.com/s2/favicons?domain=betmgm.com&sz=128" },
   { name: "Bet365", logo: "https://www.google.com/s2/favicons?domain=bet365.com&sz=128" },
   { name: "Caesars", logo: "https://www.google.com/s2/favicons?domain=caesars.com&sz=128" },
-  { name: "Kalshi", logo: "https://www.google.com/s2/favicons?domain=kalshi.com&sz=128" },
   { name: "1xBet", logo: "https://www.google.com/s2/favicons?domain=1xbet.com&sz=128" },
+];
+
+const predictionMarkets = [
+  { name: "Kalshi", logo: "https://www.google.com/s2/favicons?domain=kalshi.com&sz=128" },
   { name: "Polymarket", logo: "https://www.google.com/s2/favicons?domain=polymarket.com&sz=128" },
 ];
 
@@ -46,17 +49,17 @@ export function Coverage() {
         </div>
 
         {/* Sportsbooks Carousel */}
-        <div className="mb-16">
+        <div className="mb-12">
           <h3 className="text-sm font-mono text-zinc-500 mb-6 flex items-center gap-2">
             <span className="w-8 h-px bg-zinc-700" />
-            SOURCES
+            SPORTSBOOKS
           </h3>
           <div className="relative overflow-hidden">
             {/* Fade edges */}
             <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#050505] to-transparent z-10 pointer-events-none" />
             <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#050505] to-transparent z-10 pointer-events-none" />
 
-            <div className="flex animate-ticker w-max" style={{ animationDuration: "50s" }}>
+            <div className="flex animate-ticker w-max" style={{ animationDuration: "45s" }}>
               {[...sportsbooks, ...sportsbooks].map((book, i) => (
                 <div
                   key={`${book.name}-${i}`}
@@ -73,6 +76,31 @@ export function Coverage() {
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+
+        {/* Prediction Markets */}
+        <div className="mb-16">
+          <h3 className="text-sm font-mono text-zinc-500 mb-6 flex items-center gap-2">
+            <span className="w-8 h-px bg-purple-700" />
+            PREDICTION MARKETS
+          </h3>
+          <div className="flex gap-4 justify-center">
+            {predictionMarkets.map((market) => (
+              <div
+                key={market.name}
+                className="flex items-center gap-3 px-6 py-3 rounded-lg border border-purple-500/10 bg-purple-500/[0.03] opacity-60"
+              >
+                <img
+                  src={market.logo}
+                  alt={`${market.name} logo`}
+                  className="w-6 h-6 rounded grayscale"
+                />
+                <span className="text-sm font-mono text-zinc-500 whitespace-nowrap">
+                  {market.name}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
 

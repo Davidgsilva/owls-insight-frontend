@@ -42,9 +42,11 @@ const sections: Section[] = [
     { id: "sub-box-scores", label: "Box scores" },
     { id: "sub-rolling-averages", label: "Rolling averages" },
   ], keywords: ["stats", "box score", "averages", "l5", "l10", "l20", "h2h"] },
-  { id: "kalshi-api", label: "Kalshi Markets", subItems: [
+  { id: "prediction-markets", label: "Prediction Markets", subItems: [
+    { id: "sub-kalshi-endpoints", label: "Kalshi endpoints" },
     { id: "sub-series-tickers", label: "Series tickers" },
-  ], keywords: ["kalshi", "prediction", "markets", "series", "cftc"] },
+    { id: "sub-polymarket-endpoints", label: "Polymarket endpoints" },
+  ], keywords: ["kalshi", "polymarket", "prediction", "markets", "series", "cftc", "decentralized", "exchange"] },
   { id: "history-api", label: "Historical Data", subItems: [
     { id: "sub-history-endpoints", label: "Endpoints" },
   ], keywords: ["history", "historical", "snapshots", "games", "odds history", "props history", "stats history"] },
@@ -58,11 +60,6 @@ const sections: Section[] = [
     { id: "sub-realtime-parameters", label: "Parameters" },
     { id: "sub-realtime-ws", label: "WebSocket event" },
   ], keywords: ["realtime", "real-time", "pinnacle", "live odds", "fast", "low latency"] },
-  { id: "polymarket-api", label: "Polymarket", subItems: [
-    { id: "sub-polymarket-endpoints", label: "Endpoints" },
-    { id: "sub-polymarket-parameters", label: "Parameters" },
-    { id: "sub-polymarket-ws", label: "WebSocket event" },
-  ], keywords: ["polymarket", "prediction", "clob", "decentralized", "real-time", "crypto", "web3"] },
   { id: "usage-api", label: "Usage", keywords: ["usage", "dashboard", "requests"] },
   { id: "rate-limits", label: "Rate Limits", subItems: [
     { id: "sub-tier-features", label: "Tier features" },
@@ -401,7 +398,7 @@ export default function DocsPage() {
               API Reference
             </h1>
             <p className="text-zinc-500 text-sm font-sans leading-relaxed mb-10">
-              REST API and WebSocket streaming for live sports and esports betting odds from major sportsbooks, Kalshi prediction markets, and 1xBet. Odds update every ~3 seconds.
+              REST API and WebSocket streaming for live sports and esports betting odds from major sportsbooks, prediction markets (Kalshi and Polymarket), and 1xBet. Odds update every ~3 seconds.
             </p>
 
             <div className="rounded-lg bg-[#111113] border border-white/[0.06] px-5 py-4 mb-10">
@@ -444,7 +441,7 @@ export default function DocsPage() {
           <section id="odds-api" className="mb-20 scroll-mt-20">
             <SectionHeading>Odds API</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-6">
-              Live betting odds from Pinnacle, FanDuel, DraftKings, BetMGM, Bet365, Caesars, Kalshi, and 1xBet. Updated every ~3 seconds via polling.
+              Live betting odds from Pinnacle, FanDuel, DraftKings, BetMGM, Bet365, Caesars, Kalshi, Polymarket, and 1xBet. Updated every ~3 seconds via polling.
             </p>
 
             <SubHeading id="sub-odds-endpoints">Endpoints</SubHeading>
@@ -483,6 +480,7 @@ export default function DocsPage() {
                     { key: "bet365", name: "Bet365", notes: "Global market leader" },
                     { key: "caesars", name: "Caesars", notes: "Casino heritage" },
                     { key: "kalshi", name: "Kalshi", notes: "CFTC-regulated prediction exchange" },
+                    { key: "polymarket", name: "Polymarket", notes: "Decentralized prediction market" },
                     { key: "1xbet", name: "1xBet", notes: "CS2 esports + Soccer + MLB, live + prematch odds" },
                   ].map((book) => (
                     <tr key={book.key} className="border-b border-white/[0.04]">
@@ -1485,9 +1483,16 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
             </div>
           </section>
 
-          {/* ─── Kalshi Markets API ──────────────────────────────────── */}
-          <section id="kalshi-api" className="mb-20 scroll-mt-20">
-            <SectionHeading>Kalshi Markets API</SectionHeading>
+          {/* ─── Prediction Markets ──────────────────────────────────── */}
+          <section id="prediction-markets" className="mb-20 scroll-mt-20">
+            <SectionHeading>Prediction Markets</SectionHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-6 leading-relaxed">
+              Odds from prediction market exchanges — Kalshi (CFTC-regulated) and Polymarket (decentralized).
+              Both are included as bookmakers in the standard <code className="text-[13px] font-mono text-zinc-300">/api/v1/&#123;sport&#125;/odds</code> response,
+              and also have dedicated endpoints for raw market data.
+            </p>
+
+            <h3 className="text-lg font-mono font-semibold text-white mb-4 mt-10">Kalshi</h3>
             <p className="text-sm text-zinc-500 font-sans mb-6">
               Raw prediction market data from Kalshi, a CFTC-regulated event contract exchange.
               Returns full market objects with 50+ fields including liquidity, open interest, volume,
@@ -1681,6 +1686,75 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            <h3 className="text-lg font-mono font-semibold text-white mb-4 mt-14 pt-8 border-t border-white/[0.06]">Polymarket</h3>
+            <p className="text-sm text-zinc-500 font-sans mb-6">
+              Prediction market odds from Polymarket, the largest decentralized prediction market.
+              Polymarket odds are included as a bookmaker in the standard odds response — no separate endpoint needed.
+            </p>
+
+            <SubHeading id="sub-polymarket-endpoints">How Polymarket data is delivered</SubHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-4 leading-relaxed">
+              Polymarket appears as a bookmaker (<code className="text-[13px] font-mono text-zinc-300">key: &quot;polymarket&quot;</code>) in the
+              standard <code className="text-[13px] font-mono text-zinc-300">/api/v1/&#123;sport&#125;/odds</code> response alongside
+              Pinnacle, FanDuel, DraftKings, and other books. No separate API call required.
+            </p>
+
+            <CodeBlock
+              language="bash"
+              code={`# Polymarket odds are included in the standard odds endpoint
+curl -H "Authorization: Bearer YOUR_API_KEY" \\
+  "https://api.owlsinsight.com/api/v1/nba/odds"
+
+# Look for bookmaker with key "polymarket" in each game's bookmakers array`}
+            />
+
+            <SubHeading>Supported sports</SubHeading>
+            <div className="flex flex-wrap gap-2 mb-8">
+              {["nba", "ncaab", "nfl", "nhl", "ncaaf", "mlb", "ncaah", "tennis", "soccer"].map((sport) => (
+                <code key={sport} className="text-[13px] font-mono text-zinc-300 bg-white/[0.04] px-2.5 py-1 rounded">
+                  {sport}
+                </code>
+              ))}
+            </div>
+
+            <SubHeading>Example response</SubHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-4">
+              Polymarket odds use the same format as all other bookmakers — American odds for moneylines, spreads, and totals:
+            </p>
+            <CodeBlock
+              language="json"
+              code={`{
+  "key": "polymarket",
+  "title": "Polymarket",
+  "last_update": "2026-03-01T08:12:04.678Z",
+  "markets": [
+    {
+      "key": "h2h",
+      "last_update": "2026-03-01T08:12:04.678Z",
+      "outcomes": [
+        { "name": "Memphis Grizzlies", "price": 245 },
+        { "name": "Denver Nuggets", "price": -223 }
+      ]
+    },
+    {
+      "key": "spreads",
+      "outcomes": [
+        { "name": "Memphis Grizzlies", "price": 1553, "point": -12.5 },
+        { "name": "Denver Nuggets", "price": -1553, "point": 12.5 }
+      ]
+    }
+  ]
+}`}
+            />
+
+            <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5 mt-8">
+              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
+                <strong className="text-white">How it works:</strong> A dedicated worker polls Polymarket&apos;s Gamma REST API every 10 seconds.
+                Bid/ask probabilities from the CLOB order book are converted to American odds format
+                using the midpoint price. Data is merged into the standard odds response with moneylines, spreads, and totals.
+              </p>
             </div>
           </section>
 
@@ -1949,7 +2023,6 @@ socket.on("connect", () => {
                 { name: "betmgm-props-update", description: "BetMGM player props (live games only), streamed on change (requires subscribe-betmgm-props)", tier: "Rookie+" },
                 { name: "caesars-props-update", description: "Caesars player props, streamed on change (requires subscribe-caesars-props)", tier: "Rookie+" },
                 { name: "esports-update", description: "CS2 live + prematch odds from 1xBet, streamed on change (requires esports: true)", tier: undefined },
-                { name: "polymarket-realtime", description: "Real-time Polymarket prediction market odds, pushed automatically (no subscription required)", tier: "MVP" },
               ].map((event) => (
                 <div key={event.name} className="flex items-start gap-3 py-3 border-b border-white/[0.04]">
                   <code className="text-[13px] font-mono text-white shrink-0">{event.name}</code>
@@ -2234,177 +2307,6 @@ socket.on("esports-update", (data) => {
             </div>
           </section>
 
-          {/* ─── Polymarket API ──────────────────────────────────────── */}
-          <section id="polymarket-api" className="mb-20 scroll-mt-20">
-            <SectionHeading>Polymarket Real-Time Odds</SectionHeading>
-            <p className="text-sm text-zinc-500 font-sans mb-6">
-              Real-time prediction market odds from Polymarket, the largest decentralized prediction market.
-              Delivered via a dedicated CLOB WebSocket feed with sub-second updates. Available to MVP tier subscribers only.
-            </p>
-
-            <div className="rounded-lg bg-[#111113] border border-purple-500/15 p-5 mb-8">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
-                <p className="font-mono text-sm font-semibold text-white">Beta</p>
-                <TierBadge tier="MVP" />
-              </div>
-              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
-                Polymarket odds are derived from the CLOB order book (best bid/ask midpoint), converted to American odds format.
-                Covers moneylines, spreads, and totals across 10 sports. The <code className="text-[13px] font-mono text-zinc-300">meta.freshness</code> object
-                tells you exactly how old the data is.
-              </p>
-            </div>
-
-            <SubHeading id="sub-polymarket-endpoints">Endpoints</SubHeading>
-            <div className="overflow-x-auto mb-8">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-white/[0.08]">
-                    <th className="text-left py-2.5 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Method</th>
-                    <th className="text-left py-2.5 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Endpoint</th>
-                    <th className="text-left py-2.5 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Description</th>
-                  </tr>
-                </thead>
-                <tbody className="text-[13px]">
-                  <tr className="border-b border-white/[0.04]">
-                    <td className="py-2.5 pr-6 font-mono text-[#00FF88]">GET</td>
-                    <td className="py-2.5 pr-6 font-mono text-white">/api/v1/polymarket/&#123;sport&#125;/realtime</td>
-                    <td className="py-2.5 text-zinc-400">Real-time Polymarket prediction market odds for a sport</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <p className="text-sm text-zinc-500 font-sans mb-6">
-              Supported sports: {["nba", "ncaab", "nfl", "nhl", "ncaaf", "mlb", "ncaah", "tennis", "soccer", "cs2"].map((sport, i) => (
-                <span key={sport}>
-                  <code className="text-[13px] font-mono text-zinc-300">{sport}</code>
-                  {i < 9 ? ", " : ""}
-                </span>
-              ))}
-            </p>
-
-            <SubHeading id="sub-polymarket-parameters">Parameters</SubHeading>
-            <p className="text-sm text-zinc-500 font-sans mb-4">
-              No query parameters. The sport is specified in the URL path.
-            </p>
-
-            <SubHeading>Example request</SubHeading>
-            <CodeBlock
-              language="bash"
-              code={`curl -H "Authorization: Bearer YOUR_API_KEY" \\
-  "https://api.owlsinsight.com/api/v1/polymarket/nba/realtime"`}
-            />
-
-            <SubHeading>Response</SubHeading>
-            <CodeBlock
-              language="json"
-              code={`{
-  "success": true,
-  "data": [
-    {
-      "id": "polymarket-nba-den-mem-2026-01-25",
-      "sport_key": "basketball_nba",
-      "sport_title": "NBA",
-      "commence_time": "2026-03-18T20:30:00Z",
-      "home_team": "Memphis Grizzlies",
-      "away_team": "Denver Nuggets",
-      "bookmakers": [
-        {
-          "key": "polymarket",
-          "title": "Polymarket",
-          "last_update": "2026-02-26T08:12:04.678Z",
-          "markets": [
-            {
-              "key": "h2h",
-              "last_update": "2026-02-26T08:12:04.678Z",
-              "outcomes": [
-                { "name": "Memphis Grizzlies", "price": 245 },
-                { "name": "Denver Nuggets", "price": -223 }
-              ]
-            },
-            {
-              "key": "spreads",
-              "last_update": "2026-02-26T08:12:04.678Z",
-              "outcomes": [
-                { "name": "Memphis Grizzlies", "price": 1553, "point": -12.5 },
-                { "name": "Denver Nuggets", "price": -1553, "point": 12.5 }
-              ]
-            },
-            {
-              "key": "totals",
-              "last_update": "2026-02-26T08:12:04.678Z",
-              "outcomes": [
-                { "name": "Over", "price": -900, "point": 217.5 },
-                { "name": "Under", "price": 900, "point": 217.5 }
-              ]
-            }
-          ]
-        }
-      ],
-      "sport": "nba",
-      "status": "scheduled"
-    }
-  ],
-  "meta": {
-    "sport": "nba",
-    "source": "polymarket_clob_ws",
-    "available": true,
-    "events": 47,
-    "timestamp": "2026-02-26T08:12:04.738Z",
-    "freshness": {
-      "ageSeconds": 1,
-      "stale": false,
-      "threshold": 30
-    }
-  }
-}`}
-            />
-
-            <SubHeading>Freshness metadata</SubHeading>
-            <p className="text-sm text-zinc-500 font-sans mb-4">
-              The <code className="text-[13px] font-mono text-zinc-300">meta.freshness</code> object indicates how recent the data is.
-            </p>
-            <ParamTable
-              params={[
-                { name: "ageSeconds", type: "number", required: true, description: "How many seconds ago the data was last updated" },
-                { name: "stale", type: "boolean", required: true, description: "True if data is older than the threshold (feed may be reconnecting)" },
-                { name: "threshold", type: "number", required: true, description: "Staleness threshold in seconds (currently 30)" },
-              ]}
-            />
-
-            <SubHeading id="sub-polymarket-ws">WebSocket event</SubHeading>
-            <p className="text-sm text-zinc-500 font-sans mb-4">
-              MVP tier WebSocket connections automatically receive a <code className="text-[13px] font-mono text-zinc-300">polymarket-realtime</code> event
-              with real-time Polymarket odds whenever new data is available. No subscription required — it is pushed automatically.
-            </p>
-            <CodeBlock
-              language="javascript"
-              code={`socket.on("polymarket-realtime", (data) => {
-  // data contains all sports: nba, ncaab, nfl, nhl, ncaaf, mlb, ncaah, tennis, soccer, cs2
-  console.log("NBA events:", data.nba?.length || 0);
-  console.log("NCAAB events:", data.ncaab?.length || 0);
-  console.log("NHL events:", data.nhl?.length || 0);
-  console.log("Soccer events:", data.soccer?.length || 0);
-  console.log("Timestamp:", data.timestamp);
-});`}
-            />
-
-            <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5 mt-8">
-              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
-                <strong className="text-white">Non-MVP tiers:</strong> Bench and Rookie subscribers do not receive Polymarket data.
-                REST requests to <code className="text-[13px] font-mono text-zinc-300">/polymarket/&#123;sport&#125;/realtime</code> will return
-                a <code className="text-[13px] font-mono text-zinc-300">403</code> with an upgrade prompt.
-              </p>
-            </div>
-
-            <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5 mt-4">
-              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
-                <strong className="text-white">How it works:</strong> A dedicated pod connects to Polymarket&#39;s CLOB WebSocket API,
-                tracking 5,000+ token order books in real-time. Bid/ask probabilities are converted to American odds format
-                using the midpoint price. Data is grouped by sport with moneylines, spreads, and totals where available.
-              </p>
-            </div>
-          </section>
 
           {/* ─── Usage API ─────────────────────────────────────────── */}
           <section id="usage-api" className="mb-20 scroll-mt-20">
@@ -2529,7 +2431,7 @@ socket.on("esports-update", (data) => {
               <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5">
                 <p className="font-mono text-sm font-semibold text-white mb-2">Bench</p>
                 <ul className="text-[13px] text-zinc-500 space-y-1">
-                  <li>REST API only, polled odds/spreads/totals, live scores, Kalshi prediction markets</li>
+                  <li>REST API only, polled odds/spreads/totals, live scores, prediction markets (Kalshi + Polymarket)</li>
                 </ul>
               </div>
               <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5">
@@ -2598,7 +2500,7 @@ X-RateLimit-Reset-Month: 2026-03-01T00:00:00.000Z`}
                     { book: "Caesars", type: "US Retail", sports: "NBA, NCAAB, NFL, NHL, NCAAF, Soccer", desc: "Casino heritage with competitive NBA and NFL lines." },
                     { book: "Kalshi", type: "Exchange", sports: "NBA, NCAAB, NFL, NHL, MLB, Soccer", desc: "CFTC-regulated prediction exchange. Event contracts, not traditional odds." },
                     { book: "1xBet", type: "International", sports: "CS2, Soccer, MLB", desc: "International book with deep esports and soccer coverage." },
-                    { book: "Polymarket", type: "Exchange", sports: "NBA, NCAAB, NFL, NHL, NCAAF, NCAAH, MLB, Soccer, Tennis, CS2", desc: "Largest decentralized prediction market. Real-time CLOB WebSocket feed (MVP)." },
+                    { book: "Polymarket", type: "Exchange", sports: "NBA, NCAAB, NFL, NHL, NCAAF, NCAAH, MLB, Soccer, Tennis", desc: "Largest decentralized prediction market. CLOB order book odds converted to American format." },
                   ].map((row) => (
                     <tr key={row.book} className="border-b border-white/[0.04]">
                       <td className="py-2.5 pr-4 font-mono text-white">{row.book}</td>
@@ -2622,7 +2524,7 @@ X-RateLimit-Reset-Month: 2026-03-01T00:00:00.000Z`}
 
             <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5 mt-6">
               <p className="text-sm text-zinc-400 font-sans leading-relaxed">
-                <strong className="text-white">Prediction exchanges:</strong> Kalshi bookmaker objects in the odds response include an <code className="text-[13px] font-mono text-zinc-300">event_ticker</code> field for direct order placement. Polymarket odds are delivered via a dedicated real-time feed (MVP only) — see the <a href="#polymarket-api" className="text-[#00FF88] hover:underline">Polymarket section</a> for details.
+                <strong className="text-white">Prediction exchanges:</strong> Both Kalshi and Polymarket appear as bookmakers in the standard odds response. Kalshi bookmaker objects include an <code className="text-[13px] font-mono text-zinc-300">event_ticker</code> field for direct order placement. See the <a href="#prediction-markets" className="text-[#00FF88] hover:underline">Prediction Markets section</a> for dedicated endpoints and raw market data.
               </p>
             </div>
           </section>
