@@ -1834,7 +1834,9 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
                 { name: "side", type: "string", required: false, description: "home, away, over, or under" },
                 { name: "startTime", type: "string", required: false, description: "ISO date or Unix timestamp (ms)" },
                 { name: "endTime", type: "string", required: false, description: "ISO date or Unix timestamp (ms)" },
+                { name: "opening", type: "string", required: false, description: "Set to \"true\" to return only opening lines (first recorded snapshot per book/market/side)" },
                 { name: "limit", type: "number", required: false, description: "Max results (1-5000, default 1000)" },
+                { name: "offset", type: "number", required: false, description: "Pagination offset (default 0)" },
               ]}
             />
 
@@ -1845,7 +1847,11 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
                 { name: "playerName", type: "string", required: false, description: "Filter by player name" },
                 { name: "propType", type: "string", required: false, description: "Filter by prop type (points, rebounds, etc.)" },
                 { name: "book", type: "string", required: false, description: "Filter by sportsbook" },
+                { name: "startTime", type: "string", required: false, description: "ISO date or Unix timestamp (ms)" },
+                { name: "endTime", type: "string", required: false, description: "ISO date or Unix timestamp (ms)" },
+                { name: "opening", type: "string", required: false, description: "Set to \"true\" to return only opening lines (first recorded snapshot per player/prop/book)" },
                 { name: "limit", type: "number", required: false, description: "Max results (1-5000, default 1000)" },
+                { name: "offset", type: "number", required: false, description: "Pagination offset (default 0)" },
               ]}
             />
 
@@ -1880,6 +1886,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
   "success": true,
   "data": {
     "eventId": "nba:Los Angeles Clippers@Sacramento Kings-20260207",
+    "opening": false,
     "timeRange": { "start": null, "end": null },
     "snapshots": [
       {
@@ -1892,7 +1899,8 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
       }
     ],
     "count": 1,
-    "limit": 1000
+    "limit": 1000,
+    "offset": 0
   }
 }`}
             />
@@ -1904,6 +1912,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
   "success": true,
   "data": {
     "eventId": "nba:Los Angeles Clippers@Sacramento Kings-20260207",
+    "opening": false,
     "timeRange": { "start": null, "end": null },
     "snapshots": [
       {
@@ -1917,7 +1926,8 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
       }
     ],
     "count": 1,
-    "limit": 1000
+    "limit": 1000,
+    "offset": 0
   }
 }`}
             />
