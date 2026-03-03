@@ -57,7 +57,12 @@ function formatGameDetail(game: LiveGame): string {
 
   if (status.state === "pre") {
     const d = new Date(game.startTime);
-    return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+    return d.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    });
   }
 
   if (status.state === "post") return "FINAL";
