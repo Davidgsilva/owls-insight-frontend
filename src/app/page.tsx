@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import {
   Header,
   Hero,
-  LiveTicker,
+  LiveGames,
+  OddsShowcase,
   Features,
   Coverage,
   Pricing,
@@ -146,7 +147,8 @@ export default function Home() {
       <main className="min-h-screen">
         <Header />
         <Hero />
-        <LiveTicker />
+        <LiveGames />
+        <OddsShowcase />
         <Features />
         <Coverage />
         <Pricing />
