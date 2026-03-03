@@ -271,7 +271,7 @@ function GameCard({
   const displayBooks = game.books.slice(0, 5);
 
   return (
-    <div className="rounded-xl bg-[#111111] border border-white/5 overflow-hidden card-hover">
+    <div className="rounded-xl bg-[#111111] border border-white/5 overflow-hidden">
       {/* Matchup header */}
       <div className="px-4 pt-4 pb-3 border-b border-white/5">
         <div className="flex items-center justify-between mb-1">
@@ -445,7 +445,7 @@ export function OddsShowcase() {
             <span className="text-[#00FF88] text-glow-green">Odds Comparison</span>
           </h2>
           <p className="text-zinc-400 max-w-2xl mx-auto">
-            Compare pre-match odds across sportsbooks in real-time.
+            Compare pre-match odds across sportsbooks.
             Best prices highlighted in green.
           </p>
         </div>
@@ -460,7 +460,7 @@ export function OddsShowcase() {
                 className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${
                   activeSport === sport
                     ? "bg-[#00FF88]/10 text-[#00FF88] border border-[#00FF88]/20"
-                    : "text-zinc-500 hover:text-zinc-300 border border-transparent"
+                    : "text-zinc-500 border border-transparent"
                 }`}
               >
                 {SPORT_LABELS[sport] || sport.toUpperCase()}

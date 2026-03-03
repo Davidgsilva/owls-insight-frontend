@@ -140,7 +140,7 @@ function GameCard({ game }: { game: LiveGame }) {
       : null;
 
   return (
-    <div className="relative p-4 rounded-xl bg-[#111111] border border-white/5 card-hover">
+    <div className="relative p-4 rounded-xl bg-[#111111] border border-white/5">
       {/* Top row: sport badge + status */}
       <div className="flex items-center justify-between mb-3">
         <span className="text-xs font-mono text-zinc-500">
@@ -330,7 +330,7 @@ export function LiveGames() {
               className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${
                 activeSport === "all"
                   ? "bg-[#00FF88]/10 text-[#00FF88] border border-[#00FF88]/20"
-                  : "text-zinc-500 hover:text-zinc-300 border border-transparent"
+                  : "text-zinc-500 border border-transparent"
               }`}
             >
               ALL
@@ -342,7 +342,7 @@ export function LiveGames() {
                 className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${
                   activeSport === sport
                     ? "bg-[#00FF88]/10 text-[#00FF88] border border-[#00FF88]/20"
-                    : "text-zinc-500 hover:text-zinc-300 border border-transparent"
+                    : "text-zinc-500 border border-transparent"
                 }`}
               >
                 {SPORT_LABELS[sport] || sport.toUpperCase()}
