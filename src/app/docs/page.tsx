@@ -1184,12 +1184,18 @@ export default function DocsPage() {
       "firstServePointsWon": { "home": 72, "away": 61 },
       "secondServePointsWon": { "home": 48, "away": 39 },
       "breakPointsSaved": { "home": 67, "away": 50 },
+      "firstReturnPointsWon": { "home": 39, "away": 28 },
+      "secondReturnPointsWon": { "home": 52, "away": 61 },
       "breakPointsConverted": { "home": 50, "away": 33 },
       "winners": { "home": 18, "away": 12 },
       "unforcedErrors": { "home": 14, "away": 22 },
+      "netPointsWon": { "home": 8, "away": 4 },
+      "servicePointsWon": { "home": 42, "away": 33 },
+      "returnPointsWon": { "home": 16, "away": 16 },
       "totalPointsWon": { "home": 58, "away": 49 },
       "serviceGamesWon": { "home": 8, "away": 7 },
-      "returnGamesWon": { "home": 2, "away": 1 }
+      "returnGamesWon": { "home": 2, "away": 1 },
+      "totalGamesWon": { "home": 10, "away": 8 }
     },
     "sets": [
       {
@@ -1210,7 +1216,7 @@ export default function DocsPage() {
 
             <SubHeading id="sub-tennis-stats">Tennis stats fields</SubHeading>
             <p className="text-sm text-zinc-500 font-sans mb-4">
-              The <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">tennisStats</code> object contains <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">match</code> (full-match totals) and an optional <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">sets</code> array with per-set breakdowns. All values use <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">{`{ "home": number, "away": number }`}</code> format and are <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">null</code> when unavailable.
+              The <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">tennisStats</code> object contains <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">match</code> (full-match totals) and an optional <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">sets</code> array with per-set breakdowns. Per-set objects include the same stat fields as the match object. All values use <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">{`{ "home": number, "away": number }`}</code> format and are <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">null</code> when unavailable.
             </p>
             <div className="overflow-x-auto mb-8">
               <table className="w-full text-sm">
@@ -1324,7 +1330,7 @@ export default function DocsPage() {
 
             <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5 mb-6">
               <p className="text-sm text-zinc-400 font-sans leading-relaxed">
-                <strong className="text-zinc-300">Soccer &amp; Tennis data</strong> — Match stats, incidents, and player ratings are sourced from FlashScore and update every ~30 seconds during live matches. Extended stats (xG, big chances, shot breakdowns) are available for top soccer leagues. Tennis stats (aces, serve %, break points, winners, unforced errors) include per-set breakdowns. When matches complete, all data is automatically archived to the{" "}
+                <strong className="text-zinc-300">Live match data</strong> — Sourced from FlashScore, updated every ~30 seconds. Soccer includes team stats, match incidents (goals, cards, substitutions), and per-player ratings — extended stats (xG, big chances, shot breakdowns) are available for top leagues. Tennis includes per-match and per-set statistics (aces, serve %, break points, winners, unforced errors). When matches complete, all data is automatically archived to the{" "}
                 <a href="#history-api" className="text-[#00FF88] hover:underline">Historical Data API</a>.
               </p>
             </div>
@@ -2162,6 +2168,9 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
             />
 
             <SubHeading>Tennis stats response</SubHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-4">
+              Returns a flat array of stat objects — one with <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">scope: &quot;match&quot;</code> for match totals, plus one per set (<code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">set1</code>, <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">set2</code>, etc.). Each stat field is <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">{`{ "home": number, "away": number }`}</code> or <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">null</code> when unavailable.
+            </p>
             <CodeBlock
               language="json"
               code={`{
@@ -2177,29 +2186,30 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
         "firstServePointsWon": { "home": 76, "away": 65 },
         "secondServePointsWon": { "home": 52, "away": 44 },
         "breakPointsSaved": { "home": 80, "away": 60 },
+        "firstReturnPointsWon": { "home": 35, "away": 24 },
+        "secondReturnPointsWon": { "home": 56, "away": 48 },
         "breakPointsConverted": { "home": 40, "away": 20 },
         "winners": { "home": 34, "away": 22 },
         "unforcedErrors": { "home": 18, "away": 31 },
+        "netPointsWon": { "home": 12, "away": 6 },
+        "servicePointsWon": { "home": 68, "away": 52 },
+        "returnPointsWon": { "home": 44, "away": 42 },
         "totalPointsWon": { "home": 112, "away": 94 },
         "serviceGamesWon": { "home": 14, "away": 11 },
-        "returnGamesWon": { "home": 3, "away": 2 }
+        "returnGamesWon": { "home": 3, "away": 2 },
+        "totalGamesWon": { "home": 17, "away": 13 },
+        "recordedAt": "2026-03-01T18:45:00.000Z"
       },
       {
         "scope": "set1",
         "aces": { "home": 3, "away": 2 },
         "doubleFaults": { "home": 1, "away": 1 },
         "firstServePercent": { "home": 70, "away": 60 },
-        "totalPointsWon": { "home": 38, "away": 30 }
-      },
-      {
-        "scope": "set2",
-        "aces": { "home": 2, "away": 1 },
-        "doubleFaults": { "home": 0, "away": 2 },
-        "firstServePercent": { "home": 65, "away": 58 },
-        "totalPointsWon": { "home": 35, "away": 32 }
+        "totalPointsWon": { "home": 38, "away": 30 },
+        "recordedAt": "2026-03-01T18:45:00.000Z"
       }
     ],
-    "count": 3
+    "count": 2
   }
 }`}
             />
