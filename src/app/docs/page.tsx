@@ -34,9 +34,11 @@ const sections: Section[] = [
     { id: "sub-scores-endpoints", label: "Endpoints" },
     { id: "sub-scores-nba", label: "NBA example" },
     { id: "sub-scores-soccer", label: "Soccer example" },
+    { id: "sub-scores-tennis", label: "Tennis example" },
     { id: "sub-match-stats", label: "Match stats" },
+    { id: "sub-tennis-stats", label: "Tennis stats" },
     { id: "sub-incidents", label: "Incidents" },
-  ], keywords: ["scores", "live", "soccer", "nba", "possession", "goals", "cards", "xg", "expected goals", "incidents", "substitution"] },
+  ], keywords: ["scores", "live", "soccer", "nba", "tennis", "aces", "serve", "break points", "possession", "goals", "cards", "xg", "expected goals", "incidents", "substitution"] },
   { id: "stats-api", label: "Player Stats", subItems: [
     { id: "sub-stats-endpoints", label: "Endpoints" },
     { id: "sub-box-scores", label: "Box scores" },
@@ -49,7 +51,8 @@ const sections: Section[] = [
   ], keywords: ["kalshi", "polymarket", "prediction", "markets", "series", "cftc", "decentralized", "exchange"] },
   { id: "history-api", label: "Historical Data", subItems: [
     { id: "sub-history-endpoints", label: "Endpoints" },
-  ], keywords: ["history", "historical", "snapshots", "games", "odds history", "props history", "stats history"] },
+    { id: "sub-history-tennis-stats", label: "Tennis stats" },
+  ], keywords: ["history", "historical", "snapshots", "games", "odds history", "props history", "stats history", "tennis stats", "aces", "serve"] },
   { id: "websocket", label: "WebSocket", subItems: [
     { id: "sub-ws-connection", label: "Connection" },
     { id: "sub-ws-events", label: "Events" },
@@ -1003,7 +1006,7 @@ export default function DocsPage() {
           <section id="scores-api" className="mb-20 scroll-mt-20">
             <SectionHeading>Live Scores API</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-6">
-              Live game scores and status updates, refreshed every ~3 seconds. Soccer matches include rich in-match data: team statistics, match incidents (goals, cards, substitutions), and per-player ratings.
+              Live game scores and status updates, refreshed every ~3 seconds. Soccer matches include rich in-match data: team statistics, match incidents (goals, cards, substitutions), and per-player ratings. Tennis matches include per-match and per-set statistics (aces, serve %, break points, winners, unforced errors).
             </p>
 
             <SubHeading id="sub-scores-endpoints">Endpoints</SubHeading>
@@ -1139,6 +1142,114 @@ export default function DocsPage() {
 }`}
             />
 
+            <SubHeading id="sub-scores-tennis">Tennis example</SubHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-4">
+              Tennis events include <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">tennisDetail</code> (set scores, current game score, serving indicator) and <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">tennisStats</code> (per-match and per-set statistics) when available. Stats update every ~30 seconds during live matches.
+            </p>
+            <CodeBlock
+              language="json"
+              code={`{
+  "id": "tennis:Rokusek@Vickery-20260304",
+  "sport": "tennis",
+  "name": "Vickery S. at Rokusek S.",
+  "startTime": "2026-03-04T01:00:00Z",
+  "status": {
+    "state": "in",
+    "detail": "Live"
+  },
+  "home": {
+    "homeAway": "home",
+    "team": { "displayName": "Rokusek S." },
+    "score": 1
+  },
+  "away": {
+    "homeAway": "away",
+    "team": { "displayName": "Vickery S." },
+    "score": 0
+  },
+  "tennisDetail": {
+    "currentSet": 2,
+    "sets": [
+      { "home": 7, "away": 6 },
+      { "home": 1, "away": 4 }
+    ],
+    "currentGameScore": { "home": "0", "away": "0" },
+    "serving": "home"
+  },
+  "tennisStats": {
+    "match": {
+      "aces": { "home": 3, "away": 1 },
+      "doubleFaults": { "home": 2, "away": 4 },
+      "firstServePercent": { "home": 65, "away": 58 },
+      "firstServePointsWon": { "home": 72, "away": 61 },
+      "secondServePointsWon": { "home": 48, "away": 39 },
+      "breakPointsSaved": { "home": 67, "away": 50 },
+      "breakPointsConverted": { "home": 50, "away": 33 },
+      "winners": { "home": 18, "away": 12 },
+      "unforcedErrors": { "home": 14, "away": 22 },
+      "totalPointsWon": { "home": 58, "away": 49 },
+      "serviceGamesWon": { "home": 8, "away": 7 },
+      "returnGamesWon": { "home": 2, "away": 1 }
+    },
+    "sets": [
+      {
+        "set": 1,
+        "stats": {
+          "aces": { "home": 2, "away": 1 },
+          "doubleFaults": { "home": 1, "away": 3 },
+          "firstServePercent": { "home": 62, "away": 55 },
+          "totalPointsWon": { "home": 42, "away": 38 }
+        }
+      }
+    ]
+  },
+  "sourceMatchId": "WnroroiU",
+  "lastUpdated": "2026-03-04T01:45:00.000Z"
+}`}
+            />
+
+            <SubHeading id="sub-tennis-stats">Tennis stats fields</SubHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-4">
+              The <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">tennisStats</code> object contains <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">match</code> (full-match totals) and an optional <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">sets</code> array with per-set breakdowns. All values use <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">{`{ "home": number, "away": number }`}</code> format and are <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">null</code> when unavailable.
+            </p>
+            <div className="overflow-x-auto mb-8">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-white/[0.08]">
+                    <th className="text-left py-2 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Field</th>
+                    <th className="text-left py-2 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Description</th>
+                  </tr>
+                </thead>
+                <tbody className="text-[13px]">
+                  {[
+                    { field: "aces", desc: "Aces served" },
+                    { field: "doubleFaults", desc: "Double faults" },
+                    { field: "firstServePercent", desc: "1st serve percentage" },
+                    { field: "firstServePointsWon", desc: "1st serve points won %" },
+                    { field: "secondServePointsWon", desc: "2nd serve points won %" },
+                    { field: "breakPointsSaved", desc: "Break points saved %" },
+                    { field: "firstReturnPointsWon", desc: "1st return points won %" },
+                    { field: "secondReturnPointsWon", desc: "2nd return points won %" },
+                    { field: "breakPointsConverted", desc: "Break points converted %" },
+                    { field: "winners", desc: "Winners hit" },
+                    { field: "unforcedErrors", desc: "Unforced errors" },
+                    { field: "netPointsWon", desc: "Net points won" },
+                    { field: "servicePointsWon", desc: "Service points won" },
+                    { field: "returnPointsWon", desc: "Return points won" },
+                    { field: "totalPointsWon", desc: "Total points won" },
+                    { field: "serviceGamesWon", desc: "Service games won" },
+                    { field: "returnGamesWon", desc: "Return games won" },
+                    { field: "totalGamesWon", desc: "Total games won" },
+                  ].map((row) => (
+                    <tr key={row.field} className="border-b border-white/[0.04]">
+                      <td className="py-2.5 pr-6 font-mono text-white whitespace-nowrap">{row.field}</td>
+                      <td className="py-2.5 text-zinc-400">{row.desc}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
             <SubHeading id="sub-match-stats">Match stats fields</SubHeading>
             <p className="text-sm text-zinc-500 font-sans mb-4">
               All stats use the <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">{`{ "home": number, "away": number }`}</code> format. Fields are <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">null</code> when not available for a given match.
@@ -1213,7 +1324,7 @@ export default function DocsPage() {
 
             <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5 mb-6">
               <p className="text-sm text-zinc-400 font-sans leading-relaxed">
-                <strong className="text-zinc-300">Soccer data</strong> — Match stats, incidents, and player ratings are sourced from FlashScore and update every ~30 seconds during live matches. Extended stats (xG, big chances, shot breakdowns) are available for top leagues. When a soccer game completes, all data is automatically archived to the{" "}
+                <strong className="text-zinc-300">Soccer &amp; Tennis data</strong> — Match stats, incidents, and player ratings are sourced from FlashScore and update every ~30 seconds during live matches. Extended stats (xG, big chances, shot breakdowns) are available for top soccer leagues. Tennis stats (aces, serve %, break points, winners, unforced errors) include per-set breakdowns. When matches complete, all data is automatically archived to the{" "}
                 <a href="#history-api" className="text-[#00FF88] hover:underline">Historical Data API</a>.
               </p>
             </div>
@@ -1799,7 +1910,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
           <section id="history-api" className="mb-20 scroll-mt-20">
             <SectionHeading>Historical Data API</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-2">
-              Archived odds, props, and player stats for completed games. Data is archived automatically when games finish.
+              Archived odds, props, player stats, and tennis match statistics for completed games. Data is archived automatically when games finish.
             </p>
             <p className="text-sm mb-6">
               <TierBadge tier="MVP" />
@@ -1812,6 +1923,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
               <Endpoint method="GET" path="/api/v1/history/props" description="Historical props snapshots for an archived game" tier="MVP" />
               <Endpoint method="GET" path="/api/v1/history/stats" description="Historical player box scores for archived games" tier="MVP" />
               <Endpoint method="GET" path="/api/v1/history/stats/averages" description="Rolling averages (L5/L10/L20) with optional H2H filtering" tier="Rookie+" />
+              <Endpoint method="GET" path="/api/v1/history/tennis-stats" description="Historical tennis match statistics (per-match and per-set)" tier="MVP" />
             </div>
 
             <SubHeading>/history/games parameters</SubHeading>
@@ -2030,6 +2142,66 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
               language="bash"
               code={`curl -H "Authorization: Bearer YOUR_API_KEY" \\
   "https://api.owlsinsight.com/api/v1/history/stats/averages?playerName=Jalen%20Brunson&sport=nba"`}
+            />
+
+            <SubHeading id="sub-history-tennis-stats">/history/tennis-stats parameters</SubHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-4">
+              Archived per-match and per-set tennis statistics (aces, serve %, break points, winners, etc.). Data is archived automatically when tennis matches complete.
+            </p>
+            <ParamTable
+              params={[
+                { name: "eventId", type: "string", required: true, description: "Tennis game identifier from /history/games" },
+              ]}
+            />
+
+            <SubHeading>Tennis stats example request</SubHeading>
+            <CodeBlock
+              language="bash"
+              code={`curl -H "Authorization: Bearer YOUR_API_KEY" \\
+  "https://api.owlsinsight.com/api/v1/history/tennis-stats?eventId=tennis:Sinner@Djokovic-20260301"`}
+            />
+
+            <SubHeading>Tennis stats response</SubHeading>
+            <CodeBlock
+              language="json"
+              code={`{
+  "success": true,
+  "data": {
+    "eventId": "tennis:Sinner@Djokovic-20260301",
+    "stats": [
+      {
+        "scope": "match",
+        "aces": { "home": 8, "away": 5 },
+        "doubleFaults": { "home": 2, "away": 4 },
+        "firstServePercent": { "home": 68, "away": 62 },
+        "firstServePointsWon": { "home": 76, "away": 65 },
+        "secondServePointsWon": { "home": 52, "away": 44 },
+        "breakPointsSaved": { "home": 80, "away": 60 },
+        "breakPointsConverted": { "home": 40, "away": 20 },
+        "winners": { "home": 34, "away": 22 },
+        "unforcedErrors": { "home": 18, "away": 31 },
+        "totalPointsWon": { "home": 112, "away": 94 },
+        "serviceGamesWon": { "home": 14, "away": 11 },
+        "returnGamesWon": { "home": 3, "away": 2 }
+      },
+      {
+        "scope": "set1",
+        "aces": { "home": 3, "away": 2 },
+        "doubleFaults": { "home": 1, "away": 1 },
+        "firstServePercent": { "home": 70, "away": 60 },
+        "totalPointsWon": { "home": 38, "away": 30 }
+      },
+      {
+        "scope": "set2",
+        "aces": { "home": 2, "away": 1 },
+        "doubleFaults": { "home": 0, "away": 2 },
+        "firstServePercent": { "home": 65, "away": 58 },
+        "totalPointsWon": { "home": 35, "away": 32 }
+      }
+    ],
+    "count": 3
+  }
+}`}
             />
           </section>
 
