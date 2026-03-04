@@ -1006,7 +1006,7 @@ export default function DocsPage() {
           <section id="scores-api" className="mb-20 scroll-mt-20">
             <SectionHeading>Live Scores API</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-6">
-              Live game scores and status updates, refreshed every ~3 seconds. Soccer matches include rich in-match data: team statistics, match incidents (goals, cards, substitutions), and per-player ratings. Tennis matches include per-match and per-set statistics (aces, serve %, break points, winners, unforced errors).
+              Live game scores and status updates, refreshed every ~1-2 seconds during live games. Soccer matches include rich in-match data: team statistics, match incidents (goals, cards, substitutions), and per-player ratings. Tennis matches include per-match and per-set statistics (aces, serve %, break points, winners, unforced errors).
             </p>
 
             <SubHeading id="sub-scores-endpoints">Endpoints</SubHeading>
