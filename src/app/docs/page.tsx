@@ -1144,7 +1144,7 @@ export default function DocsPage() {
 
             <SubHeading id="sub-scores-tennis">Tennis example</SubHeading>
             <p className="text-sm text-zinc-500 font-sans mb-4">
-              Tennis events include <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">tennisDetail</code> (set scores, current game score, serving indicator) and <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">tennisStats</code> (per-match and per-set statistics) when available. Stats update every ~30 seconds during live matches.
+              Tennis events include <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">tennisDetail</code> (set scores, current game score, serving indicator) and <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">tennisStats</code> (per-match and per-set statistics) when available.
             </p>
             <CodeBlock
               language="json"
@@ -1330,7 +1330,7 @@ export default function DocsPage() {
 
             <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5 mb-6">
               <p className="text-sm text-zinc-400 font-sans leading-relaxed">
-                <strong className="text-zinc-300">Live match data</strong> — Sourced from FlashScore, updated every ~30 seconds. Soccer includes team stats, match incidents (goals, cards, substitutions), and per-player ratings — extended stats (xG, big chances, shot breakdowns) are available for top leagues. Tennis includes per-match and per-set statistics (aces, serve %, break points, winners, unforced errors). When matches complete, all data is automatically archived to the{" "}
+                <strong className="text-zinc-300">Live match data</strong> — Soccer includes team stats, match incidents (goals, cards, substitutions), and per-player ratings — extended stats (xG, big chances, shot breakdowns) are available for top leagues. Tennis includes per-match and per-set statistics (aces, serve %, break points, winners, unforced errors). When matches complete, all data is automatically archived to the{" "}
                 <a href="#history-api" className="text-[#00FF88] hover:underline">Historical Data API</a>.
               </p>
             </div>
