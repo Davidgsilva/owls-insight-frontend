@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import { Copy, Check, MagnifyingGlass, ArrowUp } from "@phosphor-icons/react";
+import * as Tabs from "@radix-ui/react-tabs";
 
 // Navigation sections
 type SubItem = { id: string; label: string };
@@ -11,7 +12,6 @@ type Section = { id: string; label: string; subItems?: SubItem[]; keywords?: str
 const sections: Section[] = [
   { id: "getting-started", label: "Getting Started", subItems: [
     { id: "sub-quick-start", label: "Quick start" },
-    { id: "sub-health-check", label: "Health check" },
   ], keywords: ["base url", "curl", "api key", "setup"] },
   { id: "authentication", label: "Authentication", keywords: ["bearer", "header", "api key", "auth"] },
   { id: "odds-api", label: "Odds", subItems: [
@@ -33,23 +33,17 @@ const sections: Section[] = [
   ], keywords: ["props", "player", "points", "rebounds", "assists", "threes", "fanduel", "draftkings", "caesars", "betmgm", "bet365"] },
   { id: "scores-api", label: "Live Scores", subItems: [
     { id: "sub-scores-endpoints", label: "Endpoints" },
-    { id: "sub-scores-nba", label: "NBA example" },
-    { id: "sub-scores-soccer", label: "Soccer example" },
-    { id: "sub-scores-tennis", label: "Tennis example" },
-    { id: "sub-match-stats", label: "Match stats" },
-    { id: "sub-tennis-stats", label: "Tennis stats" },
-    { id: "sub-incidents", label: "Incidents" },
-  ], keywords: ["scores", "live", "soccer", "nba", "tennis", "aces", "serve", "break points", "possession", "goals", "cards", "xg", "expected goals", "incidents", "substitution"] },
+    { id: "sub-scores-nba", label: "Sport examples" },
+  ], keywords: ["scores", "live", "soccer", "nba", "tennis", "aces", "serve", "break points", "possession", "goals", "cards", "xg", "expected goals", "incidents", "substitution", "match stats", "tennis stats"] },
   { id: "stats-api", label: "Player Stats", subItems: [
     { id: "sub-stats-endpoints", label: "Endpoints" },
     { id: "sub-box-scores", label: "Box scores" },
     { id: "sub-rolling-averages", label: "Rolling averages" },
   ], keywords: ["stats", "box score", "averages", "l5", "l10", "l20", "h2h"] },
   { id: "prediction-markets", label: "Prediction Markets", subItems: [
-    { id: "sub-kalshi-endpoints", label: "Kalshi endpoints" },
-    { id: "sub-series-tickers", label: "Series tickers" },
-    { id: "sub-polymarket-endpoints", label: "Polymarket endpoints" },
-  ], keywords: ["kalshi", "polymarket", "prediction", "markets", "series", "cftc", "decentralized", "exchange"] },
+    { id: "sub-kalshi-endpoints", label: "Kalshi" },
+    { id: "sub-polymarket-endpoints", label: "Polymarket" },
+  ], keywords: ["kalshi", "polymarket", "prediction", "markets", "series", "cftc", "decentralized", "exchange", "series tickers"] },
   { id: "history-api", label: "Historical Data", subItems: [
     { id: "sub-history-endpoints", label: "Endpoints" },
     { id: "sub-history-tennis-stats", label: "Tennis stats" },
@@ -59,20 +53,18 @@ const sections: Section[] = [
     { id: "sub-ws-events", label: "Events" },
     { id: "sub-ws-props", label: "Props streaming" },
   ], keywords: ["websocket", "ws", "socket", "streaming", "live", "subscribe", "events", "real-time"] },
-  { id: "realtime-api", label: "Real-Time Odds", subItems: [
+  { id: "realtime-api", label: "Real-Time Odds (Beta)", subItems: [
     { id: "sub-realtime-endpoints", label: "Endpoints" },
     { id: "sub-realtime-parameters", label: "Parameters" },
     { id: "sub-realtime-ws", label: "WebSocket event" },
   ], keywords: ["realtime", "real-time", "pinnacle", "live odds", "fast", "low latency"] },
-  { id: "usage-api", label: "Usage", keywords: ["usage", "dashboard", "requests"] },
   { id: "rate-limits", label: "Rate Limits", subItems: [
     { id: "sub-tier-features", label: "Tier features" },
   ], keywords: ["rate limit", "tier", "bench", "rookie", "mvp", "pricing", "price", "connections"] },
-  { id: "sportsbooks", label: "Sportsbooks", keywords: ["sportsbook", "pinnacle", "fanduel", "draftkings", "betmgm", "bet365", "caesars", "kalshi", "betonline", "polymarket", "1xbet", "sharp", "retail", "exchange"] },
-  { id: "coverage", label: "Coverage", subItems: [
+  { id: "coverage", label: "Sportsbooks & Coverage", subItems: [
     { id: "sub-game-odds-coverage", label: "Game odds" },
     { id: "sub-props-coverage", label: "Player props" },
-  ], keywords: ["coverage", "sports", "books", "sportsbooks", "availability", "mma", "ufc", "betonline"] },
+  ], keywords: ["coverage", "sports", "books", "sportsbooks", "availability", "mma", "ufc", "betonline", "pinnacle", "fanduel", "draftkings", "betmgm", "bet365", "caesars", "kalshi", "polymarket", "1xbet", "sharp", "retail", "exchange"] },
   { id: "errors", label: "Errors", keywords: ["error", "status code", "401", "403", "429", "500"] },
 ];
 
@@ -114,6 +106,57 @@ function CodeBlock({ code, language = "json" }: { code: string; language?: strin
       <pre className="p-4 overflow-x-auto text-[13px] leading-relaxed font-mono text-zinc-400">
         <code>{code}</code>
       </pre>
+    </div>
+  );
+}
+
+function CollapsibleCodeBlock({ code, language = "json", label = "response" }: { code: string; language?: string; label?: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const lineCount = useMemo(() => code.split("\n").length, [code]);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="border-l-2 border-[#00FF88]/20">
+      <div className="flex items-center gap-3 px-4 py-2.5 bg-[#0a0a0a] border border-white/[0.06] rounded-t-lg">
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="flex items-center gap-3 flex-1 text-left hover:bg-white/[0.02] transition-colors"
+          aria-expanded={expanded}
+        >
+          <span className="text-zinc-600 text-xs shrink-0">{expanded ? "\u25BC" : "\u25B6"}</span>
+          <span className="text-[12px] font-mono text-zinc-500">
+            {expanded ? `Hide ${label}` : `Show ${label}`}
+            <span className="text-zinc-700 ml-2">&middot; {lineCount} lines</span>
+          </span>
+        </button>
+        <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-600">{language}</span>
+        <button
+          onClick={handleCopy}
+          className="text-zinc-600 hover:text-zinc-300 transition-colors p-1 -m-1"
+          aria-label={copied ? "Copied" : "Copy code"}
+        >
+          {copied ? <Check size={14} /> : <Copy size={14} />}
+        </button>
+      </div>
+      <div
+        className="grid transition-[grid-template-rows] duration-300 ease-in-out"
+        style={{ gridTemplateRows: expanded ? "1fr" : "0fr" }}
+      >
+        <div className="overflow-hidden">
+          <div className="bg-[#0a0a0a] border border-t-0 border-white/[0.06] rounded-b-lg">
+            <pre className="p-4 overflow-x-auto text-[13px] leading-relaxed font-mono text-zinc-400">
+              <code>{code}</code>
+            </pre>
+          </div>
+        </div>
+      </div>
+      {!expanded && <div className="h-0 border-b border-white/[0.06] rounded-b-lg" />}
     </div>
   );
 }
@@ -193,6 +236,29 @@ function ParamTable({
   );
 }
 
+function DocsTabs({ tabs, defaultValue, label }: { tabs: { value: string; label: string; content: React.ReactNode }[]; defaultValue?: string; label?: string }) {
+  return (
+    <Tabs.Root defaultValue={defaultValue || tabs[0]?.value}>
+      <Tabs.List aria-label={label} className="flex border-b border-white/[0.06] mb-6">
+        {tabs.map((tab) => (
+          <Tabs.Trigger
+            key={tab.value}
+            value={tab.value}
+            className="px-4 py-2.5 font-mono text-[12px] uppercase tracking-wider text-zinc-600 hover:text-zinc-300 transition-colors border-b-2 border-transparent data-[state=active]:text-white data-[state=active]:border-[#00FF88]"
+          >
+            {tab.label}
+          </Tabs.Trigger>
+        ))}
+      </Tabs.List>
+      {tabs.map((tab) => (
+        <Tabs.Content key={tab.value} value={tab.value} forceMount className="data-[state=inactive]:hidden">
+          {tab.content}
+        </Tabs.Content>
+      ))}
+    </Tabs.Root>
+  );
+}
+
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
     <h2 className="text-xl font-mono font-bold text-white mb-1 tracking-tight">
@@ -264,7 +330,7 @@ export default function DocsPage() {
     }).slice(0, 8);
   }, [searchQuery]);
 
-  // Track active section on scroll (sections + sub-items)
+  // Track active section on scroll (sections + sub-items) + URL hash sync
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -274,6 +340,8 @@ export default function DocsPage() {
             // Map sub-item IDs to parent section
             const parentId = subItemToParent[id];
             setActiveSection(parentId || id);
+            // Sync URL hash for deep linking
+            window.history.replaceState(null, "", `#${id}`);
           }
         }
       },
@@ -288,6 +356,17 @@ export default function DocsPage() {
           const subEl = document.getElementById(sub.id);
           if (subEl) observer.observe(subEl);
         }
+      }
+    }
+
+    // On mount: scroll to hash target and set active section
+    const hash = window.location.hash.slice(1);
+    if (hash) {
+      const el = document.getElementById(hash);
+      if (el) {
+        setTimeout(() => el.scrollIntoView({ behavior: "smooth" }), 100);
+        const parentId = subItemToParent[hash];
+        setActiveSection(parentId || hash);
       }
     }
 
@@ -418,7 +497,7 @@ export default function DocsPage() {
               API Reference
             </h1>
             <p className="text-zinc-500 text-sm font-sans leading-relaxed mb-10">
-              REST API and WebSocket streaming for live sports and esports betting odds from major sportsbooks, prediction markets (Kalshi and Polymarket), and 1xBet. WebSocket updates are pushed on change — Pinnacle every ~1s, FanDuel/DraftKings/Kalshi every ~3s, BetMGM/Bet365/Caesars every ~30s, live scores every ~1.6s.
+              REST API and WebSocket streaming for live sports and esports betting odds from 10 sportsbooks, prediction markets (Kalshi and Polymarket), and 1xBet.
             </p>
 
             <div className="rounded-lg bg-[#111113] border border-white/[0.06] px-5 py-4 mb-10">
@@ -436,15 +515,6 @@ export default function DocsPage() {
               code={`curl -H "Authorization: Bearer YOUR_API_KEY" \\
   https://api.owlsinsight.com/api/v1/nba/odds`}
             />
-
-            <SubHeading id="sub-health-check">Health check</SubHeading>
-            <p className="text-sm text-zinc-500 font-sans mb-4">
-              No authentication required.
-            </p>
-            <CodeBlock
-              language="bash"
-              code={`curl https://api.owlsinsight.com/api/health`}
-            />
           </section>
 
           {/* ─── Authentication ─────────────────────────────────────── */}
@@ -460,10 +530,6 @@ export default function DocsPage() {
           {/* ─── Odds API ──────────────────────────────────────────── */}
           <section id="odds-api" className="mb-20 scroll-mt-20">
             <SectionHeading>Odds API</SectionHeading>
-            <p className="text-sm text-zinc-500 font-sans mb-6">
-              Live betting odds from Pinnacle, FanDuel, DraftKings, BetMGM, Bet365, Caesars, BetOnline, Kalshi, Polymarket, and 1xBet. Pinnacle refreshes every ~1s, FanDuel/DraftKings/Kalshi every ~3s, BetMGM/Bet365/Caesars every ~30s, BetOnline every ~2min.
-            </p>
-
             <SubHeading id="sub-odds-endpoints">Endpoints</SubHeading>
             <div className="mb-8">
               <Endpoint method="GET" path="/api/v1/{sport}/odds" description="All odds for a sport (spreads, moneylines, totals)" />
@@ -482,56 +548,22 @@ export default function DocsPage() {
             </div>
 
             <SubHeading id="sub-odds-sportsbooks">Sportsbooks</SubHeading>
-            <div className="overflow-x-auto mb-8">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-white/[0.08]">
-                    <th className="text-left py-2 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Key</th>
-                    <th className="text-left py-2 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Name</th>
-                    <th className="text-left py-2 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Notes</th>
-                  </tr>
-                </thead>
-                <tbody className="text-[13px]">
-                  {[
-                    { key: "pinnacle", name: "Pinnacle", notes: "Sharp book, real-time sharp odds (MVP)" },
-                    { key: "fanduel", name: "FanDuel", notes: "US retail leader, full props" },
-                    { key: "draftkings", name: "DraftKings", notes: "Full market coverage" },
-                    { key: "betmgm", name: "BetMGM", notes: "Vegas-backed lines" },
-                    { key: "bet365", name: "Bet365", notes: "Global market leader" },
-                    { key: "caesars", name: "Caesars", notes: "Casino heritage" },
-                    { key: "kalshi", name: "Kalshi", notes: "CFTC-regulated prediction exchange" },
-                    { key: "polymarket", name: "Polymarket", notes: "Decentralized prediction market" },
-                    { key: "betonline", name: "BetOnline", notes: "MMA/UFC moneylines (85+ fights across 10+ promotions)" },
-                    { key: "1xbet", name: "1xBet", notes: "CS2 esports + Soccer + MLB, live + prematch odds" },
-                  ].map((book) => (
-                    <tr key={book.key} className="border-b border-white/[0.04]">
-                      <td className="py-2.5 pr-6 font-mono text-white">{book.key}</td>
-                      <td className="py-2.5 pr-6 text-zinc-300">{book.name}</td>
-                      <td className="py-2.5 text-zinc-500">{book.notes}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {["pinnacle", "fanduel", "draftkings", "betmgm", "bet365", "caesars", "kalshi", "polymarket", "betonline", "1xbet"].map((book) => (
+                <code key={book} className="text-[13px] font-mono text-zinc-300 bg-white/[0.04] px-2.5 py-1 rounded">
+                  {book}
+                </code>
+              ))}
             </div>
-
-            <div className="rounded-lg bg-[#111113] border border-emerald-500/15 p-5 mb-10">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="w-2 h-2 rounded-full bg-[#00FF88] animate-pulse" />
-                <p className="font-mono text-sm font-semibold text-white">Fast Pinnacle Odds</p>
-                <TierBadge tier="Rookie+" />
-              </div>
-              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
-                Pinnacle odds are refreshed every ~3 seconds for moneylines, spreads, and totals across all sports.
-                Rookie and MVP tiers receive Pinnacle data via REST polling (~3s). MVP and Hall of Fame tiers also receive real-time Pinnacle odds via WebSocket. Bench tier receives Pinnacle data on a slower refresh cycle.
-                Use <code className="text-[13px] font-mono text-zinc-300">?alternates=true</code> to include alternate spread and total lines on Pinnacle outcomes (Rookie+ only).
-              </p>
-            </div>
+            <p className="text-sm text-zinc-500 font-sans mb-8">
+              See <a href="#coverage" className="text-[#00FF88] hover:underline">Sportsbooks &amp; Coverage</a> for per-sport availability and details.
+            </p>
 
             <SubHeading id="sub-odds-parameters">Parameters</SubHeading>
             <ParamTable
               params={[
                 { name: "books", type: "string", required: false, description: "Comma-separated list of sportsbooks to include" },
-                { name: "alternates", type: "boolean", required: false, description: "Include Pinnacle alternate spread/total lines (Rookie+ only)" },
+                { name: "alternates", type: "boolean", required: false, description: "Include Pinnacle alternate spread/total lines" },
                 { name: "league", type: "string", required: false, description: "Filter by league name — substring match, case-insensitive (soccer, tennis, and basketball)" },
               ]}
             />
@@ -544,7 +576,7 @@ export default function DocsPage() {
             />
 
             <SubHeading>Response</SubHeading>
-            <CodeBlock
+            <CollapsibleCodeBlock
               language="json"
               code={`{
   "success": true,
@@ -641,8 +673,8 @@ export default function DocsPage() {
             />
 
             <p className="text-xs text-zinc-600 font-sans mt-3 leading-relaxed">
-              The <code className="text-[11px] font-mono text-zinc-500">alternateLines</code> array on spread/total outcomes is only present when <code className="text-[11px] font-mono text-zinc-500">?alternates=true</code> is passed by a Rookie+ tier user. Currently available for Pinnacle.
-              The <code className="text-[11px] font-mono text-zinc-500">alternates</code> field in <code className="text-[11px] font-mono text-zinc-500">meta</code> is always present in responses — it returns <code className="text-[11px] font-mono text-zinc-500">false</code> when the parameter is omitted or the API key&apos;s tier is below Rookie.
+              The <code className="text-[11px] font-mono text-zinc-500">alternateLines</code> array on spread/total outcomes is only present when <code className="text-[11px] font-mono text-zinc-500">?alternates=true</code> is passed. Currently available for Pinnacle.
+              The <code className="text-[11px] font-mono text-zinc-500">alternates</code> field in <code className="text-[11px] font-mono text-zinc-500">meta</code> is always present in responses — it returns <code className="text-[11px] font-mono text-zinc-500">false</code> when the parameter is omitted.
               The <code className="text-[11px] font-mono text-zinc-500">limits</code> array is currently provided for Pinnacle markets only, reflecting their published maximum stake limits.
               A market may include <code className="text-[11px] font-mono text-zinc-500">suspended: true</code> when the market is temporarily closed (e.g., during a goal review in soccer). This field is omitted when the market is open.
               Soccer events include a <code className="text-[11px] font-mono text-zinc-500">league</code> field (e.g., &quot;England - Premier League&quot;) and <code className="text-[11px] font-mono text-zinc-500">country_code</code> (ISO 3166-1 alpha-2, e.g., &quot;GB&quot;) for league identification and flag display.
@@ -778,12 +810,6 @@ export default function DocsPage() {
               </table>
             </div>
 
-            <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5 mb-8">
-              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
-                <strong className="text-white">Source:</strong> Pinnacle only. Odds are refreshed every ~15 seconds. Markets include moneylines, spreads, totals, and alternate lines.
-                Completed games are automatically removed within one poll cycle.
-              </p>
-            </div>
           </section>
 
           {/* ─── Esports API ───────────────────────────────────────── */}
@@ -808,7 +834,7 @@ export default function DocsPage() {
             />
 
             <SubHeading>Response</SubHeading>
-            <CodeBlock
+            <CollapsibleCodeBlock
               language="json"
               code={`{
   "success": true,
@@ -929,40 +955,26 @@ export default function DocsPage() {
               </table>
             </div>
 
-            <div className="rounded-lg bg-[#111113] border border-purple-500/15 p-5 mt-8">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
-                <p className="font-mono text-sm font-semibold text-white">Live via WebSocket</p>
-              </div>
-              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
-                For live CS2 odds, subscribe to the <code className="text-[13px] font-mono text-zinc-300">esports-update</code> WebSocket event.
-                Opt in by emitting <code className="text-[13px] font-mono text-zinc-300">subscribe</code> with <code className="text-[13px] font-mono text-zinc-300">{`{ esports: true }`}</code>.
-                Includes both live and prematch games. Updates are pushed every ~3 seconds.
-              </p>
-            </div>
           </section>
 
           {/* ─── Props API ─────────────────────────────────────────── */}
           <section id="props-api" className="mb-20 scroll-mt-20">
             <SectionHeading>Player Props API</SectionHeading>
-            <p className="text-sm text-zinc-500 font-sans mb-2">
+            <p className="text-sm text-zinc-500 font-sans mb-6">
               Player prop betting lines from multiple sportsbooks with alternate lines support.
-            </p>
-            <p className="text-sm mb-6">
-              <TierBadge tier="Rookie+" />
             </p>
 
             <SubHeading id="sub-props-endpoints">Endpoints</SubHeading>
             <div className="mb-8">
-              <Endpoint method="GET" path="/api/v1/{sport}/props" description="Aggregated player props from all books (use ?books=pinnacle to filter)" tier="Rookie+" />
-              <Endpoint method="GET" path="/api/v1/{sport}/props/fanduel" description="FanDuel player props only" tier="Rookie+" />
-              <Endpoint method="GET" path="/api/v1/{sport}/props/draftkings" description="DraftKings player props only" tier="Rookie+" />
-              <Endpoint method="GET" path="/api/v1/{sport}/props/caesars" description="Caesars player props only" tier="Rookie+" />
-              <Endpoint method="GET" path="/api/v1/{sport}/props/betmgm" description="BetMGM player props only (live games)" tier="Rookie+" />
-              <Endpoint method="GET" path="/api/v1/{sport}/props/bet365" description="Bet365 player props only" tier="Rookie+" />
-              <Endpoint method="GET" path="/api/v1/{sport}/props/history" description="Historical prop line movements" tier="Rookie+" />
-              <Endpoint method="GET" path="/api/v1/props/{book}/stats" description="Per-book props cache statistics (bet365, fanduel, draftkings, caesars, betmgm)" tier="Rookie+" />
-              <Endpoint method="GET" path="/api/v1/props/stats" description="Aggregated props cache statistics" tier="Rookie+" />
+              <Endpoint method="GET" path="/api/v1/{sport}/props" description="Aggregated player props from all books (use ?books=pinnacle to filter)" />
+              <Endpoint method="GET" path="/api/v1/{sport}/props/fanduel" description="FanDuel player props only" />
+              <Endpoint method="GET" path="/api/v1/{sport}/props/draftkings" description="DraftKings player props only" />
+              <Endpoint method="GET" path="/api/v1/{sport}/props/caesars" description="Caesars player props only" />
+              <Endpoint method="GET" path="/api/v1/{sport}/props/betmgm" description="BetMGM player props only (live games)" />
+              <Endpoint method="GET" path="/api/v1/{sport}/props/bet365" description="Bet365 player props only" />
+              <Endpoint method="GET" path="/api/v1/{sport}/props/history" description="Historical prop line movements" />
+              <Endpoint method="GET" path="/api/v1/props/{book}/stats" description="Per-book props cache statistics (bet365, fanduel, draftkings, caesars, betmgm)" />
+              <Endpoint method="GET" path="/api/v1/props/stats" description="Aggregated props cache statistics" />
             </div>
 
             <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5 mb-8">
@@ -1004,7 +1016,7 @@ export default function DocsPage() {
             </div>
 
             <SubHeading>Response</SubHeading>
-            <CodeBlock
+            <CollapsibleCodeBlock
               language="json"
               code={`{
   "success": true,
@@ -1100,10 +1112,19 @@ export default function DocsPage() {
 }`}
             />
 
-            <SubHeading id="sub-scores-nba">NBA example</SubHeading>
-            <CodeBlock
-              language="json"
-              code={`{
+            <SubHeading id="sub-scores-nba">Sport examples</SubHeading>
+            <DocsTabs
+              defaultValue="nba"
+              label="Sport examples"
+              tabs={[
+                {
+                  value: "nba",
+                  label: "NBA",
+                  content: (
+                    <>
+                      <CollapsibleCodeBlock
+                        language="json"
+                        code={`{
   "id": "nba:BOS@LAL-20260131",
   "sport": "nba",
   "name": "Boston Celtics at Los Angeles Lakers",
@@ -1126,15 +1147,21 @@ export default function DocsPage() {
   },
   "lastUpdated": "2026-01-31T20:15:00.000Z"
 }`}
-            />
-
-            <SubHeading id="sub-scores-soccer">Soccer example</SubHeading>
-            <p className="text-sm text-zinc-500 font-sans mb-4">
-              Soccer events include <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">matchStats</code>, <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">incidents</code>, and <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">playerStats</code> when available. Stats populate for top leagues (EPL, Champions League, La Liga, etc.) and update every ~30 seconds.
-            </p>
-            <CodeBlock
-              language="json"
-              code={`{
+                      />
+                    </>
+                  ),
+                },
+                {
+                  value: "soccer",
+                  label: "Soccer",
+                  content: (
+                    <>
+                      <p id="sub-scores-soccer" className="text-sm text-zinc-500 font-sans mb-4 scroll-mt-20">
+                        Soccer events include <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">matchStats</code>, <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">incidents</code>, and <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">playerStats</code> when available. Stats populate for top leagues (EPL, Champions League, La Liga, etc.) and update every ~30 seconds.
+                      </p>
+                      <CollapsibleCodeBlock
+                        language="json"
+                        code={`{
   "id": "soccer:Galatasaray@Juventus-20260218",
   "sport": "soccer",
   "name": "Galatasaray at Juventus",
@@ -1206,15 +1233,93 @@ export default function DocsPage() {
   ],
   "lastUpdated": "2026-02-18T20:42:00.000Z"
 }`}
-            />
+                      />
 
-            <SubHeading id="sub-scores-tennis">Tennis example</SubHeading>
-            <p className="text-sm text-zinc-500 font-sans mb-4">
-              Tennis events include <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">tennisDetail</code> (set scores, current game score, serving indicator) and <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">tennisStats</code> (per-match and per-set statistics) when available.
-            </p>
-            <CodeBlock
-              language="json"
-              code={`{
+                      <h4 id="sub-match-stats" className="text-sm font-mono font-semibold text-zinc-300 mt-10 mb-3 uppercase tracking-wider scroll-mt-20">Match stats fields</h4>
+                      <p className="text-sm text-zinc-500 font-sans mb-4">
+                        All stats use the <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">{`{ "home": number, "away": number }`}</code> format. Fields are <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">null</code> when not available for a given match.
+                      </p>
+                      <div className="overflow-x-auto mb-8">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b border-white/[0.08]">
+                              <th className="text-left py-2 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Field</th>
+                              <th className="text-left py-2 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Description</th>
+                            </tr>
+                          </thead>
+                          <tbody className="text-[13px]">
+                            {[
+                              { field: "possession", desc: "Ball possession %" },
+                              { field: "shots", desc: "Total shots" },
+                              { field: "shotsOnTarget", desc: "Shots on target" },
+                              { field: "shotsOffTarget", desc: "Shots off target" },
+                              { field: "blockedShots", desc: "Blocked shots" },
+                              { field: "shotsInsideBox", desc: "Shots inside the box" },
+                              { field: "shotsOutsideBox", desc: "Shots outside the box" },
+                              { field: "corners", desc: "Corner kicks" },
+                              { field: "fouls", desc: "Fouls committed" },
+                              { field: "yellowCards", desc: "Yellow cards" },
+                              { field: "redCards", desc: "Red cards" },
+                              { field: "offsides", desc: "Offsides" },
+                              { field: "expectedGoals", desc: "Expected goals (xG)" },
+                              { field: "bigChances", desc: "Big chances created" },
+                              { field: "goalkeeperSaves", desc: "Goalkeeper saves" },
+                              { field: "passes", desc: "Pass accuracy (percentage)" },
+                              { field: "tackles", desc: "Tackles" },
+                              { field: "freeKicks", desc: "Free kicks" },
+                              { field: "throwIns", desc: "Throw-ins" },
+                            ].map((row) => (
+                              <tr key={row.field} className="border-b border-white/[0.04]">
+                                <td className="py-2.5 pr-6 font-mono text-white whitespace-nowrap">{row.field}</td>
+                                <td className="py-2.5 text-zinc-400">{row.desc}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <h4 id="sub-incidents" className="text-sm font-mono font-semibold text-zinc-300 mt-10 mb-3 uppercase tracking-wider scroll-mt-20">Incident types</h4>
+                      <div className="overflow-x-auto mb-8">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b border-white/[0.08]">
+                              <th className="text-left py-2 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Type</th>
+                              <th className="text-left py-2 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Extra fields</th>
+                              <th className="text-left py-2 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Description</th>
+                            </tr>
+                          </thead>
+                          <tbody className="text-[13px]">
+                            {[
+                              { type: "goal", extra: "assistPlayerName?", desc: "Goal scored (includes assist when available)" },
+                              { type: "penalty", extra: "assistPlayerName?", desc: "Penalty goal" },
+                              { type: "ownGoal", extra: "\u2014", desc: "Own goal" },
+                              { type: "yellowCard", extra: "\u2014", desc: "Yellow card" },
+                              { type: "redCard", extra: "\u2014", desc: "Red card" },
+                              { type: "substitution", extra: "playerOut", desc: "Substitution (playerName = in, playerOut = replaced)" },
+                            ].map((row) => (
+                              <tr key={row.type} className="border-b border-white/[0.04]">
+                                <td className="py-2.5 pr-6 font-mono text-white whitespace-nowrap">{row.type}</td>
+                                <td className="py-2.5 pr-6 font-mono text-zinc-500 whitespace-nowrap">{row.extra}</td>
+                                <td className="py-2.5 text-zinc-400">{row.desc}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </>
+                  ),
+                },
+                {
+                  value: "tennis",
+                  label: "Tennis",
+                  content: (
+                    <>
+                      <p id="sub-scores-tennis" className="text-sm text-zinc-500 font-sans mb-4 scroll-mt-20">
+                        Tennis events include <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">tennisDetail</code> (set scores, current game score, serving indicator) and <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">tennisStats</code> (per-match and per-set statistics) when available.
+                      </p>
+                      <CollapsibleCodeBlock
+                        language="json"
+                        code={`{
   "id": "tennis:Rokusek@Vickery-20260304",
   "sport": "tennis",
   "name": "Vickery S. at Rokusek S.",
@@ -1278,121 +1383,54 @@ export default function DocsPage() {
   "sourceMatchId": "WnroroiU",
   "lastUpdated": "2026-03-04T01:45:00.000Z"
 }`}
+                      />
+
+                      <h4 id="sub-tennis-stats" className="text-sm font-mono font-semibold text-zinc-300 mt-10 mb-3 uppercase tracking-wider scroll-mt-20">Tennis stats fields</h4>
+                      <p className="text-sm text-zinc-500 font-sans mb-4">
+                        The <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">tennisStats</code> object contains <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">match</code> (full-match totals) and an optional <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">sets</code> array with per-set breakdowns. Per-set objects include the same stat fields as the match object. All values use <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">{`{ "home": number, "away": number }`}</code> format and are <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">null</code> when unavailable.
+                      </p>
+                      <div className="overflow-x-auto mb-8">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b border-white/[0.08]">
+                              <th className="text-left py-2 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Field</th>
+                              <th className="text-left py-2 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Description</th>
+                            </tr>
+                          </thead>
+                          <tbody className="text-[13px]">
+                            {[
+                              { field: "aces", desc: "Aces served" },
+                              { field: "doubleFaults", desc: "Double faults" },
+                              { field: "firstServePercent", desc: "1st serve percentage" },
+                              { field: "firstServePointsWon", desc: "1st serve points won %" },
+                              { field: "secondServePointsWon", desc: "2nd serve points won %" },
+                              { field: "breakPointsSaved", desc: "Break points saved %" },
+                              { field: "firstReturnPointsWon", desc: "1st return points won %" },
+                              { field: "secondReturnPointsWon", desc: "2nd return points won %" },
+                              { field: "breakPointsConverted", desc: "Break points converted %" },
+                              { field: "winners", desc: "Winners hit" },
+                              { field: "unforcedErrors", desc: "Unforced errors" },
+                              { field: "netPointsWon", desc: "Net points won" },
+                              { field: "servicePointsWon", desc: "Service points won" },
+                              { field: "returnPointsWon", desc: "Return points won" },
+                              { field: "totalPointsWon", desc: "Total points won" },
+                              { field: "serviceGamesWon", desc: "Service games won" },
+                              { field: "returnGamesWon", desc: "Return games won" },
+                              { field: "totalGamesWon", desc: "Total games won" },
+                            ].map((row) => (
+                              <tr key={row.field} className="border-b border-white/[0.04]">
+                                <td className="py-2.5 pr-6 font-mono text-white whitespace-nowrap">{row.field}</td>
+                                <td className="py-2.5 text-zinc-400">{row.desc}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </>
+                  ),
+                },
+              ]}
             />
-
-            <SubHeading id="sub-tennis-stats">Tennis stats fields</SubHeading>
-            <p className="text-sm text-zinc-500 font-sans mb-4">
-              The <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">tennisStats</code> object contains <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">match</code> (full-match totals) and an optional <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">sets</code> array with per-set breakdowns. Per-set objects include the same stat fields as the match object. All values use <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">{`{ "home": number, "away": number }`}</code> format and are <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">null</code> when unavailable.
-            </p>
-            <div className="overflow-x-auto mb-8">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-white/[0.08]">
-                    <th className="text-left py-2 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Field</th>
-                    <th className="text-left py-2 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Description</th>
-                  </tr>
-                </thead>
-                <tbody className="text-[13px]">
-                  {[
-                    { field: "aces", desc: "Aces served" },
-                    { field: "doubleFaults", desc: "Double faults" },
-                    { field: "firstServePercent", desc: "1st serve percentage" },
-                    { field: "firstServePointsWon", desc: "1st serve points won %" },
-                    { field: "secondServePointsWon", desc: "2nd serve points won %" },
-                    { field: "breakPointsSaved", desc: "Break points saved %" },
-                    { field: "firstReturnPointsWon", desc: "1st return points won %" },
-                    { field: "secondReturnPointsWon", desc: "2nd return points won %" },
-                    { field: "breakPointsConverted", desc: "Break points converted %" },
-                    { field: "winners", desc: "Winners hit" },
-                    { field: "unforcedErrors", desc: "Unforced errors" },
-                    { field: "netPointsWon", desc: "Net points won" },
-                    { field: "servicePointsWon", desc: "Service points won" },
-                    { field: "returnPointsWon", desc: "Return points won" },
-                    { field: "totalPointsWon", desc: "Total points won" },
-                    { field: "serviceGamesWon", desc: "Service games won" },
-                    { field: "returnGamesWon", desc: "Return games won" },
-                    { field: "totalGamesWon", desc: "Total games won" },
-                  ].map((row) => (
-                    <tr key={row.field} className="border-b border-white/[0.04]">
-                      <td className="py-2.5 pr-6 font-mono text-white whitespace-nowrap">{row.field}</td>
-                      <td className="py-2.5 text-zinc-400">{row.desc}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <SubHeading id="sub-match-stats">Match stats fields</SubHeading>
-            <p className="text-sm text-zinc-500 font-sans mb-4">
-              All stats use the <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">{`{ "home": number, "away": number }`}</code> format. Fields are <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">null</code> when not available for a given match.
-            </p>
-            <div className="overflow-x-auto mb-8">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-white/[0.08]">
-                    <th className="text-left py-2 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Field</th>
-                    <th className="text-left py-2 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Description</th>
-                  </tr>
-                </thead>
-                <tbody className="text-[13px]">
-                  {[
-                    { field: "possession", desc: "Ball possession %" },
-                    { field: "shots", desc: "Total shots" },
-                    { field: "shotsOnTarget", desc: "Shots on target" },
-                    { field: "shotsOffTarget", desc: "Shots off target" },
-                    { field: "blockedShots", desc: "Blocked shots" },
-                    { field: "shotsInsideBox", desc: "Shots inside the box" },
-                    { field: "shotsOutsideBox", desc: "Shots outside the box" },
-                    { field: "corners", desc: "Corner kicks" },
-                    { field: "fouls", desc: "Fouls committed" },
-                    { field: "yellowCards", desc: "Yellow cards" },
-                    { field: "redCards", desc: "Red cards" },
-                    { field: "offsides", desc: "Offsides" },
-                    { field: "expectedGoals", desc: "Expected goals (xG)" },
-                    { field: "bigChances", desc: "Big chances created" },
-                    { field: "goalkeeperSaves", desc: "Goalkeeper saves" },
-                    { field: "passes", desc: "Pass accuracy (percentage)" },
-                    { field: "tackles", desc: "Tackles" },
-                    { field: "freeKicks", desc: "Free kicks" },
-                    { field: "throwIns", desc: "Throw-ins" },
-                  ].map((row) => (
-                    <tr key={row.field} className="border-b border-white/[0.04]">
-                      <td className="py-2.5 pr-6 font-mono text-white whitespace-nowrap">{row.field}</td>
-                      <td className="py-2.5 text-zinc-400">{row.desc}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <SubHeading id="sub-incidents">Incident types</SubHeading>
-            <div className="overflow-x-auto mb-8">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-white/[0.08]">
-                    <th className="text-left py-2 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Type</th>
-                    <th className="text-left py-2 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Extra fields</th>
-                    <th className="text-left py-2 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Description</th>
-                  </tr>
-                </thead>
-                <tbody className="text-[13px]">
-                  {[
-                    { type: "goal", extra: "assistPlayerName?", desc: "Goal scored (includes assist when available)" },
-                    { type: "penalty", extra: "assistPlayerName?", desc: "Penalty goal" },
-                    { type: "ownGoal", extra: "—", desc: "Own goal" },
-                    { type: "yellowCard", extra: "—", desc: "Yellow card" },
-                    { type: "redCard", extra: "—", desc: "Red card" },
-                    { type: "substitution", extra: "playerOut", desc: "Substitution (playerName = in, playerOut = replaced)" },
-                  ].map((row) => (
-                    <tr key={row.type} className="border-b border-white/[0.04]">
-                      <td className="py-2.5 pr-6 font-mono text-white whitespace-nowrap">{row.type}</td>
-                      <td className="py-2.5 pr-6 font-mono text-zinc-500 whitespace-nowrap">{row.extra}</td>
-                      <td className="py-2.5 text-zinc-400">{row.desc}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
 
             <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5 mb-6">
               <p className="text-sm text-zinc-400 font-sans leading-relaxed">
@@ -1405,17 +1443,14 @@ export default function DocsPage() {
           {/* ─── Player Stats API ──────────────────────────────────── */}
           <section id="stats-api" className="mb-20 scroll-mt-20">
             <SectionHeading>Player Stats API</SectionHeading>
-            <p className="text-sm text-zinc-500 font-sans mb-2">
-              NBA box score data. Returns per-player statistics including points, rebounds, assists, shooting splits, and more for today&apos;s games. Box scores are currently NBA-only; rolling averages are available for all sports.
-            </p>
-            <p className="text-sm mb-6">
-              <TierBadge tier="Rookie+" />
+            <p className="text-sm text-zinc-500 font-sans mb-6">
+              Per-player statistics including points, rebounds, assists, shooting splits, and more for today&apos;s games. Rolling averages are available for all sports.
             </p>
 
             <SubHeading id="sub-stats-endpoints">Endpoints</SubHeading>
             <div className="mb-8">
-              <Endpoint method="GET" path="/api/v1/nba/stats" description="Box scores for today's NBA games (live and completed)" tier="Rookie+" />
-              <Endpoint method="GET" path="/api/v1/{sport}/stats/averages" description="Rolling averages (L5/L10/L20) with optional H2H filtering" tier="Rookie+" />
+              <Endpoint method="GET" path="/api/v1/nba/stats" description="Box scores for today's NBA games (live and completed)" />
+              <Endpoint method="GET" path="/api/v1/{sport}/stats/averages" description="Rolling averages (L5/L10/L20) with optional H2H filtering" />
             </div>
 
             <SubHeading id="sub-box-scores">Box scores parameters</SubHeading>
@@ -1439,7 +1474,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
             />
 
             <SubHeading>Response</SubHeading>
-            <CodeBlock
+            <CollapsibleCodeBlock
               language="json"
               code={`{
   "success": true,
@@ -1579,7 +1614,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
             />
 
             <SubHeading>Averages response</SubHeading>
-            <CodeBlock
+            <CollapsibleCodeBlock
               language="json"
               code={`{
   "success": true,
@@ -1697,7 +1732,15 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
               Kalshi also has dedicated endpoints for raw market data (order book depth, liquidity, settlement rules).
             </p>
 
-            <h3 className="text-lg font-mono font-semibold text-white mb-4 mt-10">Kalshi</h3>
+            <DocsTabs
+              defaultValue="kalshi"
+              label="Prediction market providers"
+              tabs={[
+                {
+                  value: "kalshi",
+                  label: "Kalshi",
+                  content: (
+                    <>
             <p className="text-sm text-zinc-500 font-sans mb-6">
               Raw prediction market data from Kalshi, a CFTC-regulated event contract exchange.
               Returns full market objects with 50+ fields including liquidity, open interest, volume,
@@ -1800,7 +1843,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
             />
 
             <SubHeading>Markets response</SubHeading>
-            <CodeBlock
+            <CollapsibleCodeBlock
               language="json"
               code={`{
   "series_ticker": "KXNBAGAME",
@@ -1843,7 +1886,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
             />
 
             <SubHeading>Series listing response</SubHeading>
-            <CodeBlock
+            <CollapsibleCodeBlock
               language="json"
               code={`{
   "sport_series": [
@@ -1900,7 +1943,14 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
               </table>
             </div>
 
-            <h3 className="text-lg font-mono font-semibold text-white mb-4 mt-14 pt-8 border-t border-white/[0.06]">Polymarket</h3>
+                    </>
+                  ),
+                },
+                {
+                  value: "polymarket",
+                  label: "Polymarket",
+                  content: (
+                    <>
             <p className="text-sm text-zinc-500 font-sans mb-6">
               Prediction market odds from Polymarket, the largest decentralized prediction market.
               Polymarket odds are included as a bookmaker in the standard odds response — no separate endpoint needed.
@@ -1935,7 +1985,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
             <p className="text-sm text-zinc-500 font-sans mb-4">
               Polymarket odds use the same format as all other bookmakers — American odds for moneylines, spreads, and totals:
             </p>
-            <CodeBlock
+            <CollapsibleCodeBlock
               language="json"
               code={`{
   "key": "polymarket",
@@ -1961,41 +2011,35 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
 }`}
             />
 
-            <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5 mt-8 mb-8">
-              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
-                <strong className="text-white">How it works:</strong> A dedicated worker polls Polymarket&apos;s Gamma REST API every 10 seconds.
-                Bid/ask probabilities from the CLOB order book are converted to American odds format
-                using the midpoint price. Data is merged into the standard odds response with moneylines, spreads, and totals.
-              </p>
-            </div>
-
             <SubHeading>Raw market data</SubHeading>
             <p className="text-sm text-zinc-500 font-sans mb-4 leading-relaxed">
               For raw Polymarket market data including condition IDs, token addresses, and order book info, use the dedicated endpoint:
             </p>
             <div className="mb-8">
-              <Endpoint method="GET" path="/api/v1/polymarket/{sport}/markets" description="Raw Polymarket market data (condition IDs, token addresses, order book info)" tier="Rookie+" />
+              <Endpoint method="GET" path="/api/v1/polymarket/{sport}/markets" description="Raw Polymarket market data (condition IDs, token addresses, order book info)" />
             </div>
+                    </>
+                  ),
+                },
+              ]}
+            />
           </section>
 
           {/* ─── Historical Data API ───────────────────────────────── */}
           <section id="history-api" className="mb-20 scroll-mt-20">
             <SectionHeading>Historical Data API</SectionHeading>
-            <p className="text-sm text-zinc-500 font-sans mb-2">
+            <p className="text-sm text-zinc-500 font-sans mb-6">
               Archived odds, props, player stats, and tennis match statistics for completed games. Data is archived automatically when games finish.
-            </p>
-            <p className="text-sm mb-6">
-              <TierBadge tier="MVP" />
             </p>
 
             <SubHeading id="sub-history-endpoints">Endpoints</SubHeading>
             <div className="mb-8">
-              <Endpoint method="GET" path="/api/v1/history/games" description="List archived games with filtering and pagination" tier="MVP" />
-              <Endpoint method="GET" path="/api/v1/history/odds" description="Historical odds snapshots for an archived game" tier="MVP" />
-              <Endpoint method="GET" path="/api/v1/history/props" description="Historical props snapshots for an archived game" tier="MVP" />
-              <Endpoint method="GET" path="/api/v1/history/stats" description="Historical player box scores for archived games" tier="MVP" />
-              <Endpoint method="GET" path="/api/v1/history/stats/averages" description="Rolling averages (L5/L10/L20) with optional H2H filtering" tier="Rookie+" />
-              <Endpoint method="GET" path="/api/v1/history/tennis-stats" description="Historical tennis match statistics (per-match and per-set)" tier="MVP" />
+              <Endpoint method="GET" path="/api/v1/history/games" description="List archived games with filtering and pagination" />
+              <Endpoint method="GET" path="/api/v1/history/odds" description="Historical odds snapshots for an archived game" />
+              <Endpoint method="GET" path="/api/v1/history/props" description="Historical props snapshots for an archived game" />
+              <Endpoint method="GET" path="/api/v1/history/stats" description="Historical player box scores for archived games" />
+              <Endpoint method="GET" path="/api/v1/history/stats/averages" description="Rolling averages (L5/L10/L20) with optional H2H filtering" />
+              <Endpoint method="GET" path="/api/v1/history/tennis-stats" description="Historical tennis match statistics (per-match and per-set)" />
             </div>
 
             <SubHeading>/history/games parameters</SubHeading>
@@ -2040,7 +2084,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
             />
 
             <SubHeading>Games response</SubHeading>
-            <CodeBlock
+            <CollapsibleCodeBlock
               language="json"
               code={`{
   "success": true,
@@ -2064,7 +2108,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
             />
 
             <SubHeading>Odds snapshots response</SubHeading>
-            <CodeBlock
+            <CollapsibleCodeBlock
               language="json"
               code={`{
   "success": true,
@@ -2090,7 +2134,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
             />
 
             <SubHeading>Props snapshots response</SubHeading>
-            <CodeBlock
+            <CollapsibleCodeBlock
               language="json"
               code={`{
   "success": true,
@@ -2146,7 +2190,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
             />
 
             <SubHeading>Stats response</SubHeading>
-            <CodeBlock
+            <CollapsibleCodeBlock
               language="json"
               code={`{
   "success": true,
@@ -2237,7 +2281,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
             <p className="text-sm text-zinc-500 font-sans mb-4">
               Returns a flat array of stat objects — one with <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">scope: &quot;match&quot;</code> for match totals, plus one per set (<code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">set1</code>, <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">set2</code>, etc.). Each stat field is <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">{`{ "home": number, "away": number }`}</code> or <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">null</code> when unavailable.
             </p>
-            <CodeBlock
+            <CollapsibleCodeBlock
               language="json"
               code={`{
   "success": true,
@@ -2284,11 +2328,8 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
           {/* ─── WebSocket API ─────────────────────────────────────── */}
           <section id="websocket" className="mb-20 scroll-mt-20">
             <SectionHeading>WebSocket API</SectionHeading>
-            <p className="text-sm text-zinc-500 font-sans mb-2">
-              Live streaming for odds, scores, and player props. Updates are pushed on change — no polling required, no message limits. Update frequency varies by source: Pinnacle every ~1s, FanDuel/DraftKings/Kalshi every ~3s, BetMGM/Bet365/Caesars every ~30s, live scores every ~1.6s, and player props on change.
-            </p>
-            <p className="text-sm mb-6">
-              <TierBadge tier="Rookie+" />
+            <p className="text-sm text-zinc-500 font-sans mb-6">
+              Live streaming for odds, scores, and player props. Updates are pushed on change — no polling required, no message limits.
             </p>
 
             <SubHeading id="sub-ws-connection">Connection</SubHeading>
@@ -2311,14 +2352,14 @@ socket.on("connect", () => {
               {[
                 { name: "odds-update", description: "Latest odds data, pushed on change — frequency varies by book (automatic)", tier: undefined },
                 { name: "scores-update", description: "Live scores, pushed every ~1.6s during live games (automatic)", tier: undefined },
-                { name: "player-props-update", description: "Pinnacle player props, streamed on change (requires subscribe-props)", tier: "Rookie+" },
-                { name: "fanduel-props-update", description: "FanDuel player props, streamed on change (requires subscribe-fanduel-props)", tier: "Rookie+" },
-                { name: "draftkings-props-update", description: "DraftKings player props, streamed on change (requires subscribe-draftkings-props)", tier: "Rookie+" },
-                { name: "bet365-props-update", description: "Bet365 player props, streamed on change (requires subscribe-bet365-props)", tier: "Rookie+" },
-                { name: "betmgm-props-update", description: "BetMGM player props (live games only), streamed on change (requires subscribe-betmgm-props)", tier: "Rookie+" },
-                { name: "caesars-props-update", description: "Caesars player props, streamed on change (requires subscribe-caesars-props)", tier: "Rookie+" },
+                { name: "player-props-update", description: "Pinnacle player props, streamed on change (requires subscribe-props)", tier: undefined },
+                { name: "fanduel-props-update", description: "FanDuel player props, streamed on change (requires subscribe-fanduel-props)", tier: undefined },
+                { name: "draftkings-props-update", description: "DraftKings player props, streamed on change (requires subscribe-draftkings-props)", tier: undefined },
+                { name: "bet365-props-update", description: "Bet365 player props, streamed on change (requires subscribe-bet365-props)", tier: undefined },
+                { name: "betmgm-props-update", description: "BetMGM player props (live games only), streamed on change (requires subscribe-betmgm-props)", tier: undefined },
+                { name: "caesars-props-update", description: "Caesars player props, streamed on change (requires subscribe-caesars-props)", tier: undefined },
                 { name: "esports-update", description: "CS2 live + prematch odds from 1xBet, streamed on change (requires esports: true)", tier: undefined },
-                { name: "pinnacle-realtime", description: "Real-time Pinnacle sharp odds, pushed every ~1 second", tier: "MVP" },
+                { name: "pinnacle-realtime", description: "Real-time Pinnacle sharp odds via dedicated feed", tier: undefined },
               ].map((event) => (
                 <div key={event.name} className="flex items-start gap-3 py-3 border-b border-white/[0.04]">
                   <code className="text-[13px] font-mono text-white shrink-0">{event.name}</code>
@@ -2353,7 +2394,7 @@ socket.on("scores-update", (data) => {
 socket.emit("subscribe", {
   sports: ["nba", "ncaab"],
   books: ["pinnacle", "fanduel", "draftkings", "betmgm", "bet365", "caesars"],
-  alternates: true  // Include Pinnacle alternate spread/total lines (Rookie+)
+  alternates: true  // Include Pinnacle alternate spread/total lines
 });`}
             />
 
@@ -2454,23 +2495,12 @@ socket.on("esports-update", (data) => {
 
           {/* ─── Real-Time Odds API ──────────────────────────────────── */}
           <section id="realtime-api" className="mb-20 scroll-mt-20">
-            <SectionHeading>Real-Time Odds</SectionHeading>
+            <SectionHeading>Real-Time Odds (Beta)</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-6">
-              Real-time sharp Pinnacle odds delivered via a dedicated low-latency feed. Available to MVP tier subscribers only.
+              Real-time sharp Pinnacle odds delivered via a dedicated low-latency feed.
               This is separate from the aggregated <code className="text-[13px] font-mono text-zinc-300">/odds</code> endpoint — it provides the fastest possible Pinnacle data with freshness metadata.
+              The <code className="text-[13px] font-mono text-zinc-300">meta.freshness</code> object in each response tells you exactly how old the data is.
             </p>
-
-            <div className="rounded-lg bg-[#111113] border border-purple-500/15 p-5 mb-8">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
-                <p className="font-mono text-sm font-semibold text-white">Beta</p>
-                <TierBadge tier="MVP" />
-              </div>
-              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
-                This feature is currently in beta. Data refreshes in 1-3 seconds with moneylines, spreads, and totals across all 9 sports.
-                The <code className="text-[13px] font-mono text-zinc-300">meta.freshness</code> object in each response tells you exactly how old the data is.
-              </p>
-            </div>
 
             <SubHeading id="sub-realtime-endpoints">Endpoints</SubHeading>
             <div className="overflow-x-auto mb-8">
@@ -2510,7 +2540,7 @@ socket.on("esports-update", (data) => {
             />
 
             <SubHeading>Response</SubHeading>
-            <CodeBlock
+            <CollapsibleCodeBlock
               language="json"
               code={`{
   "success": true,
@@ -2581,7 +2611,7 @@ socket.on("esports-update", (data) => {
 
             <SubHeading id="sub-realtime-ws">WebSocket event</SubHeading>
             <p className="text-sm text-zinc-500 font-sans mb-4">
-              MVP tier WebSocket connections automatically receive a <code className="text-[13px] font-mono text-zinc-300">pinnacle-realtime</code> event
+              WebSocket connections automatically receive a <code className="text-[13px] font-mono text-zinc-300">pinnacle-realtime</code> event
               with the full real-time payload whenever new data is available. No subscription required — it is pushed automatically.
             </p>
             <CodeBlock
@@ -2594,77 +2624,9 @@ socket.on("esports-update", (data) => {
 });`}
             />
 
-            <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5 mt-8">
-              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
-                <strong className="text-white">Non-MVP tiers:</strong> Bench and Rookie subscribers receive Pinnacle data through the standard
-                aggregated <code className="text-[13px] font-mono text-zinc-300">/odds</code> endpoint and <code className="text-[13px] font-mono text-zinc-300">odds-update</code> WebSocket event.
-                Requests to <code className="text-[13px] font-mono text-zinc-300">/realtime</code> will return a <code className="text-[13px] font-mono text-zinc-300">403</code> with an upgrade prompt.
-              </p>
-            </div>
           </section>
 
 
-          {/* ─── Usage API ─────────────────────────────────────────── */}
-          <section id="usage-api" className="mb-20 scroll-mt-20">
-            <SectionHeading>Usage API</SectionHeading>
-            <p className="text-sm text-zinc-500 font-sans mb-6">
-              Monitor API usage and rate limit status. Available via the dashboard (requires login session, not API key).
-            </p>
-
-            <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5 mb-8">
-              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
-                Usage data is accessed through the{" "}
-                <a href="/dashboard" className="text-[#00FF88] hover:underline">dashboard</a>{" "}
-                using your login session. It is not available via API key authentication.
-                To check your current rate limit status programmatically, inspect the{" "}
-                <code className="text-[13px] font-mono text-zinc-300">X-RateLimit-*</code>{" "}
-                headers returned with every API response.
-              </p>
-            </div>
-
-            <SubHeading>Endpoint</SubHeading>
-            <div className="mb-8">
-              <Endpoint method="GET" path="/api/v1/usage" description="API usage statistics (dashboard session required)" />
-            </div>
-
-            <SubHeading>Parameters</SubHeading>
-            <ParamTable
-              params={[
-                { name: "date", type: "string", required: false, description: "Date in YYYY-MM-DD format (defaults to today)" },
-                { name: "apiKeyId", type: "string", required: false, description: "Filter to a specific API key" },
-              ]}
-            />
-
-            <SubHeading>Response</SubHeading>
-            <CodeBlock
-              language="json"
-              code={`{
-  "success": true,
-  "date": "2026-02-01",
-  "totals": {
-    "totalRequests": 1234,
-    "successfulRequests": 1200,
-    "failedRequests": 34
-  },
-  "usage": [
-    {
-      "apiKeyId": "key_abc123",
-      "keyName": "Production",
-      "tier": "rookie",
-      "stats": {
-        "totalRequests": 1234,
-        "successfulRequests": 1200,
-        "failedRequests": 34
-      },
-      "currentRateLimits": {
-        "minute": { "count": 45, "limit": 120, "remaining": 75 },
-        "month": { "count": 12340, "limit": 75000, "remaining": 62660 }
-      }
-    }
-  ]
-}`}
-            />
-          </section>
 
           {/* ─── Rate Limits ───────────────────────────────────────── */}
           <section id="rate-limits" className="mb-20 scroll-mt-20">
@@ -2769,70 +2731,43 @@ X-RateLimit-Reset-Month: 2026-03-01T00:00:00.000Z`}
             />
           </section>
 
-          {/* ─── Sportsbooks ────────────────────────────────────────── */}
-          <section id="sportsbooks" className="mb-20 scroll-mt-20">
-            <SectionHeading>Supported Sportsbooks</SectionHeading>
+          {/* ─── Sportsbooks & Coverage ─────────────────────────────── */}
+          <section id="coverage" className="mb-20 scroll-mt-20">
+            <SectionHeading>Sportsbooks &amp; Coverage</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-6 leading-relaxed">
               We aggregate real-time odds from 10 sportsbooks — sharp lines from Pinnacle, US retail leaders, prediction exchanges (Kalshi and Polymarket), and international markets.
+              Coverage varies by sport, book, and market type.
             </p>
 
-            <div className="overflow-x-auto mb-6">
+            <div className="overflow-x-auto mb-10">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-white/[0.08]">
                     <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Book</th>
-                    <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Type</th>
-                    <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Sports</th>
-                    <th className="text-left py-2.5 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Description</th>
+                    <th className="text-left py-2.5 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Sports</th>
                   </tr>
                 </thead>
                 <tbody className="text-[13px]">
                   {[
-                    { book: "Pinnacle", type: "Sharp", sports: "NBA, NCAAB, NFL, NHL, NCAAF, NCAAH, MLB, Soccer, Tennis, Intl Basketball", desc: "Industry benchmark for sharp lines. Lowest margins, highest limits. Real-time sharp odds via dedicated feed (MVP)." },
-                    { book: "FanDuel", type: "US Retail", sports: "NBA, NCAAB, NFL, NHL, NCAAF, MLB, Soccer", desc: "Largest US sportsbook by market share. Full player props." },
-                    { book: "DraftKings", type: "US Retail", sports: "NBA, NCAAB, NFL, NHL, NCAAF, MLB, Soccer", desc: "Full market coverage across all major US sports." },
-                    { book: "BetMGM", type: "US Retail", sports: "NBA, NCAAB, NFL, NHL, NCAAF, Soccer", desc: "Vegas-backed lines from the MGM Resorts network." },
-                    { book: "Bet365", type: "International", sports: "NBA, NCAAB, NFL, NHL, NCAAF, Soccer", desc: "World\u2019s largest online sportsbook by volume." },
-                    { book: "Caesars", type: "US Retail", sports: "NBA, NCAAB, NFL, NHL, NCAAF, Soccer", desc: "Casino heritage with competitive NBA and NFL lines." },
-                    { book: "Kalshi", type: "Exchange", sports: "NBA, NCAAB, NFL, NHL, MLB, Soccer", desc: "CFTC-regulated prediction exchange. Event contracts, not traditional odds." },
-                    { book: "BetOnline", type: "International", sports: "MMA", desc: "MMA/UFC moneylines across UFC, RIZIN, ONE, Oktagon, and more." },
-                    { book: "1xBet", type: "International", sports: "CS2, Soccer, MLB", desc: "International book with deep esports and soccer coverage." },
-                    { book: "Polymarket", type: "Exchange", sports: "NBA, NCAAB, NFL, NHL, NCAAF, NCAAH, MLB, Soccer, Tennis", desc: "Largest decentralized prediction market. CLOB order book odds converted to American format." },
+                    { book: "Pinnacle", sports: "NBA, NCAAB, NFL, NHL, NCAAF, NCAAH, MLB, Soccer, Tennis, Intl Basketball" },
+                    { book: "FanDuel", sports: "NBA, NCAAB, NFL, NHL, NCAAF, MLB, Soccer" },
+                    { book: "DraftKings", sports: "NBA, NCAAB, NFL, NHL, NCAAF, MLB, Soccer" },
+                    { book: "BetMGM", sports: "NBA, NCAAB, NFL, NHL, NCAAF, Soccer" },
+                    { book: "Bet365", sports: "NBA, NCAAB, NFL, NHL, NCAAF, Soccer" },
+                    { book: "Caesars", sports: "NBA, NCAAB, NFL, NHL, NCAAF, Soccer" },
+                    { book: "Kalshi", sports: "NBA, NCAAB, NFL, NHL, MLB, Soccer" },
+                    { book: "BetOnline", sports: "MMA" },
+                    { book: "1xBet", sports: "CS2, Soccer, MLB" },
+                    { book: "Polymarket", sports: "NBA, NCAAB, NFL, NHL, NCAAF, NCAAH, MLB, Soccer, Tennis" },
                   ].map((row) => (
                     <tr key={row.book} className="border-b border-white/[0.04]">
                       <td className="py-2.5 pr-4 font-mono text-white">{row.book}</td>
-                      <td className="py-2.5 pr-4">
-                        <span className={`inline-flex items-center text-[12px] font-mono ${
-                          row.type === "Sharp" ? "text-[#00FF88]" :
-                          row.type === "Exchange" ? "text-purple-400" :
-                          row.type === "International" ? "text-sky-400" :
-                          "text-amber-400"
-                        }`}>
-                          {row.type}
-                        </span>
-                      </td>
-                      <td className="py-2.5 pr-4 text-zinc-400 text-[12px]">{row.sports}</td>
-                      <td className="py-2.5 text-zinc-500">{row.desc}</td>
+                      <td className="py-2.5 text-zinc-400 text-[12px]">{row.sports}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-
-            <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5 mt-6">
-              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
-                <strong className="text-white">Prediction exchanges:</strong> Both Kalshi and Polymarket appear as bookmakers in the standard odds response. Kalshi bookmaker objects include an <code className="text-[13px] font-mono text-zinc-300">event_ticker</code> field for direct order placement. See the <a href="#prediction-markets" className="text-[#00FF88] hover:underline">Prediction Markets section</a> for Kalshi&apos;s dedicated endpoints and details on Polymarket integration.
-              </p>
-            </div>
-          </section>
-
-          {/* ─── Coverage ──────────────────────────────────────────── */}
-          <section id="coverage" className="mb-20 scroll-mt-20">
-            <SectionHeading>Coverage</SectionHeading>
-            <p className="text-sm text-zinc-500 font-sans mb-6 leading-relaxed">
-              We aggregate odds from multiple sportsbooks across multiple sports. Coverage varies by sport, book, and market type.
-              We&apos;re continuously expanding coverage and improving data quality.
-            </p>
 
             <SubHeading id="sub-game-odds-coverage">Game odds</SubHeading>
             <p className="text-sm text-zinc-500 font-sans mb-4">
