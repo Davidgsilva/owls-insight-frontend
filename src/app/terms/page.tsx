@@ -17,7 +17,7 @@ export default function TermsPage() {
         </Link>
 
         <h1 className="text-4xl font-mono font-bold mb-2">Terms of Service</h1>
-        <p className="text-zinc-500 text-sm mb-12">Effective date: February 18, 2026</p>
+        <p className="text-zinc-500 text-sm mb-12">Effective date: March 5, 2026</p>
 
         <div className="prose prose-invert prose-zinc max-w-none space-y-8 text-zinc-300 text-sm leading-relaxed">
           <section>
@@ -117,7 +117,7 @@ export default function TermsPage() {
             <h2 className="text-lg font-mono font-semibold text-white mb-3">6. Subscription Plans and Billing</h2>
             <h3 className="font-medium text-white text-sm">6.1 Plans</h3>
             <p className="mt-2">
-              The Service is offered through tiered subscription plans (currently Bench, Rookie, and MVP), each
+              The Service is offered through tiered subscription plans (currently Bench, Rookie, MVP, and Hall of Fame), each
               with defined rate limits, feature access, and monthly pricing as described on our pricing page.
               We may modify plan names, features, or pricing at any time. Material changes to pricing will be
               communicated to active subscribers at least 30 days before taking effect.
@@ -149,9 +149,17 @@ export default function TermsPage() {
 
             <h3 className="font-medium text-white text-sm mt-4">6.5 Refunds</h3>
             <p className="mt-2">
-              Refund requests are handled on a case-by-case basis. If you experience a significant service
-              outage or billing error, contact us at david@wisesportsai.com within 14 days of the charge. We
-              reserve the right to grant or deny refund requests at our sole discretion.
+              All sales are final. Due to the nature of digital data services, subscription payments are
+              non-refundable once processed. By subscribing, you acknowledge and agree that you will not be
+              entitled to a refund for any subscription fees already paid.
+            </p>
+            <p className="mt-3">
+              In exceptional circumstances &mdash; such as a verified billing error, duplicate charge, or extended
+              service outage materially affecting your access &mdash; you may submit a dispute for review by
+              contacting us at david@wisesportsai.com within 14 days of the charge. Disputes are evaluated on
+              a case-by-case basis and any resolution, including partial or full credits, is at our sole
+              discretion. You agree to contact us to resolve any billing disputes before initiating a
+              chargeback with your payment provider.
             </p>
 
             <h3 className="font-medium text-white text-sm mt-4">6.6 Failed Payments</h3>
