@@ -21,7 +21,8 @@ const sections: Section[] = [
     { id: "sub-odds-parameters", label: "Parameters" },
     { id: "sub-tennis-markets", label: "Tennis markets" },
     { id: "sub-soccer-markets", label: "Soccer markets" },
-  ], keywords: ["nba", "nfl", "nhl", "mlb", "ncaab", "ncaaf", "soccer", "tennis", "pinnacle", "fanduel", "draftkings", "moneyline", "spreads", "totals", "alternates", "double chance", "btts", "asian handicap", "corners", "cards"] },
+    { id: "sub-basketball-intl", label: "Intl Basketball" },
+  ], keywords: ["nba", "nfl", "nhl", "mlb", "ncaab", "ncaaf", "soccer", "tennis", "basketball", "euroleague", "pinnacle", "fanduel", "draftkings", "moneyline", "spreads", "totals", "alternates", "double chance", "btts", "asian handicap", "corners", "cards"] },
   { id: "esports-api", label: "Esports", subItems: [
     { id: "sub-esports-markets", label: "Markets" },
   ], keywords: ["cs2", "counter-strike", "1xbet", "esports"] },
@@ -530,7 +531,7 @@ export default function DocsPage() {
               params={[
                 { name: "books", type: "string", required: false, description: "Comma-separated list of sportsbooks to include" },
                 { name: "alternates", type: "boolean", required: false, description: "Include Pinnacle alternate spread/total lines (Rookie+ only)" },
-                { name: "league", type: "string", required: false, description: "Filter by league name — substring match, case-insensitive (soccer and tennis)" },
+                { name: "league", type: "string", required: false, description: "Filter by league name — substring match, case-insensitive (soccer, tennis, and basketball)" },
               ]}
             />
 
@@ -644,6 +645,7 @@ export default function DocsPage() {
               The <code className="text-[11px] font-mono text-zinc-500">limits</code> array is currently provided for Pinnacle markets only, reflecting their published maximum stake limits.
               A market may include <code className="text-[11px] font-mono text-zinc-500">suspended: true</code> when the market is temporarily closed (e.g., during a goal review in soccer). This field is omitted when the market is open.
               Soccer events include a <code className="text-[11px] font-mono text-zinc-500">league</code> field (e.g., &quot;England - Premier League&quot;) and <code className="text-[11px] font-mono text-zinc-500">country_code</code> (ISO 3166-1 alpha-2, e.g., &quot;GB&quot;) for league identification and flag display.
+              International basketball events include a <code className="text-[11px] font-mono text-zinc-500">league</code> field (e.g., &quot;Europe - Euroleague&quot;) — see the <a href="#sub-basketball-intl" className="text-[#00FF88] hover:underline">International Basketball</a> section below.
             </p>
 
             <SubHeading id="sub-tennis-markets">Tennis markets</SubHeading>
@@ -717,6 +719,69 @@ export default function DocsPage() {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            <SubHeading id="sub-basketball-intl">International Basketball</SubHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-4 leading-relaxed">
+              Odds for international basketball leagues from Pinnacle, served via dedicated endpoints.
+              Each event includes a <code className="text-[13px] font-mono text-zinc-300">league</code> field for filtering. Use the <code className="text-[13px] font-mono text-zinc-300">?league=</code> query parameter for case-insensitive substring matching.
+            </p>
+            <div className="mb-8">
+              <Endpoint method="GET" path="/api/v1/basketball/odds" description="All international basketball odds" />
+              <Endpoint method="GET" path="/api/v1/basketball/moneyline" description="Moneylines only" />
+              <Endpoint method="GET" path="/api/v1/basketball/spreads" description="Spreads only" />
+              <Endpoint method="GET" path="/api/v1/basketball/totals" description="Totals only" />
+            </div>
+
+            <SubHeading>Example request</SubHeading>
+            <CodeBlock
+              language="bash"
+              code={`curl -H "Authorization: Bearer YOUR_API_KEY" \\
+  "https://api.owlsinsight.com/api/v1/basketball/odds?league=EuroLeague"`}
+            />
+
+            <SubHeading>Leagues</SubHeading>
+            <div className="overflow-x-auto mb-8">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-white/[0.08]">
+                    <th className="text-left py-2 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Region</th>
+                    <th className="text-left py-2 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">League</th>
+                  </tr>
+                </thead>
+                <tbody className="text-sm">
+                  {[
+                    { region: "Europe", league: "EuroLeague" },
+                    { region: "Europe", league: "EuroCup" },
+                    { region: "Europe", league: "ABA Adriatic League" },
+                    { region: "Spain", league: "Liga FEB" },
+                    { region: "France", league: "Championnat Pro B" },
+                    { region: "Germany", league: "Pro A" },
+                    { region: "Italy", league: "Serie A2" },
+                    { region: "UK", league: "British SLB" },
+                    { region: "Turkey", league: "Super League" },
+                    { region: "Lithuania", league: "National Basketball League" },
+                    { region: "Czech Republic", league: "Czech NBL" },
+                    { region: "Brazil", league: "Novo Basquete Brasil" },
+                    { region: "Argentina", league: "Liga Nacional / La Liga" },
+                    { region: "Australia", league: "Australia NBL" },
+                    { region: "South Korea", league: "KBL" },
+                    { region: "China", league: "CBA" },
+                  ].map((l) => (
+                    <tr key={`${l.region}-${l.league}`} className="border-b border-white/[0.04]">
+                      <td className="py-2.5 pr-6 text-zinc-400">{l.region}</td>
+                      <td className="py-2.5 text-zinc-300">{l.league}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="rounded-lg bg-[#111113] border border-white/[0.06] p-5 mb-8">
+              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
+                <strong className="text-white">Source:</strong> Pinnacle only. Odds are refreshed every ~15 seconds. Markets include moneylines, spreads, totals, and alternate lines.
+                Completed games are automatically removed within one poll cycle.
+              </p>
             </div>
           </section>
 
@@ -2432,7 +2497,7 @@ socket.on("esports-update", (data) => {
             <SubHeading id="sub-realtime-parameters">Parameters</SubHeading>
             <ParamTable
               params={[
-                { name: "league", type: "string", required: false, description: "Filter by league name — substring match, case-insensitive (useful for soccer and tennis)" },
+                { name: "league", type: "string", required: false, description: "Filter by league name — substring match, case-insensitive (useful for soccer, tennis, and basketball)" },
               ]}
             />
 
@@ -2722,7 +2787,7 @@ X-RateLimit-Reset-Month: 2026-03-01T00:00:00.000Z`}
                 </thead>
                 <tbody className="text-[13px]">
                   {[
-                    { book: "Pinnacle", type: "Sharp", sports: "NBA, NCAAB, NFL, NHL, NCAAF, NCAAH, MLB, Soccer, Tennis", desc: "Industry benchmark for sharp lines. Lowest margins, highest limits. Real-time sharp odds via dedicated feed (MVP)." },
+                    { book: "Pinnacle", type: "Sharp", sports: "NBA, NCAAB, NFL, NHL, NCAAF, NCAAH, MLB, Soccer, Tennis, Intl Basketball", desc: "Industry benchmark for sharp lines. Lowest margins, highest limits. Real-time sharp odds via dedicated feed (MVP)." },
                     { book: "FanDuel", type: "US Retail", sports: "NBA, NCAAB, NFL, NHL, NCAAF, MLB, Soccer", desc: "Largest US sportsbook by market share. Full player props." },
                     { book: "DraftKings", type: "US Retail", sports: "NBA, NCAAB, NFL, NHL, NCAAF, MLB, Soccer", desc: "Full market coverage across all major US sports." },
                     { book: "BetMGM", type: "US Retail", sports: "NBA, NCAAB, NFL, NHL, NCAAF, Soccer", desc: "Vegas-backed lines from the MGM Resorts network." },
