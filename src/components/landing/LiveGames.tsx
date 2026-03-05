@@ -67,9 +67,7 @@ function formatGameDetail(game: LiveGame): string {
 
   if (status.state === "post") return "FINAL";
 
-  // In-progress
   if (sport === "soccer") {
-    // status.detail often looks like "67'" or "45+2'"
     if (status.displayClock) return status.displayClock;
     if (status.detail) return status.detail;
     return "LIVE";
@@ -105,7 +103,6 @@ function formatGameDetail(game: LiveGame): string {
   if (sport === "mlb") {
     const period = status.period;
     const detail = status.detail || "";
-    // detail often has "Top 5th" or "Bot 7th"
     if (detail) return detail;
     return period ? `Inning ${period}` : "LIVE";
   }
@@ -117,7 +114,6 @@ function getTeamAbbrev(team: TeamInfo): string {
   if (team.team.abbreviation) return team.team.abbreviation;
   const words = team.team.displayName.trim().split(/\s+/);
   if (words.length === 1) return words[0].substring(0, 3).toUpperCase();
-  // Use last word
   return words[words.length - 1].substring(0, 3).toUpperCase();
 }
 
@@ -140,42 +136,61 @@ function GameCard({ game }: { game: LiveGame }) {
       : null;
 
   return (
-    <div className="relative p-4 rounded-xl bg-[#111111] border border-white/5">
+    <div
+      className={`relative p-4 rounded-xl border transition-all duration-300 group ${
+        isLive
+          ? "bg-[#111111] border-[#00FF88]/10 hover:border-[#00FF88]/20"
+          : "bg-[#111111] border-white/[0.05] hover:border-white/[0.1]"
+      }`}
+    >
+      {/* Live pulse indicator bar */}
+      {isLive && (
+        <div className="absolute top-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-[#00FF88]/40 to-transparent" />
+      )}
+
       {/* Top row: sport badge + status */}
       <div className="flex items-center justify-between mb-3">
-        <span className="text-xs font-mono text-zinc-500">
+        <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest">
           {SPORT_LABELS[game.sport] || game.sport.toUpperCase()}
         </span>
         {isLive ? (
           <div className="flex items-center gap-1.5">
-            <span className="relative flex h-2 w-2">
+            <span className="relative flex h-1.5 w-1.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00FF88] opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00FF88]" />
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#00FF88]" />
             </span>
-            <span className="text-xs font-mono font-medium text-[#00FF88]">LIVE</span>
+            <span className="text-[10px] font-mono font-semibold text-[#00FF88] tracking-wider">
+              LIVE
+            </span>
           </div>
         ) : isFinal ? (
-          <span className="text-xs font-mono text-zinc-500">FINAL</span>
+          <span className="text-[10px] font-mono text-zinc-500 tracking-wider">FINAL</span>
         ) : (
-          <span className="text-xs font-mono text-zinc-600">{detail}</span>
+          <span className="text-[10px] font-mono text-zinc-600">{detail}</span>
         )}
       </div>
 
       {/* Away team */}
-      <div className="flex items-center justify-between mb-1.5">
-        <span
-          className={`text-sm font-mono truncate mr-2 ${
-            isFinal && awayWinning ? "text-white font-semibold" : "text-zinc-300"
-          }`}
-        >
-          {getTeamAbbrev(game.away)}{" "}
-          <span className="text-zinc-500 text-xs hidden sm:inline">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <span
+            className={`text-sm font-mono font-medium truncate ${
+              isFinal && awayWinning ? "text-white" : "text-zinc-300"
+            }`}
+          >
+            {getTeamAbbrev(game.away)}
+          </span>
+          <span className="text-zinc-600 text-xs hidden sm:inline truncate">
             {game.away.team.displayName}
           </span>
-        </span>
+        </div>
         <span
-          className={`text-xl font-mono font-bold tabular-nums ${
-            awayWinning ? "text-white" : "text-zinc-400"
+          className={`text-lg font-mono font-bold tabular-nums ml-2 ${
+            isLive && awayWinning
+              ? "text-[#00FF88]"
+              : awayWinning
+                ? "text-white"
+                : "text-zinc-500"
           }`}
         >
           {game.away.score ?? "-"}
@@ -184,19 +199,25 @@ function GameCard({ game }: { game: LiveGame }) {
 
       {/* Home team */}
       <div className="flex items-center justify-between mb-3">
-        <span
-          className={`text-sm font-mono truncate mr-2 ${
-            isFinal && homeWinning ? "text-white font-semibold" : "text-zinc-300"
-          }`}
-        >
-          {getTeamAbbrev(game.home)}{" "}
-          <span className="text-zinc-500 text-xs hidden sm:inline">
+        <div className="flex items-center gap-2 min-w-0">
+          <span
+            className={`text-sm font-mono font-medium truncate ${
+              isFinal && homeWinning ? "text-white" : "text-zinc-300"
+            }`}
+          >
+            {getTeamAbbrev(game.home)}
+          </span>
+          <span className="text-zinc-600 text-xs hidden sm:inline truncate">
             {game.home.team.displayName}
           </span>
-        </span>
+        </div>
         <span
-          className={`text-xl font-mono font-bold tabular-nums ${
-            homeWinning ? "text-white" : "text-zinc-400"
+          className={`text-lg font-mono font-bold tabular-nums ml-2 ${
+            isLive && homeWinning
+              ? "text-[#00FF88]"
+              : homeWinning
+                ? "text-white"
+                : "text-zinc-500"
           }`}
         >
           {game.home.score ?? "-"}
@@ -204,7 +225,7 @@ function GameCard({ game }: { game: LiveGame }) {
       </div>
 
       {/* Detail line */}
-      <div className="border-t border-white/5 pt-2">
+      <div className="border-t border-white/[0.04] pt-2">
         {tennisSetScores ? (
           <div className="flex items-center gap-2">
             {tennisSetScores.map((set, i) => (
@@ -248,7 +269,6 @@ export function LiveGames() {
         }
       }
 
-      // Sort: live first, then pre, then post. Within each group, by start time
       const stateOrder: Record<string, number> = { in: 0, pre: 1, post: 2 };
       allGames.sort((a, b) => {
         const sa = stateOrder[a.status.state] ?? 1;
@@ -271,7 +291,6 @@ export function LiveGames() {
     return () => clearInterval(interval);
   }, [fetchScores]);
 
-  // Which sports have games
   const sportsWithGames = new Set(games.map((g) => g.sport));
   const availableTabs = TAB_ORDER.filter((s) => sportsWithGames.has(s));
 
@@ -284,10 +303,13 @@ export function LiveGames() {
 
   if (isLoading) {
     return (
-      <section id="live-scores" className="py-20 relative">
+      <section id="live-scores" className="py-24 relative">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center">
-            <span className="text-sm font-mono text-zinc-600">Loading live scores...</span>
+            <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-[#111111] border border-white/[0.05]">
+              <div className="w-2 h-2 rounded-full bg-zinc-600 animate-pulse" />
+              <span className="text-sm font-mono text-zinc-600">Loading live scores...</span>
+            </div>
           </div>
         </div>
       </section>
@@ -297,7 +319,7 @@ export function LiveGames() {
   if (games.length === 0) return null;
 
   return (
-    <section id="live-scores" className="py-20 relative">
+    <section id="live-scores" className="py-24 relative">
       <div className="max-w-7xl mx-auto px-6">
         {/* Section Header */}
         <div className="text-center mb-12">
@@ -310,11 +332,11 @@ export function LiveGames() {
             )}
             <span className="text-xs font-mono text-[#00FF88]">LIVE SCORES</span>
           </div>
-          <h2 className="text-4xl font-mono font-bold mb-4">
+          <h2 className="text-4xl md:text-5xl font-mono font-bold mb-4">
             Real-Time{" "}
             <span className="text-[#00FF88] text-glow-green">Game Tracking</span>
           </h2>
-          <p className="text-zinc-400 max-w-2xl mx-auto">
+          <p className="text-zinc-400 max-w-2xl mx-auto text-lg">
             Live scores across {availableTabs.length} sports, updated every 15 seconds.
             {liveCount > 0
               ? ` ${liveCount} game${liveCount > 1 ? "s" : ""} in progress right now.`
@@ -324,13 +346,13 @@ export function LiveGames() {
 
         {/* Sport tabs */}
         {availableTabs.length > 1 && (
-          <div className="flex items-center justify-center gap-2 mb-8 flex-wrap">
+          <div className="flex items-center justify-center gap-1.5 mb-10 flex-wrap">
             <button
               onClick={() => setActiveSport("all")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${
+              className={`px-4 py-2 rounded-lg text-xs font-mono transition-all duration-200 cursor-pointer ${
                 activeSport === "all"
-                  ? "bg-[#00FF88]/10 text-[#00FF88] border border-[#00FF88]/20"
-                  : "text-zinc-500 border border-transparent"
+                  ? "bg-[#00FF88]/10 text-[#00FF88] border border-[#00FF88]/20 shadow-[0_0_10px_rgba(0,255,136,0.08)]"
+                  : "text-zinc-500 border border-transparent hover:text-zinc-300 hover:bg-white/[0.03]"
               }`}
             >
               ALL
@@ -339,10 +361,10 @@ export function LiveGames() {
               <button
                 key={sport}
                 onClick={() => setActiveSport(sport)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${
+                className={`px-4 py-2 rounded-lg text-xs font-mono transition-all duration-200 cursor-pointer ${
                   activeSport === sport
-                    ? "bg-[#00FF88]/10 text-[#00FF88] border border-[#00FF88]/20"
-                    : "text-zinc-500 border border-transparent"
+                    ? "bg-[#00FF88]/10 text-[#00FF88] border border-[#00FF88]/20 shadow-[0_0_10px_rgba(0,255,136,0.08)]"
+                    : "text-zinc-500 border border-transparent hover:text-zinc-300 hover:bg-white/[0.03]"
                 }`}
               >
                 {SPORT_LABELS[sport] || sport.toUpperCase()}
@@ -352,14 +374,14 @@ export function LiveGames() {
         )}
 
         {/* Games grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {filtered.map((game) => (
             <GameCard key={game.id} game={game} />
           ))}
         </div>
 
         {filtered.length === 0 && (
-          <div className="text-center py-8">
+          <div className="text-center py-12">
             <p className="text-sm font-mono text-zinc-600">
               No {activeSport !== "all" ? SPORT_LABELS[activeSport] : ""} games right now.
             </p>

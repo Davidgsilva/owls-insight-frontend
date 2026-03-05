@@ -5,7 +5,7 @@ import Image from "next/image";
 
 export function Footer() {
   return (
-    <footer className="py-16 border-t border-white/5 bg-[#0a0a0a]">
+    <footer className="py-16 border-t border-white/[0.05] bg-[#0a0a0a]">
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid md:grid-cols-4 gap-12 mb-12">
           {/* Brand */}
@@ -29,9 +29,8 @@ export function Footer() {
             </p>
           </div>
 
-          {/* TODO: Uncomment when pages are ready
           {/* Product */}
-          {/* <div>
+          <div>
             <h4 className="font-mono font-semibold text-sm mb-4 text-neutral-300">
               Product
             </h4>
@@ -39,7 +38,7 @@ export function Footer() {
               <li>
                 <Link
                   href="#features"
-                  className="text-sm text-neutral-500 hover:text-white transition-colors"
+                  className="text-sm text-neutral-500 hover:text-white transition-colors duration-200"
                 >
                   Features
                 </Link>
@@ -47,7 +46,7 @@ export function Footer() {
               <li>
                 <Link
                   href="#pricing"
-                  className="text-sm text-neutral-500 hover:text-white transition-colors"
+                  className="text-sm text-neutral-500 hover:text-white transition-colors duration-200"
                 >
                   Pricing
                 </Link>
@@ -55,7 +54,7 @@ export function Footer() {
               <li>
                 <Link
                   href="/docs"
-                  className="text-sm text-neutral-500 hover:text-white transition-colors"
+                  className="text-sm text-neutral-500 hover:text-white transition-colors duration-200"
                 >
                   Documentation
                 </Link>
@@ -63,83 +62,32 @@ export function Footer() {
               <li>
                 <Link
                   href="#coverage"
-                  className="text-sm text-neutral-500 hover:text-white transition-colors"
+                  className="text-sm text-neutral-500 hover:text-white transition-colors duration-200"
                 >
                   Coverage
                 </Link>
               </li>
             </ul>
-          </div> */}
-
-          {/* Resources */}
-          {/* <div>
-            <h4 className="font-mono font-semibold text-sm mb-4 text-neutral-300">
-              Resources
-            </h4>
-            <ul className="space-y-3">
-              <li>
-                <Link
-                  href="/docs#quickstart"
-                  className="text-sm text-neutral-500 hover:text-white transition-colors"
-                >
-                  Quick Start
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/docs#api-reference"
-                  className="text-sm text-neutral-500 hover:text-white transition-colors"
-                >
-                  API Reference
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/docs#websocket"
-                  className="text-sm text-neutral-500 hover:text-white transition-colors"
-                >
-                  WebSocket Guide
-                </Link>
-              </li>
-              <li>
-                <a
-                  href="https://status.owlsinsight.com"
-                  className="text-sm text-neutral-500 hover:text-white transition-colors"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Status Page
-                </a>
-              </li>
-            </ul>
-          </div> */}
+          </div>
 
           {/* Company */}
-          {/* <div>
+          <div>
             <h4 className="font-mono font-semibold text-sm mb-4 text-neutral-300">
               Company
             </h4>
             <ul className="space-y-3">
               <li>
                 <Link
-                  href="/about"
-                  className="text-sm text-neutral-500 hover:text-white transition-colors"
-                >
-                  About
-                </Link>
-              </li>
-              <li>
-                <a
-                  href="mailto:support@owlsinsight.com"
-                  className="text-sm text-neutral-500 hover:text-white transition-colors"
+                  href="/contact"
+                  className="text-sm text-neutral-500 hover:text-white transition-colors duration-200"
                 >
                   Contact
-                </a>
+                </Link>
               </li>
               <li>
                 <Link
                   href="/privacy"
-                  className="text-sm text-neutral-500 hover:text-white transition-colors"
+                  className="text-sm text-neutral-500 hover:text-white transition-colors duration-200"
                 >
                   Privacy Policy
                 </Link>
@@ -147,32 +95,64 @@ export function Footer() {
               <li>
                 <Link
                   href="/terms"
-                  className="text-sm text-neutral-500 hover:text-white transition-colors"
+                  className="text-sm text-neutral-500 hover:text-white transition-colors duration-200"
                 >
                   Terms of Service
                 </Link>
               </li>
             </ul>
           </div>
-          */}
+
+          {/* Get Started */}
+          <div>
+            <h4 className="font-mono font-semibold text-sm mb-4 text-neutral-300">
+              Get Started
+            </h4>
+            <ul className="space-y-3">
+              <li>
+                <Link
+                  href="/register"
+                  className="text-sm text-neutral-500 hover:text-white transition-colors duration-200"
+                >
+                  Sign Up Free
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/register?tier=mvp"
+                  className="text-sm text-[#00FF88]/70 hover:text-[#00FF88] transition-colors duration-200"
+                >
+                  Start Free Trial
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/login"
+                  className="text-sm text-neutral-500 hover:text-white transition-colors duration-200"
+                >
+                  Sign In
+                </Link>
+              </li>
+            </ul>
+          </div>
         </div>
 
         {/* Bottom bar */}
-        <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="pt-8 border-t border-white/[0.05] flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-4">
             <p className="text-sm text-neutral-600">
               &copy; {new Date().getFullYear()} Owls Insight. All rights reserved.
             </p>
-            <Link href="/privacy" className="text-sm text-neutral-600 hover:text-neutral-400 transition-colors">
+            <Link href="/privacy" className="text-sm text-neutral-600 hover:text-neutral-400 transition-colors duration-200">
               Privacy
             </Link>
-            <Link href="/terms" className="text-sm text-neutral-600 hover:text-neutral-400 transition-colors">
+            <Link href="/terms" className="text-sm text-neutral-600 hover:text-neutral-400 transition-colors duration-200">
               Terms
             </Link>
           </div>
 
           {/* API Status indicator */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#111111] border border-white/5">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#111111] border border-white/[0.05]">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00FF88] opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00FF88]" />

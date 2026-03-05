@@ -63,7 +63,6 @@ const BOOK_DISPLAY: Record<string, string> = {
   "1xbet": "1xBet",
 };
 
-// Only fetch 3 sports to keep landing page API load reasonable
 const SPORT_FETCH_ORDER: SportKey[] = ["nba", "nhl", "soccer"];
 
 function formatPrice(price: number): string {
@@ -206,7 +205,6 @@ function findBestOdds(games: GameOdds[]) {
   return best;
 }
 
-// Unified odds cell — tracks its own previous value via local ref
 function OddsCell({
   value,
   isBest,
@@ -221,38 +219,38 @@ function OddsCell({
 
   useEffect(() => {
     const prev = prevRef.current;
+    prevRef.current = value;
     if (prev !== undefined && value !== undefined && prev !== value) {
-      setFlash(value > prev ? "up" : "down");
-      const t = setTimeout(() => setFlash(null), 3000);
-      return () => clearTimeout(t);
+      const direction = value > prev ? "up" : "down";
+      let clearId: ReturnType<typeof setTimeout>;
+      const setId = setTimeout(() => {
+        setFlash(direction);
+        clearId = setTimeout(() => setFlash(null), 3000);
+      }, 0);
+      return () => { clearTimeout(setId); clearTimeout(clearId); };
     }
   }, [value]);
 
-  // Update ref after comparison
-  useEffect(() => {
-    prevRef.current = value;
-  }, [value]);
-
   if (value === undefined) {
-    return <span className="text-xs font-mono text-right text-zinc-700 tabular-nums">—</span>;
+    return <span className="text-xs font-mono text-right text-zinc-700 tabular-nums">&mdash;</span>;
   }
 
   return (
     <span
-      className={`text-xs font-mono text-right tabular-nums transition-colors ${
+      className={`text-xs font-mono text-right tabular-nums transition-colors duration-300 ${
         flash === "up"
-          ? "text-green-400"
+          ? "text-[#00FF88]"
           : flash === "down"
             ? "text-red-400"
             : isBest
-              ? "text-[#00FF88]"
+              ? "text-[#00FF88] font-semibold"
               : defaultColor
       }`}
     >
       {formatPrice(value)}
       {flash && (
-        <span className={`ml-0.5 text-[10px] ${flash === "up" ? "text-green-400" : "text-red-400"}`}>
-          {flash === "up" ? "▲" : "▼"}
+        <span className={`ml-0.5 text-[10px] ${flash === "up" ? "text-[#00FF88]" : "text-red-400"}`}>
+          {flash === "up" ? "\u25B2" : "\u25BC"}
         </span>
       )}
     </span>
@@ -271,28 +269,28 @@ function GameCard({
   const displayBooks = game.books.slice(0, 5);
 
   return (
-    <div className="rounded-xl bg-[#111111] border border-white/5 overflow-hidden">
+    <div className="rounded-xl bg-[#111111] border border-white/[0.05] overflow-hidden hover:border-white/[0.1] transition-all duration-300">
       {/* Matchup header */}
-      <div className="px-4 pt-4 pb-3 border-b border-white/5">
-        <div className="flex items-center justify-between mb-1">
+      <div className="px-5 pt-4 pb-3 border-b border-white/[0.04]">
+        <div className="flex items-center justify-between mb-1.5">
           <span className="text-sm font-mono text-white font-semibold truncate">
             {game.awayTeam}
           </span>
-          <span className="text-xs font-mono text-zinc-600 shrink-0 ml-2">
+          <span className="text-[10px] font-mono text-zinc-600 shrink-0 ml-2 tracking-wide">
             {formatTime(game.startTime)}
           </span>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-sm font-mono text-white font-semibold truncate">
-            @ {game.homeTeam}
+            <span className="text-zinc-500">@</span> {game.homeTeam}
           </span>
         </div>
       </div>
 
       {/* Odds table */}
-      <div className="px-4 py-3">
+      <div className="px-5 py-3">
         {/* Column headers */}
-        <div className="grid grid-cols-[1fr_auto_auto_auto] gap-x-3 mb-2 text-[10px] font-mono text-zinc-600 uppercase tracking-wider">
+        <div className="grid grid-cols-[1fr_auto_auto_auto] gap-x-4 mb-2 text-[10px] font-mono text-zinc-600 uppercase tracking-widest">
           <span>Book</span>
           {!isSoccer && <span className="text-right">Spread</span>}
           <span className="text-right">{isSoccer ? "1" : "ML"}</span>
@@ -307,7 +305,7 @@ function GameCard({
         {displayBooks.map((bk) => (
           <div
             key={bk.key}
-            className="grid grid-cols-[1fr_auto_auto_auto] gap-x-3 py-1.5 border-t border-white/[0.03]"
+            className="grid grid-cols-[1fr_auto_auto_auto] gap-x-4 py-2 border-t border-white/[0.03] hover:bg-white/[0.02] transition-colors duration-150 -mx-1 px-1 rounded"
           >
             <span className="text-xs text-zinc-500 truncate">{bk.name}</span>
 
@@ -316,12 +314,12 @@ function GameCard({
                 {bk.spread ? (
                   <>
                     {formatSpread(bk.spread.away)}{" "}
-                    <span className="text-zinc-500">
+                    <span className="text-zinc-600">
                       ({formatPrice(bk.spread.awayPrice)})
                     </span>
                   </>
                 ) : (
-                  <span className="text-zinc-700">—</span>
+                  <span className="text-zinc-700">&mdash;</span>
                 )}
               </span>
             )}
@@ -347,7 +345,7 @@ function GameCard({
               <span className="text-xs font-mono text-right tabular-nums">
                 {bk.total ? (
                   <>
-                    <span className="text-zinc-500">o</span>
+                    <span className="text-zinc-600">o</span>
                     <span className="text-zinc-400">{bk.total.point}</span>{" "}
                     <OddsCell
                       value={bk.total.over}
@@ -356,7 +354,7 @@ function GameCard({
                     />
                   </>
                 ) : (
-                  <span className="text-zinc-700">—</span>
+                  <span className="text-zinc-700">&mdash;</span>
                 )}
               </span>
             )}
@@ -397,15 +395,16 @@ export function OddsShowcase() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- async data fetch pattern
     fetchOdds();
     const interval = setInterval(fetchOdds, 60000);
     return () => clearInterval(interval);
   }, [fetchOdds]);
 
-  // Set first available sport as active
   useEffect(() => {
     if (activeSport === null) {
       const first = SPORT_FETCH_ORDER.find((s) => (gamesBySport[s]?.length ?? 0) > 0);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time init from async data
       if (first) setActiveSport(first);
     }
   }, [gamesBySport, activeSport]);
@@ -414,16 +413,22 @@ export function OddsShowcase() {
     () => SPORT_FETCH_ORDER.filter((s) => (gamesBySport[s]?.length ?? 0) > 0),
     [gamesBySport]
   );
-  const currentGames = activeSport ? (gamesBySport[activeSport] || []).slice(0, 3) : [];
+  const currentGames = useMemo(
+    () => activeSport ? (gamesBySport[activeSport] || []).slice(0, 3) : [],
+    [activeSport, gamesBySport]
+  );
   const isSoccer = activeSport === "soccer";
   const bestOddsMap = useMemo(() => findBestOdds(currentGames), [currentGames]);
 
   if (isLoading) {
     return (
-      <section id="odds" className="py-20 relative">
+      <section id="odds" className="py-24 relative">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center">
-            <span className="text-sm font-mono text-zinc-600">Loading odds data...</span>
+            <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-[#111111] border border-white/[0.05]">
+              <div className="w-2 h-2 rounded-full bg-zinc-600 animate-pulse" />
+              <span className="text-sm font-mono text-zinc-600">Loading odds data...</span>
+            </div>
           </div>
         </div>
       </section>
@@ -433,34 +438,38 @@ export function OddsShowcase() {
   if (availableSports.length === 0) return null;
 
   return (
-    <section id="odds" className="py-20 relative">
-      <div className="max-w-7xl mx-auto px-6">
+    <section id="odds" className="py-24 relative">
+      {/* Subtle grid overlay */}
+      <div className="absolute inset-0 grid-pattern opacity-20 pointer-events-none" />
+
+      <div className="relative max-w-7xl mx-auto px-6">
         {/* Section Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#00FF88]/20 bg-[#00FF88]/5 mb-6">
             <span className="text-xs font-mono text-[#00FF88]">LIVE ODDS</span>
           </div>
-          <h2 className="text-4xl font-mono font-bold mb-4">
+          <h2 className="text-4xl md:text-5xl font-mono font-bold mb-4">
             Multi-Book{" "}
             <span className="text-[#00FF88] text-glow-green">Odds Comparison</span>
           </h2>
-          <p className="text-zinc-400 max-w-2xl mx-auto">
+          <p className="text-zinc-400 max-w-2xl mx-auto text-lg">
             Compare pre-match odds across sportsbooks.
-            Best prices highlighted in green.
+            Best prices highlighted in{" "}
+            <span className="text-[#00FF88] font-medium">green</span>.
           </p>
         </div>
 
         {/* Sport tabs */}
         {availableSports.length > 1 && (
-          <div className="flex items-center justify-center gap-2 mb-8 flex-wrap">
+          <div className="flex items-center justify-center gap-1.5 mb-10 flex-wrap">
             {availableSports.map((sport) => (
               <button
                 key={sport}
                 onClick={() => setActiveSport(sport)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${
+                className={`px-4 py-2 rounded-lg text-xs font-mono transition-all duration-200 cursor-pointer ${
                   activeSport === sport
-                    ? "bg-[#00FF88]/10 text-[#00FF88] border border-[#00FF88]/20"
-                    : "text-zinc-500 border border-transparent"
+                    ? "bg-[#00FF88]/10 text-[#00FF88] border border-[#00FF88]/20 shadow-[0_0_10px_rgba(0,255,136,0.08)]"
+                    : "text-zinc-500 border border-transparent hover:text-zinc-300 hover:bg-white/[0.03]"
                 }`}
               >
                 {SPORT_LABELS[sport] || sport.toUpperCase()}
@@ -470,7 +479,7 @@ export function OddsShowcase() {
         )}
 
         {/* Games grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
           {currentGames.map((game) => (
             <GameCard
               key={game.eventId}
@@ -482,7 +491,7 @@ export function OddsShowcase() {
         </div>
 
         {currentGames.length === 0 && activeSport && (
-          <div className="text-center py-8">
+          <div className="text-center py-12">
             <p className="text-sm font-mono text-zinc-600">
               No upcoming {SPORT_LABELS[activeSport]} games with multi-book odds right now.
             </p>

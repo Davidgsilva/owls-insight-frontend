@@ -4,15 +4,20 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { TerminalDemo } from "./TerminalDemo";
 
+const stats = [
+  { value: "9", label: "Odds Sources" },
+  { value: "10+", label: "Sports" },
+];
+
 export function Hero() {
   return (
-    <section className="relative pt-32 pb-20 overflow-hidden">
+    <section className="relative pt-32 pb-24 overflow-hidden">
       {/* Background grid */}
       <div className="absolute inset-0 grid-pattern opacity-50" />
 
       {/* Gradient orbs */}
-      <div className="absolute top-20 left-1/4 w-96 h-96 bg-[#00FF88]/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#00FF88]/5 rounded-full blur-3xl" />
+      <div className="absolute top-20 left-1/4 w-[500px] h-[500px] bg-[#00FF88]/[0.07] rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-[#00FF88]/[0.04] rounded-full blur-[80px] pointer-events-none" />
 
       <div className="relative max-w-7xl mx-auto px-6">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
@@ -51,7 +56,7 @@ export function Hero() {
               <Link href="/register?tier=mvp">
                 <Button
                   size="lg"
-                  className="bg-[#00FF88] hover:bg-[#00d4aa] text-[#0a0a0a] font-mono font-medium px-6 glow-primary"
+                  className="bg-[#00FF88] hover:bg-[#00e67a] text-[#0a0a0a] font-mono font-semibold px-6 cursor-pointer shadow-[0_0_20px_rgba(0,255,136,0.25)] hover:shadow-[0_0_30px_rgba(0,255,136,0.35)] transition-all duration-200"
                 >
                   Start Free Trial
                 </Button>
@@ -60,11 +65,25 @@ export function Hero() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="border-white/10 bg-white/5 hover:bg-white/10 font-mono"
+                  className="border-white/10 bg-white/[0.03] hover:bg-white/[0.08] font-mono cursor-pointer transition-all duration-200"
                 >
                   View Documentation
                 </Button>
               </Link>
+            </div>
+
+            {/* Stats row */}
+            <div className="grid grid-cols-2 gap-6 pt-4 opacity-0 animate-fade-in-up stagger-4">
+              {stats.map((stat) => (
+                <div key={stat.label}>
+                  <div className="text-2xl font-mono font-bold text-white">
+                    {stat.value}
+                  </div>
+                  <div className="text-xs text-zinc-500 font-mono mt-0.5">
+                    {stat.label}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 

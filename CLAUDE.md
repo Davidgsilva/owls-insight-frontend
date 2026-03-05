@@ -30,15 +30,15 @@ All proxy route handlers:
 - Forward the browser's `Cookie` header so the backend identifies users via the httpOnly `token` cookie
 - Return backend responses verbatim (including status codes)
 
-Exception: `/api/odds` uses a Bearer token via `OWLS_INSIGHT_API_KEY` (consumer-facing API auth) for the landing page live ticker.
+Exception: `/api/odds` and `/api/scores` use a Bearer token via `OWLS_INSIGHT_API_KEY` (consumer-facing API auth) for the landing page.
 
 ### Route Organization
 
-**Public pages** (server-rendered): `/`, `/docs`, `/contact`, `/login`, `/register`, `/forgot-password`, `/reset-password`, `/verify-email`
+**Public pages** (server-rendered): `/`, `/docs`, `/contact`, `/login`, `/register`, `/forgot-password`, `/reset-password`, `/verify-email`, `/privacy`, `/terms`
 
 **Dashboard pages** (all `"use client"`, auth-protected): `/dashboard`, `/dashboard/keys`, `/dashboard/usage`, `/dashboard/billing`, `/dashboard/account`
 
-The landing page (`/`) assembles sections from `src/components/landing/` barrel export: `Header → Hero → LiveTicker → Features → Coverage → Pricing → Footer`.
+The landing page (`/`) assembles sections from `src/components/landing/` barrel export: `Header → Hero → LiveGames → OddsShowcase → Features → Coverage → Pricing → Footer`.
 
 The dashboard uses a shared layout (`src/app/dashboard/layout.tsx`) rendering `<Sidebar>` + `<Header>` + `<EmailVerificationBanner>` + `{children}`.
 
@@ -62,7 +62,7 @@ Three providers, all proxied through Next.js route handlers:
 
 The billing page (`/dashboard/billing`) detects provider via `subscription.paymentProvider` and shows provider-specific management UI.
 
-Subscription tiers: `free`, `bench` ($9.99), `rookie` ($24.99), `mvp` ($49.99). MVP has a 3-day free trial for eligible users.
+Subscription tiers: `free`, `bench` ($9.99), `rookie` ($24.99), `mvp` ($49.99), `hall_of_fame` ($200). MVP has a 3-day free trial for eligible users.
 
 ### State Management
 

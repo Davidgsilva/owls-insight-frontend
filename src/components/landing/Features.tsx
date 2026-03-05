@@ -1,5 +1,3 @@
-"use client";
-
 const features = [
   {
     title: "Multi-Book Aggregation",
@@ -19,61 +17,43 @@ const features = [
       "Track opening lines, line movements, and historical data. Identify CLV opportunities and steam moves.",
     highlight: "Full History",
   },
-  {
-    title: "99.9% Uptime SLA",
-    description:
-      "Enterprise-grade infrastructure with automatic failover. Rate limiting per API key with generous quotas.",
-    highlight: "Enterprise",
-  },
-  {
-    title: "Player Props",
-    description:
-      "Complete player prop markets including points, rebounds, assists, and more. Available on Pro and Enterprise tiers.",
-    highlight: "Full Props",
-  },
-  {
-    title: "Multi-Sport Coverage",
-    description:
-      "NBA, NFL, NHL, MLB, NCAAB, NCAAF, Soccer, and CS2 esports. All major sports with consistent data schemas across markets.",
-    highlight: "Multi-Sport",
-  },
 ];
 
 export function Features() {
   return (
-    <section id="features" className="py-24 relative">
+    <section id="features" className="py-28 relative">
       <div className="max-w-7xl mx-auto px-6">
         {/* Section Header */}
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#00FF88]/20 bg-[#00FF88]/5 mb-6">
             <span className="text-xs font-mono text-[#00FF88]">FEATURES</span>
           </div>
-          <h2 className="text-4xl font-mono font-bold mb-4">
+          <h2 className="text-4xl md:text-5xl font-mono font-bold mb-4">
             Built for{" "}
             <span className="text-[#00FF88] text-glow-green">Speed & Scale</span>
           </h2>
-          <p className="text-zinc-400 max-w-2xl mx-auto">
+          <p className="text-zinc-400 max-w-2xl mx-auto text-lg">
             Every feature designed for professional traders, sportsbook operators,
             and data analysts who need reliable, fast, and comprehensive odds data.
           </p>
         </div>
 
         {/* Features Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
           {features.map((feature) => (
             <div
               key={feature.title}
-              className="relative p-6 rounded-xl bg-[#111111] border border-white/5"
+              className="relative p-6 rounded-xl bg-[#111111]/80 border border-white/[0.05]"
             >
               {/* Highlight badge */}
               <div className="absolute top-4 right-4">
-                <span className="text-xs font-mono text-[#00FF88]/60">
+                <span className="text-[10px] font-mono text-[#00FF88]/50 uppercase tracking-widest">
                   {feature.highlight}
                 </span>
               </div>
 
               {/* Content */}
-              <h3 className="text-lg font-mono font-semibold mb-2">
+              <h3 className="text-base font-mono font-semibold mb-2">
                 {feature.title}
               </h3>
               <p className="text-sm text-zinc-500 leading-relaxed">

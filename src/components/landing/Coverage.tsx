@@ -28,9 +28,9 @@ const sports = [
 
 export function Coverage() {
   return (
-    <section id="coverage" className="py-24 relative bg-[#050505]">
+    <section id="coverage" className="py-28 relative bg-[#050505]">
       {/* Background pattern */}
-      <div className="absolute inset-0 grid-pattern opacity-30" />
+      <div className="absolute inset-0 grid-pattern opacity-20" />
 
       <div className="relative max-w-7xl mx-auto px-6">
         {/* Section Header */}
@@ -38,24 +38,23 @@ export function Coverage() {
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#00FF88]/20 bg-[#00FF88]/5 mb-6">
             <span className="text-xs font-mono text-[#00FF88]">COVERAGE</span>
           </div>
-          <h2 className="text-4xl font-mono font-bold mb-4">
+          <h2 className="text-4xl md:text-5xl font-mono font-bold mb-4">
             Aggregated Odds. Unified Schema.{" "}
             <span className="text-[#00FF88] text-glow-primary">One API.</span>
           </h2>
-          <p className="text-zinc-400 max-w-2xl mx-auto">
-            Real-time data from major sportsbooks and prediction markets, normalized
+          <p className="text-zinc-400 max-w-2xl mx-auto text-lg">
+            Odds from major sportsbooks and prediction markets, normalized
             and delivered consistently across every sport and market type.
           </p>
         </div>
 
         {/* Sportsbooks Carousel */}
         <div className="mb-12">
-          <h3 className="text-sm font-mono text-zinc-500 mb-6 flex items-center gap-2">
-            <span className="w-8 h-px bg-zinc-700" />
-            SPORTSBOOKS
+          <h3 className="text-[10px] font-mono text-zinc-600 mb-6 flex items-center gap-3 uppercase tracking-[0.2em]">
+            <span className="w-8 h-px bg-zinc-800" />
+            Sportsbooks
           </h3>
           <div className="relative overflow-hidden">
-            {/* Fade edges */}
             <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#050505] to-transparent z-10 pointer-events-none" />
             <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#050505] to-transparent z-10 pointer-events-none" />
 
@@ -63,7 +62,7 @@ export function Coverage() {
               {[...sportsbooks, ...sportsbooks].map((book, i) => (
                 <div
                   key={`${book.name}-${i}`}
-                  className="flex items-center gap-3 px-6 py-3 mx-2 rounded-lg border border-white/[0.04] bg-white/[0.02] opacity-50"
+                  className="flex items-center gap-3 px-6 py-3 mx-2 rounded-lg border border-white/[0.04] bg-white/[0.02] opacity-60 hover:opacity-100 transition-opacity duration-300"
                 >
                   <img
                     src={book.logo}
@@ -81,15 +80,15 @@ export function Coverage() {
 
         {/* Prediction Markets */}
         <div className="mb-16">
-          <h3 className="text-sm font-mono text-zinc-500 mb-6 flex items-center gap-2">
-            <span className="w-8 h-px bg-purple-700" />
-            PREDICTION MARKETS
+          <h3 className="text-[10px] font-mono text-zinc-600 mb-6 flex items-center gap-3 uppercase tracking-[0.2em]">
+            <span className="w-8 h-px bg-purple-800" />
+            Prediction Markets
           </h3>
           <div className="flex gap-4">
             {predictionMarkets.map((market) => (
               <div
                 key={market.name}
-                className="flex items-center gap-3 px-6 py-3 rounded-lg border border-purple-500/10 bg-purple-500/[0.03] opacity-60"
+                className="flex items-center gap-3 px-6 py-3 rounded-lg border border-purple-500/10 bg-purple-500/[0.03] opacity-60 hover:opacity-100 transition-opacity duration-300"
               >
                 <img
                   src={market.logo}
@@ -106,9 +105,9 @@ export function Coverage() {
 
         {/* Sports Carousel */}
         <div>
-          <h3 className="text-sm font-mono text-zinc-500 mb-6 flex items-center gap-2">
-            <span className="w-8 h-px bg-zinc-700" />
-            SPORTS
+          <h3 className="text-[10px] font-mono text-zinc-600 mb-6 flex items-center gap-3 uppercase tracking-[0.2em]">
+            <span className="w-8 h-px bg-zinc-800" />
+            Sports
           </h3>
           <div className="relative overflow-hidden">
             <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#050505] to-transparent z-10 pointer-events-none" />
@@ -118,7 +117,7 @@ export function Coverage() {
               {[...sports, ...sports].map((sport, i) => (
                 <div
                   key={`${sport.name}-${i}`}
-                  className="flex items-center gap-3 px-6 py-3 mx-2 rounded-lg border border-white/[0.04] bg-white/[0.02] opacity-50"
+                  className="flex items-center gap-3 px-6 py-3 mx-2 rounded-lg border border-white/[0.04] bg-white/[0.02] opacity-60 hover:opacity-100 transition-opacity duration-300"
                 >
                   <img
                     src={sport.logo}
@@ -133,7 +132,6 @@ export function Coverage() {
             </div>
           </div>
         </div>
-
       </div>
     </section>
   );
