@@ -68,11 +68,11 @@ const sections: Section[] = [
   { id: "rate-limits", label: "Rate Limits", subItems: [
     { id: "sub-tier-features", label: "Tier features" },
   ], keywords: ["rate limit", "tier", "bench", "rookie", "mvp", "pricing", "price", "connections"] },
-  { id: "sportsbooks", label: "Sportsbooks", keywords: ["sportsbook", "pinnacle", "fanduel", "draftkings", "betmgm", "bet365", "caesars", "kalshi", "1xbet", "sharp", "retail", "exchange"] },
+  { id: "sportsbooks", label: "Sportsbooks", keywords: ["sportsbook", "pinnacle", "fanduel", "draftkings", "betmgm", "bet365", "caesars", "kalshi", "betonline", "polymarket", "1xbet", "sharp", "retail", "exchange"] },
   { id: "coverage", label: "Coverage", subItems: [
     { id: "sub-game-odds-coverage", label: "Game odds" },
     { id: "sub-props-coverage", label: "Player props" },
-  ], keywords: ["coverage", "sports", "books", "sportsbooks", "availability"] },
+  ], keywords: ["coverage", "sports", "books", "sportsbooks", "availability", "mma", "ufc", "betonline"] },
   { id: "errors", label: "Errors", keywords: ["error", "status code", "401", "403", "429", "500"] },
 ];
 
@@ -461,7 +461,7 @@ export default function DocsPage() {
           <section id="odds-api" className="mb-20 scroll-mt-20">
             <SectionHeading>Odds API</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-6">
-              Live betting odds from Pinnacle, FanDuel, DraftKings, BetMGM, Bet365, Caesars, Kalshi, Polymarket, and 1xBet. Pinnacle refreshes every ~1s, FanDuel/DraftKings/Kalshi every ~3s, BetMGM/Bet365/Caesars every ~30s.
+              Live betting odds from Pinnacle, FanDuel, DraftKings, BetMGM, Bet365, Caesars, BetOnline, Kalshi, Polymarket, and 1xBet. Pinnacle refreshes every ~1s, FanDuel/DraftKings/Kalshi every ~3s, BetMGM/Bet365/Caesars every ~30s, BetOnline every ~2min.
             </p>
 
             <SubHeading id="sub-odds-endpoints">Endpoints</SubHeading>
@@ -2773,7 +2773,7 @@ X-RateLimit-Reset-Month: 2026-03-01T00:00:00.000Z`}
           <section id="sportsbooks" className="mb-20 scroll-mt-20">
             <SectionHeading>Supported Sportsbooks</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-6 leading-relaxed">
-              We aggregate real-time odds from 9 sportsbooks — sharp lines from Pinnacle, US retail leaders, prediction exchanges (Kalshi and Polymarket), and international markets.
+              We aggregate real-time odds from 10 sportsbooks — sharp lines from Pinnacle, US retail leaders, prediction exchanges (Kalshi and Polymarket), and international markets.
             </p>
 
             <div className="overflow-x-auto mb-6">
