@@ -417,7 +417,7 @@ export default function DocsPage() {
               API Reference
             </h1>
             <p className="text-zinc-500 text-sm font-sans leading-relaxed mb-10">
-              REST API and WebSocket streaming for live sports and esports betting odds from major sportsbooks, prediction markets (Kalshi and Polymarket), and 1xBet. Odds update every ~3 seconds.
+              REST API and WebSocket streaming for live sports and esports betting odds from major sportsbooks, prediction markets (Kalshi and Polymarket), and 1xBet. WebSocket updates are pushed on change — Pinnacle every ~1s, FanDuel/DraftKings/Kalshi every ~3s, BetMGM/Bet365/Caesars every ~30s, live scores every ~1.6s.
             </p>
 
             <div className="rounded-lg bg-[#111113] border border-white/[0.06] px-5 py-4 mb-10">
@@ -460,7 +460,7 @@ export default function DocsPage() {
           <section id="odds-api" className="mb-20 scroll-mt-20">
             <SectionHeading>Odds API</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-6">
-              Live betting odds from Pinnacle, FanDuel, DraftKings, BetMGM, Bet365, Caesars, Kalshi, Polymarket, and 1xBet. Updated every ~3 seconds via polling.
+              Live betting odds from Pinnacle, FanDuel, DraftKings, BetMGM, Bet365, Caesars, Kalshi, Polymarket, and 1xBet. Pinnacle refreshes every ~1s, FanDuel/DraftKings/Kalshi every ~3s, BetMGM/Bet365/Caesars every ~30s.
             </p>
 
             <SubHeading id="sub-odds-endpoints">Endpoints</SubHeading>
@@ -726,7 +726,7 @@ export default function DocsPage() {
             <p className="text-sm text-zinc-500 font-sans mb-6 leading-relaxed">
               CS2 (Counter-Strike 2) match odds from 1xBet. Live and prematch games with moneylines,
               map handicaps, map totals, correct score, map winner, round totals, and round handicap markets.
-              Updated every ~3 seconds. Available via REST and WebSocket.
+              Pushed on change via WebSocket, also available via REST.
             </p>
 
             <SubHeading>Endpoint</SubHeading>
@@ -2219,7 +2219,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
           <section id="websocket" className="mb-20 scroll-mt-20">
             <SectionHeading>WebSocket API</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-2">
-              Live streaming for odds, scores, and player props. Updates are pushed every ~3 seconds.
+              Live streaming for odds, scores, and player props. Updates are pushed on change — no polling required, no message limits. Update frequency varies by source: Pinnacle every ~1s, FanDuel/DraftKings/Kalshi every ~3s, BetMGM/Bet365/Caesars every ~30s, live scores every ~1.6s, and player props on change.
             </p>
             <p className="text-sm mb-6">
               <TierBadge tier="Rookie+" />
@@ -2243,8 +2243,8 @@ socket.on("connect", () => {
             <SubHeading id="sub-ws-events">Events</SubHeading>
             <div className="space-y-0 mb-8">
               {[
-                { name: "odds-update", description: "Latest odds data, emitted every ~3 seconds (automatic)", tier: undefined },
-                { name: "scores-update", description: "Current scores during live games, every ~3 seconds (automatic)", tier: undefined },
+                { name: "odds-update", description: "Latest odds data, pushed on change — frequency varies by book (automatic)", tier: undefined },
+                { name: "scores-update", description: "Live scores, pushed every ~1.6s during live games (automatic)", tier: undefined },
                 { name: "player-props-update", description: "Pinnacle player props, streamed on change (requires subscribe-props)", tier: "Rookie+" },
                 { name: "fanduel-props-update", description: "FanDuel player props, streamed on change (requires subscribe-fanduel-props)", tier: "Rookie+" },
                 { name: "draftkings-props-update", description: "DraftKings player props, streamed on change (requires subscribe-draftkings-props)", tier: "Rookie+" },
@@ -2252,7 +2252,7 @@ socket.on("connect", () => {
                 { name: "betmgm-props-update", description: "BetMGM player props (live games only), streamed on change (requires subscribe-betmgm-props)", tier: "Rookie+" },
                 { name: "caesars-props-update", description: "Caesars player props, streamed on change (requires subscribe-caesars-props)", tier: "Rookie+" },
                 { name: "esports-update", description: "CS2 live + prematch odds from 1xBet, streamed on change (requires esports: true)", tier: undefined },
-                { name: "pinnacle-realtime", description: "Real-time Pinnacle sharp odds, pushed automatically every ~2 seconds", tier: "MVP" },
+                { name: "pinnacle-realtime", description: "Real-time Pinnacle sharp odds, pushed every ~1 second", tier: "MVP" },
               ].map((event) => (
                 <div key={event.name} className="flex items-start gap-3 py-3 border-b border-white/[0.04]">
                   <code className="text-[13px] font-mono text-white shrink-0">{event.name}</code>
@@ -2264,7 +2264,7 @@ socket.on("connect", () => {
 
             <SubHeading>Odds and scores (automatic)</SubHeading>
             <p className="text-sm text-zinc-500 font-sans mb-4">
-              Odds and scores are sent automatically every ~3 seconds after connecting. Use <code className="text-[13px] font-mono text-zinc-300">subscribe</code> to filter by sport or book.
+              Odds and scores are pushed automatically after connecting — no polling required. Update frequency varies by source (see above). Use <code className="text-[13px] font-mono text-zinc-300">subscribe</code> to filter by sport or book.
             </p>
             <CodeBlock
               language="javascript"
@@ -2604,7 +2604,7 @@ socket.on("esports-update", (data) => {
           <section id="rate-limits" className="mb-20 scroll-mt-20">
             <SectionHeading>Rate Limits</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-6">
-              Rate limits are applied per API key. Limits vary by subscription tier.
+              Rate limits apply to <strong className="text-zinc-400">REST API requests only</strong>. WebSocket connections receive unlimited push updates with no message limits — once connected, all odds changes are streamed to you automatically.
             </p>
 
             <div className="overflow-x-auto mb-10">
@@ -2613,10 +2613,10 @@ socket.on("esports-update", (data) => {
                   <tr className="border-b border-white/[0.08]">
                     <th className="text-left py-2.5 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Tier</th>
                     <th className="text-left py-2.5 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Price</th>
-                    <th className="text-left py-2.5 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Req/Month</th>
-                    <th className="text-left py-2.5 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Req/Minute</th>
+                    <th className="text-left py-2.5 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">REST Req/Month</th>
+                    <th className="text-left py-2.5 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">REST Req/Minute</th>
                     <th className="text-left py-2.5 pr-6 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Concurrent</th>
-                    <th className="text-left py-2.5 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">WebSocket</th>
+                    <th className="text-left py-2.5 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">WebSocket (unlimited msgs)</th>
                   </tr>
                 </thead>
                 <tbody className="text-[13px]">
