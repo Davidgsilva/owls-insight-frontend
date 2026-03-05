@@ -8,6 +8,7 @@ const sportsbooks = [
   { name: "Bet365", logo: "https://www.google.com/s2/favicons?domain=bet365.com&sz=128" },
   { name: "Caesars", logo: "https://www.google.com/s2/favicons?domain=caesars.com&sz=128" },
   { name: "1xBet", logo: "https://www.google.com/s2/favicons?domain=1xbet.com&sz=128" },
+  { name: "BetOnline", logo: "https://www.google.com/s2/favicons?domain=betonline.ag&sz=128" },
 ];
 
 const predictionMarkets = [
