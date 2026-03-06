@@ -149,7 +149,10 @@ function BillingContent() {
         throw new Error(data.error || "Failed to start checkout");
       }
 
-      if (data.url) {
+      if (data.redirect === "upgraded") {
+        toast.success(`Upgraded to ${tier.replace("_", " ")}! Your new plan is active now.`);
+        await refreshUser();
+      } else if (data.url) {
         window.location.href = data.url;
       }
     } catch (error) {
@@ -491,7 +494,17 @@ function BillingContent() {
                         </Button>
                       ) : isUpgrade ? (
                         <Button
-                          onClick={() => setPaymentDialogTier(tier)}
+                          onClick={() => {
+                            // Existing Stripe subscribers can upgrade directly (payment method on file)
+                            // Exception: trial-eligible MVP goes through checkout for trial support
+                            const isExistingStripe = currentTier !== "free" && !isPayPal && !isCrypto;
+                            const wantsTrial = tier === "mvp" && trialEligible;
+                            if (isExistingStripe && !wantsTrial) {
+                              handleUpgrade(tier);
+                            } else {
+                              setPaymentDialogTier(tier);
+                            }
+                          }}
                           disabled={isLoading === tier}
                           className="w-full bg-[#00FF88] hover:bg-[#00d474] text-[#0a0a0a] font-semibold"
                         >
