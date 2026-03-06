@@ -1084,7 +1084,7 @@ export default function DocsPage() {
           <section id="scores-api" className="mb-20 scroll-mt-20">
             <SectionHeading>Live Scores API</SectionHeading>
             <p className="text-sm text-zinc-500 font-sans mb-6">
-              Live game scores and status updates, refreshed every ~1-2 seconds during live games. Soccer matches include rich in-match data: team statistics, match incidents (goals, cards, substitutions), and per-player ratings. Tennis matches include per-match and per-set statistics (aces, serve %, break points, winners, unforced errors).
+              Live game scores and status updates. Soccer matches include rich in-match data: team statistics, match incidents (goals, cards, substitutions), and per-player ratings. Tennis matches include per-match and per-set statistics (aces, serve %, break points, winners, unforced errors).
             </p>
 
             <SubHeading id="sub-scores-endpoints">Endpoints</SubHeading>
@@ -1092,6 +1092,9 @@ export default function DocsPage() {
               <Endpoint method="GET" path="/api/v1/scores/live" description="Live scores across all sports" />
               <Endpoint method="GET" path="/api/v1/{sport}/scores/live" description="Live scores for a specific sport" />
             </div>
+            <p className="text-sm text-zinc-500 font-sans mb-6">
+              Supported sports: <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">nba</code>, <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">ncaab</code>, <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">nfl</code>, <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">nhl</code>, <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">ncaaf</code>, <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">mlb</code>, <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">ncaah</code>, <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">soccer</code>, <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">tennis</code>
+            </p>
 
             <SubHeading>Response structure</SubHeading>
             <p className="text-sm text-zinc-500 font-sans mb-4">
@@ -2351,7 +2354,6 @@ socket.on("connect", () => {
             <div className="space-y-0 mb-8">
               {[
                 { name: "odds-update", description: "Latest odds data, pushed on change — frequency varies by book (automatic)", tier: undefined },
-                { name: "scores-update", description: "Live scores, pushed every ~1.6s during live games (automatic)", tier: undefined },
                 { name: "player-props-update", description: "Pinnacle player props, streamed on change (requires subscribe-props)", tier: undefined },
                 { name: "fanduel-props-update", description: "FanDuel player props, streamed on change (requires subscribe-fanduel-props)", tier: undefined },
                 { name: "draftkings-props-update", description: "DraftKings player props, streamed on change (requires subscribe-draftkings-props)", tier: undefined },
@@ -2369,24 +2371,18 @@ socket.on("connect", () => {
               ))}
             </div>
 
-            <SubHeading>Odds and scores (automatic)</SubHeading>
+            <SubHeading>Odds (automatic)</SubHeading>
             <p className="text-sm text-zinc-500 font-sans mb-4">
-              Odds and scores are pushed automatically after connecting — no polling required. Update frequency varies by source (see above). Use <code className="text-[13px] font-mono text-zinc-300">subscribe</code> to filter by sport or book.
+              Odds are pushed automatically after connecting — no polling required. Update frequency varies by source (see above). Use <code className="text-[13px] font-mono text-zinc-300">subscribe</code> to filter by sport or book. For live scores, use the <a href="#scores-api" className="text-blue-400 hover:text-blue-300 transition-colors">REST Live Scores API</a>.
             </p>
             <CodeBlock
               language="javascript"
-              code={`// Odds and scores arrive automatically after connecting
+              code={`// Odds arrive automatically after connecting
 socket.on("odds-update", (data) => {
   console.log("NBA games:", data.sports.nba?.length || 0);
   console.log("Available leagues:", data.leagues.nba); // ["NBA"]
   data.sports.nba?.forEach(game => {
     console.log(\`\${game.away_team} @ \${game.home_team}\`);
-  });
-});
-
-socket.on("scores-update", (data) => {
-  data.sports.nba?.forEach(game => {
-    console.log(\`\${game.awayTeam.abbreviation} \${game.awayTeam.score} - \${game.homeTeam.score} \${game.homeTeam.abbreviation}\`);
   });
 });
 
