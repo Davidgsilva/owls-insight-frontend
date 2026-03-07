@@ -13,6 +13,12 @@ const sections: Section[] = [
   { id: "getting-started", label: "Getting Started", subItems: [
     { id: "sub-quick-start", label: "Quick start" },
   ], keywords: ["base url", "curl", "api key", "setup"] },
+  { id: "sdk", label: "TypeScript SDK", subItems: [
+    { id: "sub-sdk-install", label: "Installation" },
+    { id: "sub-sdk-rest", label: "REST usage" },
+    { id: "sub-sdk-websocket", label: "WebSocket streaming" },
+    { id: "sub-sdk-errors", label: "Error handling" },
+  ], keywords: ["sdk", "typescript", "npm", "install", "client", "library", "package", "node", "javascript", "ts"] },
   { id: "authentication", label: "Authentication", keywords: ["bearer", "header", "api key", "auth"] },
   { id: "odds-api", label: "Odds", subItems: [
     { id: "sub-odds-endpoints", label: "Endpoints" },
@@ -514,6 +520,163 @@ export default function DocsPage() {
               language="bash"
               code={`curl -H "Authorization: Bearer YOUR_API_KEY" \\
   https://api.owlsinsight.com/api/v1/nba/odds`}
+            />
+          </section>
+
+          {/* ─── TypeScript SDK ──────────────────────────────────────── */}
+          <section id="sdk" className="mb-20 scroll-mt-20">
+            <SectionHeading>TypeScript SDK</SectionHeading>
+            <p className="text-sm text-zinc-500 font-sans leading-relaxed mb-4">
+              The official TypeScript SDK wraps all REST endpoints and WebSocket events with full type safety.
+              Use it instead of raw HTTP calls for a better developer experience.
+            </p>
+
+            <div className="rounded-lg bg-[#111113] border border-white/[0.06] px-5 py-4 mb-4">
+              <div className="flex items-center gap-3">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-600">npm</span>
+                <a
+                  href="https://www.npmjs.com/package/owls-insight-ts"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-mono text-[#00FF88] hover:underline"
+                >
+                  owls-insight-ts
+                </a>
+              </div>
+            </div>
+
+            <div className="rounded-lg bg-gradient-to-r from-[#00FF88]/5 to-transparent border border-[#00FF88]/10 px-5 py-4 mb-10">
+              <p className="text-sm text-zinc-400 font-sans leading-relaxed">
+                <span className="text-[#00FF88] font-semibold">SDK vs API</span> — The SDK is a typed client library that calls the same REST and WebSocket API documented below. You don&apos;t need both — pick whichever fits your workflow. The SDK handles authentication, error parsing, and typed responses automatically.
+              </p>
+            </div>
+
+            <SubHeading id="sub-sdk-install">Installation</SubHeading>
+            <CodeBlock language="bash" code={`npm install owls-insight-ts`} />
+
+            <div className="mt-6 mb-10">
+              <CodeBlock
+                language="typescript"
+                code={`import { OwlsInsight } from "owls-insight-ts";
+
+const client = new OwlsInsight({ apiKey: process.env.OWLS_INSIGHT_API_KEY! });`}
+              />
+            </div>
+
+            <SubHeading id="sub-sdk-rest">REST usage</SubHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-4">
+              Every REST endpoint has a typed method. Responses are fully typed — no manual JSON parsing.
+            </p>
+            <CodeBlock
+              language="typescript"
+              code={`// Odds — all books
+const odds = await client.rest.getOdds("nba");
+
+// Odds — filtered by books, with alternates
+const filtered = await client.rest.getOdds("nba", {
+  books: ["pinnacle", "fanduel"],
+  alternates: true,
+});
+
+// Moneyline, spreads, totals
+const ml = await client.rest.getMoneyline("nba");
+const spreads = await client.rest.getSpreads("nfl");
+const totals = await client.rest.getTotals("nhl");
+
+// Live scores
+const allScores = await client.rest.getScores();
+const nbaScores = await client.rest.getScores("nba");
+
+// Player props (typed per-book responses)
+const props = await client.rest.getProps("nba", { player: "LeBron" });
+const fdProps = await client.rest.getBookProps("nba", "fanduel");
+const mgmProps = await client.rest.getBookProps("nba", "betmgm");
+
+// Real-time Pinnacle odds (MVP+)
+const realtime = await client.rest.getRealtime("nba");
+
+// Historical data (MVP+)
+const games = await client.rest.getHistoryGames({ sport: "nba" });
+const snapshots = await client.rest.getHistoryOdds({ eventId: "..." });
+
+// Prediction markets
+const kalshi = await client.rest.getKalshiMarkets("nba");
+const poly = await client.rest.getPolymarketMarkets("nba");
+
+// Player stats & averages
+const stats = await client.rest.getStats("nba");
+const avg = await client.rest.getStatsAverages("nba", {
+  playerName: "LeBron James",
+});`}
+            />
+
+            <SubHeading id="sub-sdk-websocket">WebSocket streaming</SubHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-4">
+              Stream live odds updates over WebSocket with typed events.
+            </p>
+            <CodeBlock
+              language="typescript"
+              code={`await client.ws.connect();
+
+// Subscribe to odds
+client.ws.subscribe({
+  sports: ["nba", "nfl"],
+  books: ["pinnacle", "fanduel"],
+});
+
+// Listen for updates (fully typed)
+client.ws.on("odds-update", (data) => {
+  for (const [sport, events] of Object.entries(data.sports)) {
+    console.log(\`\${sport}: \${events.length} events\`);
+  }
+});
+
+// Props streaming — per book
+client.ws.subscribeProps({ sports: ["nba"] });            // Pinnacle
+client.ws.subscribeProps({ sports: ["nba"] }, "fanduel"); // FanDuel
+client.ws.subscribeProps({ sports: ["nba"] }, "betmgm");  // BetMGM
+
+client.ws.on("player-props-update", (data) => {
+  console.log("Pinnacle props:", data);
+});
+client.ws.on("fanduel-props-update", (data) => {
+  console.log("FanDuel props:", data);
+});
+
+// Promise-based waiting
+const update = await client.ws.waitFor("odds-update", 10_000);
+
+// Cleanup
+client.destroy();`}
+            />
+
+            <SubHeading id="sub-sdk-errors">Error handling</SubHeading>
+            <p className="text-sm text-zinc-500 font-sans mb-4">
+              The SDK throws typed error classes that map to HTTP status codes.
+            </p>
+            <CodeBlock
+              language="typescript"
+              code={`import {
+  OwlsInsightError,
+  AuthenticationError,
+  ForbiddenError,
+  RateLimitError,
+} from "owls-insight-ts";
+
+try {
+  const odds = await client.rest.getOdds("nba");
+} catch (err) {
+  if (err instanceof RateLimitError) {
+    console.log(\`Retry in \${err.retryAfterMs}ms\`);
+    console.log(\`Remaining: \${err.remainingMinute}/min\`);
+  } else if (err instanceof AuthenticationError) {
+    console.log("Invalid API key");
+  } else if (err instanceof ForbiddenError) {
+    console.log("Upgrade your subscription tier");
+  } else if (err instanceof OwlsInsightError) {
+    console.log(\`API error \${err.status}: \${err.message}\`);
+  }
+}`}
             />
           </section>
 

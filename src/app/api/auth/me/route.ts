@@ -17,7 +17,14 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const data = await response.json();
+    const text = await response.text();
+    let data: unknown;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      console.error("Auth me upstream returned non-JSON:", text.slice(0, 200));
+      return NextResponse.json({ error: "Upstream returned invalid response" }, { status: 502 });
+    }
 
     // If the token is invalid/expired, clear the httpOnly cookie so the
     // middleware stops redirecting /login → /dashboard in a loop
