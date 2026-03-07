@@ -4,10 +4,6 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { TerminalDemo } from "./TerminalDemo";
 
-const stats = [
-  { value: "9", label: "Odds Sources" },
-  { value: "10+", label: "Sports" },
-];
 
 export function Hero() {
   return (
@@ -72,19 +68,6 @@ export function Hero() {
               </Link>
             </div>
 
-            {/* Stats row */}
-            <div className="grid grid-cols-2 gap-6 pt-4 opacity-0 animate-fade-in-up stagger-4">
-              {stats.map((stat) => (
-                <div key={stat.label}>
-                  <div className="text-2xl font-mono font-bold text-white">
-                    {stat.value}
-                  </div>
-                  <div className="text-xs text-zinc-500 font-mono mt-0.5">
-                    {stat.label}
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
 
           {/* Right column - Terminal Demo */}

@@ -707,7 +707,7 @@ try {
 
             <SubHeading id="sub-odds-sports">Sports</SubHeading>
             <div className="flex flex-wrap gap-2 mb-8">
-              {["nba", "ncaab", "nfl", "nhl", "ncaaf", "mlb", "mma", "soccer", "ncaah", "tennis", "cs2"].map((sport) => (
+              {["nba", "ncaab", "nfl", "nhl", "ncaaf", "mlb", "mma", "soccer", "tennis", "cs2"].map((sport) => (
                 <code key={sport} className="text-[13px] font-mono text-zinc-300 bg-white/[0.04] px-2.5 py-1 rounded">
                   {sport}
                 </code>
@@ -1272,7 +1272,7 @@ try {
               <Endpoint method="GET" path="/api/v1/{sport}/scores/live" description="Live scores for a specific sport" />
             </div>
             <p className="text-sm text-zinc-500 font-sans mb-6">
-              Supported sports: <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">nba</code>, <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">ncaab</code>, <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">nfl</code>, <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">nhl</code>, <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">ncaaf</code>, <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">mlb</code>, <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">ncaah</code>, <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">soccer</code>, <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">tennis</code>
+              Supported sports: <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">nba</code>, <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">ncaab</code>, <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">nfl</code>, <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">nhl</code>, <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">ncaaf</code>, <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">mlb</code>, <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">soccer</code>, <code className="text-xs bg-white/5 px-1.5 py-0.5 rounded font-mono text-zinc-300">tennis</code>
             </p>
 
             <SubHeading>Response structure</SubHeading>
@@ -2156,7 +2156,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
 
             <SubHeading>Supported sports</SubHeading>
             <div className="flex flex-wrap gap-2 mb-8">
-              {["nba", "ncaab", "nfl", "nhl", "ncaaf", "mlb", "ncaah", "tennis", "soccer"].map((sport) => (
+              {["nba", "ncaab", "nfl", "nhl", "ncaaf", "mlb", "tennis", "soccer"].map((sport) => (
                 <code key={sport} className="text-[13px] font-mono text-zinc-300 bg-white/[0.04] px-2.5 py-1 rounded">
                   {sport}
                 </code>
@@ -2702,7 +2702,7 @@ socket.on("esports-update", (data) => {
               </table>
             </div>
             <p className="text-sm text-zinc-500 font-sans mb-6">
-              Supported sports: <code className="text-[13px] font-mono text-zinc-300">nba</code>, <code className="text-[13px] font-mono text-zinc-300">ncaab</code>, <code className="text-[13px] font-mono text-zinc-300">nfl</code>, <code className="text-[13px] font-mono text-zinc-300">nhl</code>, <code className="text-[13px] font-mono text-zinc-300">ncaaf</code>, <code className="text-[13px] font-mono text-zinc-300">mlb</code>, <code className="text-[13px] font-mono text-zinc-300">ncaah</code>, <code className="text-[13px] font-mono text-zinc-300">tennis</code>, <code className="text-[13px] font-mono text-zinc-300">soccer</code>
+              Supported sports: <code className="text-[13px] font-mono text-zinc-300">nba</code>, <code className="text-[13px] font-mono text-zinc-300">ncaab</code>, <code className="text-[13px] font-mono text-zinc-300">nfl</code>, <code className="text-[13px] font-mono text-zinc-300">nhl</code>, <code className="text-[13px] font-mono text-zinc-300">ncaaf</code>, <code className="text-[13px] font-mono text-zinc-300">mlb</code>, <code className="text-[13px] font-mono text-zinc-300">tennis</code>, <code className="text-[13px] font-mono text-zinc-300">soccer</code>
             </p>
 
             <SubHeading id="sub-realtime-parameters">Parameters</SubHeading>
@@ -2798,7 +2798,7 @@ socket.on("esports-update", (data) => {
             <CodeBlock
               language="javascript"
               code={`socket.on("pinnacle-realtime", (data) => {
-  // data contains all sports: nba, ncaab, nfl, nhl, ncaaf, mlb, ncaah, tennis, soccer
+  // data contains all sports: nba, ncaab, nfl, nhl, ncaaf, mlb, tennis, soccer
   console.log("NBA real-time events:", data.nba?.length || 0);
   console.log("Soccer real-time events:", data.soccer?.length || 0);
   console.log("Timestamp:", data.timestamp);
@@ -2930,7 +2930,7 @@ X-RateLimit-Reset-Month: 2026-03-01T00:00:00.000Z`}
                 </thead>
                 <tbody className="text-[13px]">
                   {[
-                    { book: "Pinnacle", sports: "NBA, NCAAB, NFL, NHL, NCAAF, NCAAH, MLB, Soccer, Tennis, Intl Basketball" },
+                    { book: "Pinnacle", sports: "NBA, NCAAB, NFL, NHL, NCAAF, MLB, Soccer, Tennis, Intl Basketball" },
                     { book: "FanDuel", sports: "NBA, NCAAB, NFL, NHL, NCAAF, MLB, Soccer" },
                     { book: "DraftKings", sports: "NBA, NCAAB, NFL, NHL, NCAAF, MLB, Soccer" },
                     { book: "BetMGM", sports: "NBA, NCAAB, NFL, NHL, NCAAF, Soccer" },
@@ -2939,7 +2939,7 @@ X-RateLimit-Reset-Month: 2026-03-01T00:00:00.000Z`}
                     { book: "Kalshi", sports: "NBA, NCAAB, NFL, NHL, MLB, Soccer" },
                     { book: "BetOnline", sports: "MMA" },
                     { book: "1xBet", sports: "CS2, Soccer, MLB" },
-                    { book: "Polymarket", sports: "NBA, NCAAB, NFL, NHL, NCAAF, NCAAH, MLB, Soccer, Tennis" },
+                    { book: "Polymarket", sports: "NBA, NCAAB, NFL, NHL, NCAAF, MLB, Soccer, Tennis" },
                   ].map((row) => (
                     <tr key={row.book} className="border-b border-white/[0.04]">
                       <td className="py-2.5 pr-4 font-mono text-white">{row.book}</td>
@@ -2964,7 +2964,6 @@ X-RateLimit-Reset-Month: 2026-03-01T00:00:00.000Z`}
                     <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">NFL</th>
                     <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">NCAAF</th>
                     <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">NHL</th>
-                    <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">NCAAH</th>
                     <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">MLB</th>
                     <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Soccer</th>
                     <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Tennis</th>
@@ -2974,20 +2973,20 @@ X-RateLimit-Reset-Month: 2026-03-01T00:00:00.000Z`}
                 </thead>
                 <tbody className="text-[13px]">
                   {[
-                    { book: "Pinnacle", nba: "strong", ncaab: "strong", nfl: "strong", ncaaf: "strong", nhl: "strong", ncaah: "strong", mlb: "strong", soccer: "strong", tennis: "strong", mma: "none", cs2: "none" },
-                    { book: "FanDuel", nba: "strong", ncaab: "strong", nfl: "strong", ncaaf: "strong", nhl: "strong", ncaah: "partial", mlb: "strong", soccer: "strong", tennis: "none", mma: "none", cs2: "none" },
-                    { book: "DraftKings", nba: "strong", ncaab: "strong", nfl: "strong", ncaaf: "strong", nhl: "strong", ncaah: "partial", mlb: "strong", soccer: "strong", tennis: "none", mma: "none", cs2: "none" },
-                    { book: "BetMGM", nba: "strong", ncaab: "partial", nfl: "strong", ncaaf: "partial", nhl: "partial", ncaah: "partial", mlb: "soon", soccer: "partial", tennis: "none", mma: "none", cs2: "none" },
-                    { book: "Bet365", nba: "strong", ncaab: "partial", nfl: "strong", ncaaf: "partial", nhl: "partial", ncaah: "none", mlb: "soon", soccer: "partial", tennis: "none", mma: "none", cs2: "none" },
-                    { book: "Caesars", nba: "strong", ncaab: "partial", nfl: "strong", ncaaf: "partial", nhl: "partial", ncaah: "none", mlb: "soon", soccer: "partial", tennis: "none", mma: "none", cs2: "none" },
-                    { book: "Kalshi", nba: "strong", ncaab: "partial", nfl: "strong", ncaaf: "none", nhl: "partial", ncaah: "none", mlb: "partial", soccer: "strong", tennis: "none", mma: "none", cs2: "none" },
-                    { book: "BetOnline", nba: "none", ncaab: "none", nfl: "none", ncaaf: "none", nhl: "none", ncaah: "none", mlb: "none", soccer: "none", tennis: "none", mma: "strong", cs2: "none" },
-                    { book: "1xBet", nba: "none", ncaab: "none", nfl: "none", ncaaf: "none", nhl: "none", ncaah: "none", mlb: "partial", soccer: "strong", tennis: "none", mma: "none", cs2: "strong" },
-                    { book: "Polymarket", nba: "strong", ncaab: "strong", nfl: "strong", ncaaf: "strong", nhl: "strong", ncaah: "strong", mlb: "strong", soccer: "strong", tennis: "strong", mma: "none", cs2: "none" },
+                    { book: "Pinnacle", nba: "strong", ncaab: "strong", nfl: "strong", ncaaf: "strong", nhl: "strong", mlb: "strong", soccer: "strong", tennis: "strong", mma: "none", cs2: "none" },
+                    { book: "FanDuel", nba: "strong", ncaab: "strong", nfl: "strong", ncaaf: "strong", nhl: "strong", mlb: "strong", soccer: "strong", tennis: "none", mma: "none", cs2: "none" },
+                    { book: "DraftKings", nba: "strong", ncaab: "strong", nfl: "strong", ncaaf: "strong", nhl: "strong", mlb: "strong", soccer: "strong", tennis: "none", mma: "none", cs2: "none" },
+                    { book: "BetMGM", nba: "strong", ncaab: "partial", nfl: "strong", ncaaf: "partial", nhl: "partial", mlb: "soon", soccer: "partial", tennis: "none", mma: "none", cs2: "none" },
+                    { book: "Bet365", nba: "strong", ncaab: "partial", nfl: "strong", ncaaf: "partial", nhl: "partial", mlb: "soon", soccer: "partial", tennis: "none", mma: "none", cs2: "none" },
+                    { book: "Caesars", nba: "strong", ncaab: "partial", nfl: "strong", ncaaf: "partial", nhl: "partial", mlb: "soon", soccer: "partial", tennis: "none", mma: "none", cs2: "none" },
+                    { book: "Kalshi", nba: "strong", ncaab: "partial", nfl: "strong", ncaaf: "none", nhl: "partial", mlb: "partial", soccer: "strong", tennis: "none", mma: "none", cs2: "none" },
+                    { book: "BetOnline", nba: "none", ncaab: "none", nfl: "none", ncaaf: "none", nhl: "none", mlb: "none", soccer: "none", tennis: "none", mma: "strong", cs2: "none" },
+                    { book: "1xBet", nba: "none", ncaab: "none", nfl: "none", ncaaf: "none", nhl: "none", mlb: "partial", soccer: "strong", tennis: "none", mma: "none", cs2: "strong" },
+                    { book: "Polymarket", nba: "strong", ncaab: "strong", nfl: "strong", ncaaf: "strong", nhl: "strong", mlb: "strong", soccer: "strong", tennis: "strong", mma: "none", cs2: "none" },
                   ].map((row) => (
                     <tr key={row.book} className="border-b border-white/[0.04]">
                       <td className="py-2.5 pr-4 font-mono text-white">{row.book}</td>
-                      {[row.nba, row.ncaab, row.nfl, row.ncaaf, row.nhl, row.ncaah, row.mlb, row.soccer, row.tennis, row.mma, row.cs2].map((status, i) => (
+                      {[row.nba, row.ncaab, row.nfl, row.ncaaf, row.nhl, row.mlb, row.soccer, row.tennis, row.mma, row.cs2].map((status, i) => (
                         <td key={i} className="py-2.5 pr-4">
                           {status === "none" ? (
                             <span className="text-[12px] font-mono text-zinc-700">—</span>
@@ -3032,23 +3031,22 @@ X-RateLimit-Reset-Month: 2026-03-01T00:00:00.000Z`}
                     <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">NFL</th>
                     <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">NCAAF</th>
                     <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">NHL</th>
-                    <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">NCAAH</th>
                     <th className="text-left py-2.5 pr-4 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">MLB</th>
                     <th className="text-left py-2.5 font-mono text-[11px] uppercase tracking-wider text-zinc-600 font-medium">Soccer</th>
                   </tr>
                 </thead>
                 <tbody className="text-[13px]">
                   {[
-                    { book: "FanDuel", nba: "strong", ncaab: "partial", nfl: "partial", ncaaf: "partial", nhl: "partial", ncaah: "soon", mlb: "soon", soccer: "none" },
-                    { book: "DraftKings", nba: "strong", ncaab: "soon", nfl: "partial", ncaaf: "soon", nhl: "soon", ncaah: "soon", mlb: "soon", soccer: "none" },
-                    { book: "Caesars", nba: "strong", ncaab: "soon", nfl: "partial", ncaaf: "soon", nhl: "soon", ncaah: "none", mlb: "soon", soccer: "none" },
-                    { book: "Pinnacle", nba: "partial", ncaab: "soon", nfl: "partial", ncaaf: "partial", nhl: "soon", ncaah: "partial", mlb: "soon", soccer: "partial" },
-                    { book: "Bet365", nba: "partial", ncaab: "soon", nfl: "partial", ncaaf: "soon", nhl: "soon", ncaah: "soon", mlb: "soon", soccer: "none" },
-                    { book: "BetMGM", nba: "strong", ncaab: "none", nfl: "soon", ncaaf: "soon", nhl: "soon", ncaah: "none", mlb: "soon", soccer: "none" },
+                    { book: "FanDuel", nba: "strong", ncaab: "partial", nfl: "partial", ncaaf: "partial", nhl: "partial", mlb: "soon", soccer: "none" },
+                    { book: "DraftKings", nba: "strong", ncaab: "soon", nfl: "partial", ncaaf: "soon", nhl: "soon", mlb: "soon", soccer: "none" },
+                    { book: "Caesars", nba: "strong", ncaab: "soon", nfl: "partial", ncaaf: "soon", nhl: "soon", mlb: "soon", soccer: "none" },
+                    { book: "Pinnacle", nba: "partial", ncaab: "soon", nfl: "partial", ncaaf: "partial", nhl: "soon", mlb: "soon", soccer: "partial" },
+                    { book: "Bet365", nba: "partial", ncaab: "soon", nfl: "partial", ncaaf: "soon", nhl: "soon", mlb: "soon", soccer: "none" },
+                    { book: "BetMGM", nba: "strong", ncaab: "none", nfl: "soon", ncaaf: "soon", nhl: "soon", mlb: "soon", soccer: "none" },
                   ].map((row) => (
                     <tr key={row.book} className="border-b border-white/[0.04]">
                       <td className="py-2.5 pr-4 font-mono text-white">{row.book}</td>
-                      {[row.nba, row.ncaab, row.nfl, row.ncaaf, row.nhl, row.ncaah, row.mlb, row.soccer].map((status, i) => (
+                      {[row.nba, row.ncaab, row.nfl, row.ncaaf, row.nhl, row.mlb, row.soccer].map((status, i) => (
                         <td key={i} className="py-2.5 pr-4">
                           <span className={`inline-flex items-center gap-1.5 text-[12px] font-mono ${
                             status === "strong"

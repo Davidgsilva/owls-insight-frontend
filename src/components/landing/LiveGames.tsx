@@ -35,7 +35,7 @@ interface LiveGame {
   tennisDetail?: TennisDetail;
 }
 
-type SportKey = "nba" | "nhl" | "soccer" | "tennis" | "ncaab" | "mlb" | "nfl" | "ncaaf" | "ncaah" | "cs2";
+type SportKey = "nba" | "nhl" | "soccer" | "tennis" | "ncaab" | "mlb" | "nfl" | "ncaaf" | "cs2";
 
 const SPORT_LABELS: Record<string, string> = {
   nba: "NBA",
@@ -46,7 +46,6 @@ const SPORT_LABELS: Record<string, string> = {
   soccer: "SOCCER",
   tennis: "TENNIS",
   ncaaf: "NCAAF",
-  ncaah: "NCAAH",
   cs2: "CS2",
 };
 
