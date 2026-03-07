@@ -2329,7 +2329,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
         "playerName": "deaaronfox",
         "propType": "points",
         "book": "fanduel",
-        "line": "26.5",
+        "line": 26.5,
         "overPrice": -110,
         "underPrice": -110,
         "alternateLines": [
