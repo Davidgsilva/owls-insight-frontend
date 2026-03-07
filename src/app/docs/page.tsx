@@ -569,8 +569,12 @@ const client = new OwlsInsight({ apiKey: process.env.OWLS_INSIGHT_API_KEY! });`}
             </p>
             <CodeBlock
               language="typescript"
-              code={`// Odds — all books
+              code={`// Odds — all books (data is keyed by book name)
 const odds = await client.rest.getOdds("nba");
+// odds.data = { pinnacle: [...], fanduel: [...], draftkings: [...] }
+for (const [book, events] of Object.entries(odds.data)) {
+  console.log(\`\${book}: \${events.length} events\`);
+}
 
 // Odds — filtered by books, with alternates
 const filtered = await client.rest.getOdds("nba", {
