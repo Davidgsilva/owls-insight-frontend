@@ -1152,6 +1152,13 @@ try {
                 FanDuel, DraftKings, Caesars, and BetMGM per-book endpoints support nba, ncaab, nfl, nhl, and ncaaf.
                 Bet365 supports all of the above plus mlb. If a book has no props for the requested sport, the response will be empty.
               </p>
+              <p className="text-sm text-zinc-400 font-sans leading-relaxed mt-3">
+                <strong className="text-zinc-300">Alternate lines:</strong> The <code className="text-[13px] font-mono text-zinc-300">alternateLines</code> array
+                provides additional line thresholds with their odds for each prop. Available from <strong className="text-zinc-300">FanDuel</strong> (up to 33 alt lines),
+                {" "}<strong className="text-zinc-300">DraftKings</strong> (milestone lines, up to 8), and <strong className="text-zinc-300">Caesars</strong> (up to 9).
+                Each entry contains <code className="text-[13px] font-mono text-zinc-300">line</code> (threshold) and <code className="text-[13px] font-mono text-zinc-300">odds</code> (American odds).
+                Pinnacle, BetMGM, and Bet365 do not currently provide alternate prop lines.
+              </p>
             </div>
 
             <SubHeading id="sub-props-parameters">Parameters</SubHeading>
@@ -1217,8 +1224,11 @@ try {
               "overPrice": -112,
               "underPrice": -108,
               "alternateLines": [
-                { "line": 20, "price": -280 },
-                { "line": 30, "price": 145 }
+                { "line": 20, "odds": -280 },
+                { "line": 22, "odds": -180 },
+                { "line": 25, "odds": -115 },
+                { "line": 28, "odds": 130 },
+                { "line": 30, "odds": 195 }
               ]
             }
           ]
@@ -2322,6 +2332,11 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \\
         "line": "26.5",
         "overPrice": -110,
         "underPrice": -110,
+        "alternateLines": [
+          { "line": 20, "odds": -280 },
+          { "line": 25, "odds": -115 },
+          { "line": 30, "odds": 195 }
+        ],
         "recordedAt": "2026-02-06T15:30:12.000Z"
       }
     ],
