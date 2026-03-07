@@ -125,9 +125,8 @@ export default function TermsPage() {
 
             <h3 className="font-medium text-white text-sm mt-4">6.2 Billing</h3>
             <p className="mt-2">
-              Subscriptions are billed on a recurring monthly basis. Payment is processed through Stripe, PayPal,
-              or NOWPayments (cryptocurrency), depending on the payment method you select at checkout. By
-              subscribing, you authorize us to charge your chosen payment method on a recurring basis until you
+              Subscriptions are billed on a recurring monthly basis. Payment is processed through Stripe. By
+              subscribing, you authorize us to charge your payment method on a recurring basis until you
               cancel. All prices are in US dollars unless otherwise stated.
             </p>
 
@@ -259,8 +258,8 @@ export default function TermsPage() {
           <section>
             <h2 className="text-lg font-mono font-semibold text-white mb-3">12. Third-Party Services</h2>
             <p>
-              The Service integrates with third-party providers for payment processing (Stripe, PayPal,
-              NOWPayments), authentication (Discord), and infrastructure (Amazon Web Services, Cloudflare).
+              The Service integrates with third-party providers for payment processing (Stripe),
+              authentication (Discord), and infrastructure (Amazon Web Services, Cloudflare).
               Your use of these third-party services is subject to their respective terms and privacy policies.
               We are not responsible for the availability, accuracy, or conduct of any third-party services.
             </p>

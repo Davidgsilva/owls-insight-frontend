@@ -80,29 +80,15 @@ function DashboardContent() {
   const [isLoading, setIsLoading] = useState(true);
   const hasSynced = useRef(false);
 
-  // Handle PayPal or Stripe checkout return
+  // Handle Stripe checkout return
   useEffect(() => {
     const checkoutSuccess = searchParams.get("checkout") === "success";
-    const paypalSuccess = searchParams.get("paypal") === "success";
-    if ((checkoutSuccess || paypalSuccess) && !hasSynced.current) {
+    if (checkoutSuccess && !hasSynced.current) {
       hasSynced.current = true;
       window.history.replaceState({}, "", "/dashboard");
-      if (paypalSuccess) {
-        const subId = sessionStorage.getItem("paypal_sub_id");
-        sessionStorage.removeItem("paypal_sub_id");
-        fetch("/api/paypal/sync", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ subscriptionId: subId }),
-        })
-          .catch(() => {})
-          .finally(() => refreshUser());
-      } else {
-        fetch("/api/stripe/sync", { method: "POST", credentials: "include" })
-          .catch(() => {})
-          .finally(() => refreshUser());
-      }
+      fetch("/api/stripe/sync", { method: "POST", credentials: "include" })
+        .catch(() => {})
+        .finally(() => refreshUser());
     }
   }, [searchParams, refreshUser]);
 

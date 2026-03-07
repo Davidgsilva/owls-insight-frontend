@@ -52,7 +52,7 @@ export default function PrivacyPage() {
               <li>
                 <strong className="text-zinc-300">Billing information:</strong> Your subscription tier and
                 billing status. We do not directly collect or store credit card numbers, bank account details,
-                or PayPal credentials — all payment processing is handled by our third-party payment processors
+                — all payment processing is handled by our third-party payment processor
                 (see Section 5)
               </li>
               <li>
@@ -151,12 +151,6 @@ export default function PrivacyPage() {
                     <td className="px-4 py-2">Cached user profile for instant UI load</td>
                     <td className="px-4 py-2">Until logout</td>
                   </tr>
-                  <tr>
-                    <td className="px-4 py-2">sessionStorage</td>
-                    <td className="px-4 py-2"><code className="text-xs bg-white/5 px-1 py-0.5 rounded">paypal_sub_id</code></td>
-                    <td className="px-4 py-2">PayPal subscription ID during checkout redirect</td>
-                    <td className="px-4 py-2">Until tab closes</td>
-                  </tr>
                 </tbody>
               </table>
             </div>
@@ -190,16 +184,6 @@ export default function PrivacyPage() {
                     <td className="px-4 py-2">Email, subscription tier, payment details (handled by Stripe)</td>
                   </tr>
                   <tr className="border-b border-white/[0.06]">
-                    <td className="px-4 py-2">PayPal</td>
-                    <td className="px-4 py-2">PayPal payments</td>
-                    <td className="px-4 py-2">Email, subscription tier, PayPal payer ID</td>
-                  </tr>
-                  <tr className="border-b border-white/[0.06]">
-                    <td className="px-4 py-2">NOWPayments</td>
-                    <td className="px-4 py-2">Cryptocurrency payments</td>
-                    <td className="px-4 py-2">User ID, subscription tier, payment status</td>
-                  </tr>
-                  <tr className="border-b border-white/[0.06]">
                     <td className="px-4 py-2">Amazon Web Services</td>
                     <td className="px-4 py-2">Cloud infrastructure and hosting</td>
                     <td className="px-4 py-2">All Service data (stored in US-East-1 region, Virginia)</td>
@@ -225,8 +209,6 @@ export default function PrivacyPage() {
             <p className="mt-3">
               Each provider is subject to their own privacy policy. We encourage you to review them:
               {" "}<a href="https://stripe.com/privacy" className="text-[#00FF88] hover:underline" target="_blank" rel="noopener noreferrer">Stripe</a>,
-              {" "}<a href="https://www.paypal.com/webapps/mpp/ua/privacy-full" className="text-[#00FF88] hover:underline" target="_blank" rel="noopener noreferrer">PayPal</a>,
-              {" "}<a href="https://nowpayments.io/privacy-policy" className="text-[#00FF88] hover:underline" target="_blank" rel="noopener noreferrer">NOWPayments</a>,
               {" "}<a href="https://aws.amazon.com/privacy/" className="text-[#00FF88] hover:underline" target="_blank" rel="noopener noreferrer">AWS</a>,
               {" "}<a href="https://www.cloudflare.com/privacypolicy/" className="text-[#00FF88] hover:underline" target="_blank" rel="noopener noreferrer">Cloudflare</a>,
               {" "}<a href="https://discord.com/privacy" className="text-[#00FF88] hover:underline" target="_blank" rel="noopener noreferrer">Discord</a>.

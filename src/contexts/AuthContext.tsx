@@ -18,7 +18,7 @@ interface Subscription {
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean;
   trialEligible: boolean;
-  paymentProvider?: "stripe" | "paypal" | "nowpayments";
+  paymentProvider?: "stripe";
 }
 
 interface AuthContextType {

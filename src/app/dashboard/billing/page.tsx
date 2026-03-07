@@ -7,8 +7,7 @@ import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Check, CreditCard, ArrowSquareOut, CurrencyBtc, PaypalLogo, ShieldCheck, Envelope } from "@phosphor-icons/react";
+import { Check, CreditCard, ArrowSquareOut } from "@phosphor-icons/react";
 
 const tiers = {
   bench: {
@@ -77,8 +76,6 @@ export default function BillingPage() {
 function BillingContent() {
   const { subscription, refreshUser } = useAuth();
   const [isLoading, setIsLoading] = useState<string | null>(null);
-  const [paymentDialogTier, setPaymentDialogTier] = useState<"bench" | "rookie" | "mvp" | "hall_of_fame" | null>(null);
-  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const searchParams = useSearchParams();
   const hasSynced = useRef(false);
 
@@ -87,28 +84,12 @@ function BillingContent() {
   useEffect(() => {
     const fromPortal = searchParams.get("from") === "portal";
     const checkoutSuccess = searchParams.get("checkout") === "success";
-    const paypalSuccess = searchParams.get("paypal") === "success";
-    const cryptoSuccess = searchParams.get("crypto") === "success";
-    if ((fromPortal || checkoutSuccess || paypalSuccess || cryptoSuccess) && !hasSynced.current) {
+    if ((fromPortal || checkoutSuccess) && !hasSynced.current) {
       hasSynced.current = true;
       window.history.replaceState({}, "", "/dashboard/billing");
-      if (paypalSuccess) {
-        const subId = sessionStorage.getItem("paypal_sub_id");
-        sessionStorage.removeItem("paypal_sub_id");
-        fetch("/api/paypal/sync", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ subscriptionId: subId }),
-        })
-          .catch(() => {})
-          .finally(() => refreshUser());
-      } else {
-        const syncUrl = cryptoSuccess ? "/api/nowpayments/sync" : "/api/stripe/sync";
-        fetch(syncUrl, { method: "POST", credentials: "include" })
-          .catch(() => {})
-          .finally(() => refreshUser());
-      }
+      fetch("/api/stripe/sync", { method: "POST", credentials: "include" })
+        .catch(() => {})
+        .finally(() => refreshUser());
     }
   }, [searchParams, refreshUser]);
 
@@ -190,119 +171,6 @@ function BillingContent() {
     }
   }
 
-  async function handlePayPalCheckout(tier: "bench" | "rookie" | "mvp" | "hall_of_fame") {
-    setPaymentDialogTier(null);
-    setIsLoading(tier);
-    try {
-      const res = await fetch("/api/paypal/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ tier }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to start PayPal checkout");
-      }
-
-      if (data.approvalUrl) {
-        if (data.subscriptionId) {
-          sessionStorage.setItem("paypal_sub_id", data.subscriptionId);
-        }
-        window.location.href = data.approvalUrl;
-      }
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to start PayPal checkout");
-    } finally {
-      setIsLoading(null);
-    }
-  }
-
-  async function handlePayPalCancel() {
-    setIsLoading("paypal-cancel");
-    try {
-      const res = await fetch("/api/paypal/cancel", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to cancel subscription");
-      }
-
-      toast.success("Cancellation requested — your plan stays active until the billing period ends");
-      await refreshUser();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to cancel subscription");
-    } finally {
-      setIsLoading(null);
-    }
-  }
-
-  async function handleCryptoCheckout(tier: "bench" | "rookie" | "mvp" | "hall_of_fame") {
-    setPaymentDialogTier(null);
-    setIsLoading(tier);
-    try {
-      const res = await fetch("/api/nowpayments/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ tier }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to start crypto checkout");
-      }
-
-      if (data.trial) {
-        toast.success("Your 3-day free trial has started!");
-        await refreshUser();
-      } else if (data.paymentUrl) {
-        window.location.href = data.paymentUrl;
-      } else {
-        toast.success("Crypto subscription created. Check your email for invoice.");
-        await refreshUser();
-      }
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to start crypto checkout");
-    } finally {
-      setIsLoading(null);
-    }
-  }
-
-  async function handleCryptoCancel() {
-    setIsLoading("crypto-cancel");
-    try {
-      const res = await fetch("/api/nowpayments/cancel", {
-        method: "POST",
-        credentials: "include",
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to cancel subscription");
-      }
-
-      toast.success("Crypto subscription canceled successfully");
-      await refreshUser();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to cancel subscription");
-    } finally {
-      setIsLoading(null);
-    }
-  }
-
-  const isPayPal = subscription?.paymentProvider === "paypal";
-  const isCrypto = subscription?.paymentProvider === "nowpayments";
-
   return (
     <div className="space-y-6">
       <div>
@@ -344,12 +212,6 @@ function BillingContent() {
               <div>
                 <p className="text-white font-semibold">
                   {currentTier === "free" ? "No active plan" : `${tiers[currentTier].price}/month`}
-                  {isPayPal && currentTier !== "free" && (
-                    <span className="text-zinc-500 text-sm font-normal ml-2">via PayPal</span>
-                  )}
-                  {isCrypto && currentTier !== "free" && (
-                    <span className="text-zinc-500 text-sm font-normal ml-2">via Crypto</span>
-                  )}
                 </p>
                 <p className="text-zinc-500 text-sm">
                   {currentTier === "free"
@@ -367,37 +229,15 @@ function BillingContent() {
               </div>
             </div>
             {currentTier !== "free" && (
-              isCrypto ? (
-                <Button
-                  onClick={handleCryptoCancel}
-                  disabled={isLoading === "crypto-cancel"}
-                  variant="outline"
-                  className="border-red-500/30 text-red-400 hover:bg-red-500/10"
-                >
-                  {isLoading === "crypto-cancel" ? "Canceling..." : "Cancel Subscription"}
-                </Button>
-              ) : isPayPal ? (
-                subscription?.cancelAtPeriodEnd ? null : (
-                  <Button
-                    onClick={() => setShowCancelConfirm(true)}
-                    disabled={isLoading === "paypal-cancel"}
-                    variant="outline"
-                    className="border-red-500/30 text-red-400 hover:bg-red-500/10"
-                  >
-                    {isLoading === "paypal-cancel" ? "Canceling..." : "Cancel Subscription"}
-                  </Button>
-                )
-              ) : (
-                <Button
-                  onClick={handleManageBilling}
-                  disabled={isLoading === "portal"}
-                  variant="outline"
-                  className="border-white/10 text-white hover:bg-white/5"
-                >
-                  {isLoading === "portal" ? "Loading..." : "Manage Billing"}
-                  <ArrowSquareOut size={16} className="ml-2" />
-                </Button>
-              )
+              <Button
+                onClick={handleManageBilling}
+                disabled={isLoading === "portal"}
+                variant="outline"
+                className="border-white/10 text-white hover:bg-white/5"
+              >
+                {isLoading === "portal" ? "Loading..." : "Manage Billing"}
+                <ArrowSquareOut size={16} className="ml-2" />
+              </Button>
             )}
           </div>
         </CardContent>
@@ -418,7 +258,7 @@ function BillingContent() {
                 </p>
               </div>
               <Button
-                onClick={() => setPaymentDialogTier("mvp")}
+                onClick={() => handleUpgrade("mvp")}
                 disabled={isLoading === "mvp"}
                 className="bg-[#00FF88] hover:bg-[#00d474] text-[#0a0a0a] font-semibold shrink-0 ml-4"
               >
@@ -494,17 +334,7 @@ function BillingContent() {
                         </Button>
                       ) : isUpgrade ? (
                         <Button
-                          onClick={() => {
-                            // Existing Stripe subscribers can upgrade directly (payment method on file)
-                            // Exception: trial-eligible MVP goes through checkout for trial support
-                            const isExistingStripe = currentTier !== "free" && !isPayPal && !isCrypto;
-                            const wantsTrial = tier === "mvp" && trialEligible;
-                            if (isExistingStripe && !wantsTrial) {
-                              handleUpgrade(tier);
-                            } else {
-                              setPaymentDialogTier(tier);
-                            }
-                          }}
+                          onClick={() => handleUpgrade(tier)}
                           disabled={isLoading === tier}
                           className="w-full bg-[#00FF88] hover:bg-[#00d474] text-[#0a0a0a] font-semibold"
                         >
@@ -513,10 +343,6 @@ function BillingContent() {
                             : tier === "mvp" && trialEligible
                             ? "Start 3-Day Free Trial"
                             : "Upgrade"}
-                        </Button>
-                      ) : isPayPal || isCrypto ? (
-                        <Button disabled variant="outline" className="w-full border-white/10 text-zinc-500">
-                          Cancel first to switch
                         </Button>
                       ) : (
                         <Button
@@ -536,153 +362,6 @@ function BillingContent() {
         </div>
       </div>
 
-      {/* Payment Method Dialog */}
-      <Dialog open={!!paymentDialogTier} onOpenChange={(open) => !open && setPaymentDialogTier(null)}>
-        <DialogContent className="bg-[#111113] border-white/10 sm:max-w-[420px] p-0 gap-0 overflow-hidden">
-          <div className="px-6 pt-6 pb-4">
-            <DialogHeader>
-              <DialogTitle className="text-white font-mono text-lg">Choose Payment Method</DialogTitle>
-              <DialogDescription className="text-zinc-400 text-sm">
-                {paymentDialogTier && (
-                  paymentDialogTier === "mvp" && trialEligible ? (
-                    <>
-                      Start your 3-day free trial of{" "}
-                      <span className="font-semibold text-purple-400">MVP</span>
-                    </>
-                  ) : (
-                    <>
-                      Subscribe to{" "}
-                      <span className={`font-semibold ${
-                        paymentDialogTier === "hall_of_fame" ? "text-amber-400" :
-                        paymentDialogTier === "mvp" ? "text-purple-400" :
-                        paymentDialogTier === "rookie" ? "text-blue-400" : "text-zinc-300"
-                      }`}>
-                        {tiers[paymentDialogTier].name}
-                      </span>
-                      {" "}&middot;{" "}
-                      <span className="text-white font-medium">{tiers[paymentDialogTier].price}/mo</span>
-                    </>
-                  )
-                )}
-              </DialogDescription>
-            </DialogHeader>
-          </div>
-
-          <div className="px-6 pb-6 flex flex-col gap-2">
-            {/* Card */}
-            <button
-              onClick={() => {
-                if (paymentDialogTier) {
-                  setPaymentDialogTier(null);
-                  handleUpgrade(paymentDialogTier);
-                }
-              }}
-              disabled={!!isLoading}
-              className="group flex items-center gap-4 w-full rounded-xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.07] hover:border-white/20 transition-all px-4 py-3.5 text-left disabled:opacity-50"
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/10">
-                <CreditCard size={22} weight="duotone" className="text-white" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-white font-medium text-sm">Credit or Debit Card</p>
-                <p className="text-zinc-500 text-xs">Visa, Mastercard, Amex</p>
-              </div>
-              {paymentDialogTier === "mvp" && trialEligible && (
-                <Badge className="bg-[#00FF88]/15 text-[#00FF88] border-[#00FF88]/20 border text-[10px] font-mono shrink-0">
-                  3-DAY TRIAL
-                </Badge>
-              )}
-            </button>
-
-            {/* PayPal — not available for Hall of Fame */}
-            {paymentDialogTier !== "hall_of_fame" && <button
-              onClick={() => {
-                if (paymentDialogTier) handlePayPalCheckout(paymentDialogTier);
-              }}
-              disabled={!!isLoading}
-              className="group flex items-center gap-4 w-full rounded-xl border border-white/10 bg-white/[0.03] hover:bg-[#0070BA]/10 hover:border-[#0070BA]/30 transition-all px-4 py-3.5 text-left disabled:opacity-50"
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#0070BA]/15">
-                <PaypalLogo size={22} weight="fill" className="text-[#0070BA]" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-white font-medium text-sm">PayPal</p>
-                <p className="text-zinc-500 text-xs">Pay with your PayPal account</p>
-              </div>
-              {paymentDialogTier === "mvp" && trialEligible && (
-                <Badge className="bg-[#00FF88]/15 text-[#00FF88] border-[#00FF88]/20 border text-[10px] font-mono shrink-0">
-                  3-DAY TRIAL
-                </Badge>
-              )}
-            </button>}
-
-            {/* Crypto — not available for Hall of Fame */}
-            {paymentDialogTier !== "hall_of_fame" && <button
-              onClick={() => {
-                if (paymentDialogTier) handleCryptoCheckout(paymentDialogTier);
-              }}
-              disabled={!!isLoading}
-              className="group flex items-center gap-4 w-full rounded-xl border border-white/10 bg-white/[0.03] hover:bg-[#F7931A]/10 hover:border-[#F7931A]/30 transition-all px-4 py-3.5 text-left disabled:opacity-50"
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#F7931A]/15">
-                <CurrencyBtc size={22} weight="bold" className="text-[#F7931A]" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-white font-medium text-sm">Cryptocurrency</p>
-                <p className="text-zinc-500 text-xs flex items-center gap-1">
-                  <Envelope size={12} className="text-zinc-500" />
-                  {paymentDialogTier === "mvp" && trialEligible
-                    ? "No payment required during trial"
-                    : "Payment link sent to your email"}
-                </p>
-              </div>
-              {paymentDialogTier === "mvp" && trialEligible && (
-                <Badge className="bg-[#00FF88]/15 text-[#00FF88] border-[#00FF88]/20 border text-[10px] font-mono shrink-0">
-                  3-DAY TRIAL
-                </Badge>
-              )}
-            </button>}
-          </div>
-
-          <div className="px-6 py-3 border-t border-white/5 bg-white/[0.02]">
-            <p className="text-zinc-600 text-[11px] text-center flex items-center justify-center gap-1.5">
-              <ShieldCheck size={13} weight="fill" className="text-zinc-500" />
-              Payments processed securely. Cancel anytime.
-            </p>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Cancel Confirmation Dialog */}
-      <Dialog open={showCancelConfirm} onOpenChange={setShowCancelConfirm}>
-        <DialogContent className="bg-[#111113] border-white/10 sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-white font-mono">Cancel Subscription?</DialogTitle>
-            <DialogDescription className="text-zinc-400">
-              Your PayPal subscription will be canceled at the end of your current billing period. You&apos;ll retain access until then.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex gap-3 mt-2">
-            <Button
-              onClick={() => setShowCancelConfirm(false)}
-              variant="outline"
-              className="flex-1 border-white/10 text-white hover:bg-white/5"
-            >
-              Keep Subscription
-            </Button>
-            <Button
-              onClick={() => {
-                setShowCancelConfirm(false);
-                handlePayPalCancel();
-              }}
-              disabled={isLoading === "paypal-cancel"}
-              className="flex-1 bg-red-600 hover:bg-red-700 text-white"
-            >
-              {isLoading === "paypal-cancel" ? "Canceling..." : "Yes, Cancel"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* FAQ */}
       <Card className="bg-[#111113] border-white/5">

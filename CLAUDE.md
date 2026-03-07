@@ -52,15 +52,11 @@ The dashboard uses a shared layout (`src/app/dashboard/layout.tsx`) rendering `<
 
 Auth methods: email/password and Discord OAuth. Discord flow preserves a `?tier=` param through the OAuth round-trip via an httpOnly cookie, enabling direct-to-checkout flows from pricing CTAs.
 
-### Payment Integrations
+### Payment Integration
 
-Three providers, all proxied through Next.js route handlers:
+Stripe is the sole payment provider, proxied through Next.js route handlers:
 
-- **Stripe** (primary): `/api/stripe/checkout`, `/api/stripe/portal`, `/api/stripe/sync`
-- **PayPal**: `/api/paypal/checkout`, `/api/paypal/sync`, `/api/paypal/cancel` — stores `subscriptionId` in `sessionStorage` to survive redirect
-- **NOWPayments (Crypto)**: `/api/nowpayments/checkout`, `/api/nowpayments/sync`, `/api/nowpayments/cancel`
-
-The billing page (`/dashboard/billing`) detects provider via `subscription.paymentProvider` and shows provider-specific management UI.
+- **Stripe**: `/api/stripe/checkout`, `/api/stripe/portal`, `/api/stripe/sync`
 
 Subscription tiers: `free`, `bench` ($9.99), `rookie` ($24.99), `mvp` ($49.99), `hall_of_fame` ($200). MVP has a 3-day free trial for eligible users.
 
