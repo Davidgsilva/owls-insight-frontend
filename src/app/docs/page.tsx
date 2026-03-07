@@ -593,6 +593,7 @@ export default function DocsPage() {
             "key": "pinnacle",
             "title": "Pinnacle",
             "last_update": "2026-01-31T18:29:45Z",
+            "event_link": "https://www.pinnacle.com/en/1624025571/",
             "markets": [
               {
                 "key": "h2h",
@@ -853,6 +854,7 @@ export default function DocsPage() {
           {
             "key": "1xbet",
             "title": "1xBet",
+            "event_link": "https://1xbet.com/en/line/esports/694454283",
             "markets": [
               {
                 "key": "h2h",
@@ -970,7 +972,7 @@ export default function DocsPage() {
               <Endpoint method="GET" path="/api/v1/{sport}/props/fanduel" description="FanDuel player props only" />
               <Endpoint method="GET" path="/api/v1/{sport}/props/draftkings" description="DraftKings player props only" />
               <Endpoint method="GET" path="/api/v1/{sport}/props/caesars" description="Caesars player props only" />
-              <Endpoint method="GET" path="/api/v1/{sport}/props/betmgm" description="BetMGM player props only (live games)" />
+              <Endpoint method="GET" path="/api/v1/{sport}/props/betmgm" description="BetMGM player props" />
               <Endpoint method="GET" path="/api/v1/{sport}/props/bet365" description="Bet365 player props only" />
               <Endpoint method="GET" path="/api/v1/{sport}/props/history" description="Historical prop line movements" />
               <Endpoint method="GET" path="/api/v1/props/{book}/stats" description="Per-book props cache statistics (bet365, fanduel, draftkings, caesars, betmgm)" />
@@ -2358,7 +2360,7 @@ socket.on("connect", () => {
                 { name: "fanduel-props-update", description: "FanDuel player props, streamed on change (requires subscribe-fanduel-props)", tier: undefined },
                 { name: "draftkings-props-update", description: "DraftKings player props, streamed on change (requires subscribe-draftkings-props)", tier: undefined },
                 { name: "bet365-props-update", description: "Bet365 player props, streamed on change (requires subscribe-bet365-props)", tier: undefined },
-                { name: "betmgm-props-update", description: "BetMGM player props (live games only), streamed on change (requires subscribe-betmgm-props)", tier: undefined },
+                { name: "betmgm-props-update", description: "BetMGM player props, streamed on change (requires subscribe-betmgm-props)", tier: undefined },
                 { name: "caesars-props-update", description: "Caesars player props, streamed on change (requires subscribe-caesars-props)", tier: undefined },
                 { name: "esports-update", description: "CS2 live + prematch odds from 1xBet, streamed on change (requires esports: true)", tier: undefined },
                 { name: "pinnacle-realtime", description: "Real-time Pinnacle sharp odds via dedicated feed", tier: undefined },
@@ -2551,6 +2553,7 @@ socket.on("esports-update", (data) => {
         {
           "key": "pinnacle",
           "title": "Pinnacle",
+          "event_link": "https://www.pinnacle.com/en/1624025571/",
           "markets": [
             {
               "key": "h2h",
@@ -2859,7 +2862,7 @@ X-RateLimit-Reset-Month: 2026-03-01T00:00:00.000Z`}
                     { book: "Caesars", nba: "strong", ncaab: "soon", nfl: "partial", ncaaf: "soon", nhl: "soon", ncaah: "none", mlb: "soon", soccer: "none" },
                     { book: "Pinnacle", nba: "partial", ncaab: "soon", nfl: "partial", ncaaf: "partial", nhl: "soon", ncaah: "partial", mlb: "soon", soccer: "partial" },
                     { book: "Bet365", nba: "partial", ncaab: "soon", nfl: "partial", ncaaf: "soon", nhl: "soon", ncaah: "soon", mlb: "soon", soccer: "none" },
-                    { book: "BetMGM", nba: "partial", ncaab: "soon", nfl: "soon", ncaaf: "soon", nhl: "soon", ncaah: "soon", mlb: "soon", soccer: "none" },
+                    { book: "BetMGM", nba: "strong", ncaab: "none", nfl: "soon", ncaaf: "soon", nhl: "soon", ncaah: "none", mlb: "soon", soccer: "none" },
                   ].map((row) => (
                     <tr key={row.book} className="border-b border-white/[0.04]">
                       <td className="py-2.5 pr-4 font-mono text-white">{row.book}</td>
